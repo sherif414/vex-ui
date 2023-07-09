@@ -1,0 +1,320 @@
+<script setup lang="ts">
+import { computed, onMounted, ref } from 'vue'
+import { useEventListener, useMouseInElement } from '@vueuse/core'
+import { IconDangerSign, IconBell, IconXMark, IconCheckCircle, IconWarn } from '../icons'
+import { useTimer } from '@/composables/timer'
+import { Progress } from '@/components/progress'
+import { animate } from 'motion'
+
+//==================================================
+// 📌 component meta
+//==================================================
+
+const props = withDefaults(
+  defineProps<{
+    type?: 'success' | 'danger' | 'warning' | 'primary'
+    title?: string
+    body?: string
+    duration?: number
+    persist?: boolean
+    showProgress?: boolean
+  }>(),
+  {
+    type: 'primary',
+    duration: 10000,
+    showProgress: true,
+  }
+)
+
+const emit = defineEmits<{
+  (e: 'close'): void
+}>()
+
+//==================================================
+// 📌 timer
+//==================================================
+
+const rootEl = ref<HTMLElement | null>(null)
+const progressEl = ref<InstanceType<typeof Progress> | null>(null)
+const progressValue = ref(0)
+// we add 300ms to compensate for the lost time during enter transition
+const _duration = props.duration + 300
+const timer = !props.persist ? useTimer(_duration, handleClose) : undefined
+
+// TODO: this is too expensive for its usage
+// find a better solution
+const { isOutside: isMouseOutside } = useMouseInElement(rootEl)
+
+if (timer) {
+  onMounted(() => {
+    timer.start()
+    progressValue.value = 100
+  })
+}
+
+function handleClose() {
+  timer?.stop()
+  emit('close')
+}
+
+function handleMouseLeave() {
+  if (document.activeElement !== rootEl.value) {
+    resumeTimer()
+  }
+}
+
+function handleBlur() {
+  if (isMouseOutside.value) {
+    resumeTimer()
+  }
+}
+
+function pauseTimer() {
+  timer?.pause()
+  progressEl.value?.pause()
+}
+
+function resumeTimer() {
+  timer?.resume()
+  progressEl.value?.resume()
+}
+
+//==================================================
+// 📌 swipe gesture
+//
+// TODO: extract into composable
+// TODO: does this work on pc touch screens?
+//==================================================
+
+let initialX = 0
+let prevX = 0
+let lastFrame: number | null = null
+useEventListener(rootEl, 'touchstart', (e: TouchEvent) => {
+  initialX = e.touches[0].clientX
+})
+
+useEventListener(rootEl, 'touchmove', (e: TouchEvent) => {
+  // ignore multi fingers touches
+  if (e.touches.length !== 1) return
+  e.preventDefault()
+  e.stopPropagation()
+
+  // Ignore left swipes beyond the initial position
+  // reset prevX to prevent jumps
+  if (e.touches[0].clientX < initialX) {
+    prevX = initialX
+    return
+  }
+
+  // debounced drag animation
+  if (!lastFrame) {
+    lastFrame = requestAnimationFrame(() => {
+      if (!rootEl.value) return
+
+      lastFrame = null
+      prevX = e.touches[0].clientX
+      const delta = Math.abs(prevX - initialX)
+      rootEl.value.style.transform = `translateX(${delta}px)`
+    })
+  }
+})
+
+useEventListener(rootEl, 'touchend', (e: TouchEvent) => {
+  // Ignore left swipes
+  if (prevX < initialX) return
+
+  // if the swipe distance is greater than 33% of el width, close
+  // else reset the element's transform to 0
+  const delta = Math.abs(prevX - initialX)
+  if (delta > Math.floor(rootEl.value!.offsetWidth / 3)) {
+    handleClose()
+    return
+  }
+
+  requestAnimationFrame(() => {
+    animate(rootEl.value!, { x: [delta, 0] }, { duration: 0.15, easing: 'ease-out' })
+  })
+})
+
+//==================================================
+// 📌 icon
+//==================================================
+
+const icon = computed(() => {
+  if (props.type === 'danger') return IconDangerSign
+  if (props.type === 'warning') return IconWarn
+  if (props.type === 'success') return IconCheckCircle
+  return IconBell
+})
+</script>
+
+<template>
+  <div
+    ref="rootEl"
+    tabindex="0"
+    role="status"
+    aria-atomic
+    @keydown.esc="handleClose"
+    @mouseenter="pauseTimer"
+    @mouseleave="handleMouseLeave"
+    @focus="pauseTimer"
+    @blur="handleBlur"
+    :class="[
+      $slots.default
+        ? 'vex-notification-item-custom'
+        : `vex-notification-item vex-notification-item-${props.type}`,
+    ]"
+  >
+    <slot>
+      <!-- icon -->
+
+      <div class="vex-notification-item-icon">
+        <slot name="icon">
+          <Component :is="icon" width="20" height="20" />
+        </slot>
+      </div>
+
+      <!-- content -->
+
+      <div class="vex-notification-item-content">
+        <slot name="title">
+          <span class="vex-notification-item-title">
+            {{ props.title }}
+          </span>
+        </slot>
+
+        <slot name="body">
+          <p class="vex-notification-item-body">
+            {{ props.body }}
+          </p>
+        </slot>
+      </div>
+    </slot>
+
+    <!-- close button -->
+
+    <button
+      type="button"
+      aria-label="close"
+      class="vex-notification-item-close"
+      @click="handleClose"
+    >
+      <IconXMark />
+    </button>
+
+    <!-- progress bar -->
+
+    <div v-if="!props.persist && showProgress" class="vex-notification-progress">
+      <Progress
+        ref="progressEl"
+        :color="props.type"
+        :duration="_duration"
+        :value="progressValue"
+        inert
+      />
+    </div>
+  </div>
+</template>
+
+<style lang="scss">
+.vex-notification-item {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--vex-spacing-2);
+  font-size: var(--vex-font-size-xs);
+  border-radius: var(--vex-border-radius-sm);
+  overflow: hidden;
+  width: 20rem;
+  max-width: calc(100vw - 2rem);
+  padding: var(--vex-spacing-4);
+  background-color: white;
+  filter: var(--vex-drop-shadow-sm);
+  pointer-events: auto;
+
+  &-icon {
+    flex-shrink: 0;
+  }
+
+  &-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--vex-spacing-2);
+  }
+
+  &-title {
+    text-transform: capitalize;
+    font-weight: bold;
+    font-size: var(--vex-font-size-sm);
+    margin: 0;
+  }
+
+  &-body {
+    margin: 0;
+  }
+
+  &-close {
+    all: unset;
+    position: absolute;
+    inset-block-start: 6px;
+    inset-inline-end: 6px;
+    color: var(--vex-on-surface-muted);
+    cursor: pointer;
+    padding: 4px;
+    width: 18px;
+    height: 18px;
+    border-radius: var(--vex-border-radius-rounded);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+
+    &:hover {
+      background-color: var(--vex-clr-neutral-100);
+    }
+  }
+
+  &-custom {
+    pointer-events: auto;
+    position: relative;
+  }
+}
+
+.vex-notification-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.vex-notification-item-primary {
+  .vex-notification-item-title,
+  .vex-notification-item-icon {
+    color: var(--vex-clr-primary-400);
+  }
+}
+
+.vex-notification-item-danger {
+  .vex-notification-item-title,
+  .vex-notification-item-icon {
+    color: var(--vex-clr-danger-400);
+  }
+}
+
+.vex-notification-item-warning {
+  .vex-notification-item-title,
+  .vex-notification-item-icon {
+    color: var(--vex-clr-warning-400);
+  }
+}
+
+.vex-notification-item-success {
+  .vex-notification-item-title,
+  .vex-notification-item-icon {
+    color: var(--vex-clr-success-400);
+  }
+}
+</style>
