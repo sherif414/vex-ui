@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { Loader } from '../loader'
-import { computed, getCurrentScope, onMounted, onUpdated } from 'vue'
+import { Loader } from '@/components'
+import { computed } from 'vue'
 
-/**********************************
- * 📌 component meta
- ***********************************/
+//==================================================
+// 📌 component meta
+//==================================================
 
-const props = withDefaults(
+const p = withDefaults(
   defineProps<{
     /**
      * whether the button is loading, shows a loading spinner and
-     * disables click events
+     * disables click events.
      */
     loading?: boolean
 
@@ -33,16 +33,9 @@ const props = withDefaults(
     destructive?: boolean
 
     /**
-     * specifies the button size
-     * @default 'md'
+     * renders a smaller button
      */
-    size?: 'sm' | 'md' | 'lg'
-
-    /**
-     * specifies the button type attribute
-     * @default 'button'
-     */
-    type?: 'submit' | 'button' | 'reset'
+    compact?: boolean
 
     /**
      * transforms the button into an icon-button
@@ -50,9 +43,7 @@ const props = withDefaults(
     iconOnly?: boolean
   }>(),
   {
-    size: 'md',
     variant: 'filled',
-    type: 'button',
   }
 )
 
@@ -60,26 +51,27 @@ const emit = defineEmits<{
   (e: 'click', event: Event): void
 }>()
 
-/**********************************
- * 📌 classes & styles
- ***********************************/
+//==================================================
+// 📌 classes
+//==================================================
 
 const classes = computed(() => [
   'vex-button',
-  `vex-button-variant-${props.variant}`,
-  `vex-button-size-${props.size}`,
-  props.destructive ? 'vex-button-destructive' : 'vex-button-primary',
+  `vex-button-variant-${p.variant}`,
   {
-    'vex-button-icon-only': props.iconOnly,
+    'vex-button-icon-only': p.iconOnly,
+    'vex-button-compact': p.compact,
+    'vex-button-loading': p.loading,
+    'vex-button-destructive': p.destructive,
   },
 ])
 
-/**********************************
- * 📌 events
- ***********************************/
+//==================================================
+// 📌 event handlers
+//==================================================
 
 function handleClick(e: Event) {
-  if (props.disabled || props.loading) {
+  if (p.disabled || p.loading) {
     e.preventDefault()
     return
   }
@@ -90,25 +82,25 @@ function handleClick(e: Event) {
 <template>
   <button
     @click="handleClick"
-    :disabled="props.disabled"
-    :aria-disabled="props.disabled || props.loading"
-    :type="props.type"
+    :disabled="p.disabled"
+    :aria-disabled="p.disabled || p.loading || undefined"
     :class="classes"
   >
-    <Loader style="position: absolute" v-if="props.loading" />
-    <div :class="[props.loading && 'vex-button-loading', 'vex-button-content']">
+    <Loader style="position: absolute" v-if="p.loading" />
+    <span class="vex-button-content">
       <slot />
-    </div>
+    </span>
   </button>
 </template>
 
 <style lang="scss">
 .vex-button {
+  appearance: none;
   position: relative;
   padding: 0;
+  padding-inline: var(--vex-spacing-4);
+  height: 2.5rem;
   overflow: hidden;
-  appearance: none;
-  font-family: inherit;
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -116,7 +108,9 @@ function handleClick(e: Event) {
   border-radius: var(--vex-border-radius-md);
   cursor: pointer;
   line-height: 1;
+  font-family: inherit;
   font-weight: 500;
+  font-size: var(--vex-font-size-sm);
   transition-property: background, color;
   transition-duration: 150ms;
   transition-timing-function: var(--vex-transition-easing);
@@ -131,15 +125,29 @@ function handleClick(e: Event) {
     border: none !important;
   }
 
+  &:focus-visible {
+    outline-color: var(--vex-clr-primary-400);
+  }
+
   &-content {
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    gap: var(--vex-spacing-2);
   }
 
-  &-loading {
-    opacity: 0;
+  &.vex-button-loading {
+    cursor: default;
+    .vex-button-content {
+      opacity: 0;
+    }
+  }
+
+  &.vex-button-compact {
+    height: 2rem;
+    font-size: var(--vex-font-size-xs);
+    padding-inline: var(--vex-spacing-3);
   }
 
   &-icon-only {
@@ -148,99 +156,61 @@ function handleClick(e: Event) {
   }
 }
 
-// sizes
+// normal button
 
-.vex-button-size-sm {
-  height: 2rem;
-  font-size: var(--vex-font-size-xs);
-  padding-inline: var(--vex-spacing-3);
+.vex-button-variant-filled {
+  background-color: var(--vex-clr-primary-400);
+  color: white;
+  outline-offset: 2px;
+  border: none;
 
-  .vex-button-content {
-    gap: var(--vex-spacing-2);
+  &:not([aria-disabled='true']):active {
+    background-color: var(--vex-clr-primary-500);
   }
 }
 
-.vex-button-size-md {
-  height: 2.5rem;
-  font-size: var(--vex-font-size-sm);
-  padding-inline: var(--vex-spacing-4);
+.vex-button-variant-light {
+  background-color: var(--vex-clr-primary-200);
+  color: var(--vex-clr-on-primary-500);
+  border: none;
 
-  .vex-button-content {
-    gap: var(--vex-spacing-2);
+  &:not([aria-disabled='true']):active {
+    background-color: var(--vex-clr-primary-300);
   }
 }
 
-.vex-button-size-lg {
-  height: 3rem;
-  font-size: var(--vex-font-size-md);
-  padding-inline: var(--vex-spacing-6);
+.vex-button-variant-outline {
+  background-color: transparent;
+  color: var(--vex-clr-primary-400);
+  border: 1px solid var(--vex-border-clr-base);
 
-  .vex-button-content {
-    gap: var(--vex-spacing-3);
-  }
-}
-
-// primary button
-
-.vex-button-primary {
-  &:focus-visible {
-    outline-color: var(--vex-clr-primary-400);
+  &:not([aria-disabled='true']):hover {
+    background-color: var(--vex-clr-primary-100);
   }
 
-  &.vex-button-variant-filled {
-    background-color: var(--vex-clr-primary-400);
-    color: white;
-    outline-offset: 2px;
-    border: none;
-
-    &:enabled:active {
-      background-color: var(--vex-clr-primary-500);
-    }
-  }
-
-  &.vex-button-variant-light {
+  &:not([aria-disabled='true']):active {
     background-color: var(--vex-clr-primary-200);
-    color: var(--vex-clr-on-primary-500);
-    border: none;
+  }
+}
 
-    &:enabled:hover {
-      background-color: var(--vex-clr-primary-300);
-    }
+.vex-button-variant-text {
+  background-color: transparent;
+  color: var(--vex-clr-primary-400);
+  border: none;
+
+  &:not([aria-disabled='true']):hover {
+    background-color: var(--vex-clr-primary-100);
   }
 
-  &.vex-button-variant-outline {
-    background-color: transparent;
-    color: var(--vex-clr-primary-400);
-    border: 1px solid var(--vex-border-clr-base);
-
-    &:enabled:hover {
-      background-color: var(--vex-clr-primary-100);
-    }
-
-    &:enabled:active {
-      background-color: var(--vex-clr-primary-200);
-    }
-  }
-
-  &.vex-button-variant-text {
-    background-color: transparent;
-    color: var(--vex-clr-primary-400);
-    border: none;
-
-    &:enabled:hover {
-      background-color: var(--vex-clr-primary-100);
-    }
-
-    &:enabled:active {
-      background-color: var(--vex-clr-primary-200);
-    }
+  &:not([aria-disabled='true']):active {
+    background-color: var(--vex-clr-primary-200);
   }
 }
 
 // destructive button
 
 .vex-button-destructive {
-  &:focus-visible {
+  &.vex-button:focus-visible {
     outline-color: var(--vex-clr-danger-400);
   }
 
@@ -250,7 +220,7 @@ function handleClick(e: Event) {
     outline-offset: 2px;
     border: none;
 
-    &:enabled:active {
+    &:not([aria-disabled='true']):active {
       background-color: var(--vex-clr-danger-500);
     }
   }
@@ -260,7 +230,7 @@ function handleClick(e: Event) {
     color: var(--vex-clr-danger-500);
     border: none;
 
-    &:enabled:hover {
+    &:not([aria-disabled='true']):active {
       background-color: var(--vex-clr-danger-300);
     }
   }
@@ -270,11 +240,11 @@ function handleClick(e: Event) {
     color: var(--vex-clr-danger-400);
     border: 1px solid var(--vex-border-clr-base);
 
-    &:enabled:hover {
+    &:not([aria-disabled='true']):hover {
       background-color: var(--vex-clr-danger-100);
     }
 
-    &:enabled:active {
+    &:not([aria-disabled='true']):active {
       background-color: var(--vex-clr-danger-200);
     }
   }
@@ -284,11 +254,11 @@ function handleClick(e: Event) {
     color: var(--vex-clr-danger-400);
     border: none;
 
-    &:enabled:hover {
+    &:not([aria-disabled='true']):hover {
       background-color: var(--vex-clr-danger-100);
     }
 
-    &:enabled:active {
+    &:not([aria-disabled='true']):active {
       background-color: var(--vex-clr-danger-200);
     }
   }
