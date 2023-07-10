@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-/**********************************
- * 📌 component meta
- ***********************************/
+//==================================================
+// 📌 component meta
+//==================================================
 
-const props = withDefaults(
+defineOptions({
+  inheritAttrs: true,
+})
+
+const p = withDefaults(
   defineProps<{
     /**
      * specifies the badge displayed value text
@@ -27,30 +31,26 @@ const props = withDefaults(
     /**
      * whether to render only a small circle without a value
      */
-    dotOnly?: boolean
+    dot?: boolean
 
     /**
-     * whether to show/hide the badge
+     * whether to hide the badge
      */
     hidden?: boolean
 
     /**
      * specifies the badge offset from the corner of its host element.
-     * this can be any valid css length value `1px, 1rem, 1em ...etc`
+     * this can be any valid css length value `1px, 1rem ...etc`
      * @default '-2px'
      */
     offset?: string
 
     /**
      * specifies the badge placement.
+     * - Note: this is not RTL | LTR friendly
      * @default 'top-right'
      */
     placement?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
-
-    /**
-     * whether to show the default white border around the badge
-     */
-    borderless?: boolean
   }>(),
   {
     color: 'info',
@@ -60,40 +60,41 @@ const props = withDefaults(
   }
 )
 
-/**********************************
- * 📌 badge visibility
- ***********************************/
+//==================================================
+// 📌 visibility
+//==================================================
 
 const isVisible = computed(() => {
-  return (props.dotOnly || props.value) && !props.hidden
+  return (p.dot || p.value) && !p.hidden
 })
 
-/**********************************
- * 📌 classes & styles
- ***********************************/
+//==================================================
+// 📌 classes & styles
+//==================================================
 
 const classes = computed(() => [
   'vex-badge',
-  `vex-badge-${props.color}`,
-  `vex-badge-size-${props.size}`,
-  { 'vex-badge-border': !props.borderless, 'vex-badge-with-value': !props.dotOnly },
+  `--color-${p.color}`,
+  `--size-${p.size}`,
+  {
+    '--value': !p.dot,
+  },
 ])
 
-const styles = computed(() => {
-  const [y, x] = props.placement.split('-')
-
+const positionStyles = computed(() => {
+  const [y, x] = p.placement.split('-')
   return {
-    top: y === 'top' ? `calc(0% - ${props.offset})` : `calc(100% + ${props.offset})`,
-    left: x === 'left' ? `calc(0% - ${props.offset})` : `calc(100% + ${props.offset})`,
+    top: y === 'top' ? `calc(0% - ${p.offset})` : `calc(100% + ${p.offset})`,
+    left: x === 'left' ? `calc(0% - ${p.offset})` : `calc(100% + ${p.offset})`,
   }
 })
 </script>
 
 <template>
-  <div class="vex-badge-wrapper">
-    <div v-show="isVisible" :style="styles" :class="classes">
-      <span v-if="!props.dotOnly">
-        {{ props.value }}
+  <div style="position: relative">
+    <div v-bind="$attrs" v-show="isVisible" :class="classes" :style="positionStyles">
+      <span v-if="!p.dot">
+        {{ p.value }}
       </span>
     </div>
     <slot />
@@ -101,12 +102,6 @@ const styles = computed(() => {
 </template>
 
 <style lang="scss">
-.vex-badge-wrapper {
-  position: relative;
-  width: max-content;
-  display: inline-block;
-}
-
 .vex-badge {
   z-index: 10;
   border-radius: var(--vex-border-radius-rounded);
@@ -117,55 +112,58 @@ const styles = computed(() => {
   align-items: center;
   justify-content: center;
   line-height: 1;
+  border: 2px solid white;
+}
 
-  &-border {
-    border: 2px solid white;
+//------ with value ------//
+
+.vex-badge.--value {
+  // width: max-content;
+  padding: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: content-box;
+}
+
+//------ size ------//
+
+.vex-badge {
+  &.--size-sm {
+    min-height: 0.75rem;
+    min-width: 0.75rem;
+    font-size: var(--vex-font-size-xs);
   }
-
-  &-with-value {
-    // width: max-content;
-    padding: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    box-sizing: content-box;
+  &.--size-md {
+    min-height: 1rem;
+    min-width: 1rem;
+    font-size: var(--vex-font-size-sm);
+  }
+  &.--size-lg {
+    min-height: 1.25rem;
+    min-width: 1.25rem;
+    font-size: var(--vex-font-size-md);
   }
 }
 
-// size
+//------ color ------//
 
-.vex-badge-size-sm {
-  min-height: 0.75rem;
-  min-width: 0.75rem;
-  font-size: var(--vex-font-size-xs);
-}
-.vex-badge-size-md {
-  min-height: 1rem;
-  min-width: 1rem;
-  font-size: var(--vex-font-size-sm);
-}
-.vex-badge-size-lg {
-  min-height: 1.25rem;
-  min-width: 1.25rem;
-  font-size: var(--vex-font-size-md);
-}
-
-// color
-
-.vex-badge-info {
-  background-color: var(--vex-clr-info-400);
-  color: var(--vex-clr-neutral-100);
-}
-.vex-badge-danger {
-  background-color: var(--vex-clr-danger-400);
-  color: var(--vex-clr-neutral-100);
-}
-.vex-badge-warning {
-  background-color: var(--vex-clr-warning-300);
-  color: var(--vex-clr-neutral-900);
-}
-.vex-badge-success {
-  background-color: var(--vex-clr-success-500);
-  color: var(--vex-clr-neutral-100);
+.vex-badge {
+  &.--color-info {
+    background-color: var(--vex-clr-info-400);
+    color: white;
+  }
+  &.--color-danger {
+    background-color: var(--vex-clr-danger-400);
+    color: white;
+  }
+  &.--color-warning {
+    background-color: var(--vex-clr-warning-300);
+    color: black;
+  }
+  &.--color-success {
+    background-color: var(--vex-clr-success-300);
+    color: black;
+  }
 }
 </style>
