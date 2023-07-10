@@ -60,7 +60,12 @@ const onLeave = (element: HTMLElement) => {
 </script>
 
 <template>
-  <Transition name="vex-expand" @enter="onEnter" @after-enter="onAfterEnter" @leave="onLeave">
+  <Transition
+    name="vex-expand"
+    @enter="onEnter"
+    @after-enter="onAfterEnter"
+    @leave="onLeave"
+  >
     <slot></slot>
   </Transition>
 </template>
@@ -69,7 +74,9 @@ const onLeave = (element: HTMLElement) => {
 .vex-expand-enter-active,
 .vex-expand-leave-active {
   overflow: hidden;
-  transition: all v-bind(duration) linear !important;
+  transition-property: all !important;
+  transition-duration: v-bind(duration) !important;
+  transition-timing-function: linear !important;
 }
 
 .vex-expand-enter-from,

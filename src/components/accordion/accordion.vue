@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { provide, ref, toRef, watch } from 'vue'
+import { computed, provide, ref, toRef, watch } from 'vue'
 import { useListNavigation } from '@/composables'
 import { ACCORDION_INJECTION_KEY, type ActiveIndex } from '.'
 
@@ -23,7 +23,6 @@ const p = withDefaults(
 
     /**
      * whether to hide the chevron arrow.
-     * @default true
      */
     hideArrow?: boolean
 
@@ -44,7 +43,7 @@ const p = withDefaults(
   }
 )
 
-const CHILDREN_SELECTOR = '.vex-accordion-item-button:enabled'
+const CHILDREN_SELECTOR = '.vex-accordion-item-header-button:enabled'
 
 //==================================================
 // 📌 keyboard & focus management
@@ -73,13 +72,21 @@ function getIndex() {
 provide(ACCORDION_INJECTION_KEY, {
   activeIndex,
   getIndex,
-  arrow: () => p.hideArrow,
+  isChevron: () => !p.hideArrow,
   arrowPosition: () => p.arrowPosition,
+})
+
+//==================================================
+// 📌 classes
+//==================================================
+
+const classes = computed(() => {
+  return ['vex-accordion', `--variant-${p.variant}`]
 })
 </script>
 
 <template>
-  <div :class="['vex-accordion', `--variant-${p.variant}`]" @keydown="onKeydown">
+  <div :class="classes" @keydown="onKeydown">
     <slot />
   </div>
 </template>
@@ -95,60 +102,62 @@ provide(ACCORDION_INJECTION_KEY, {
 
 //------ variant default ------//
 
-.vex-accordion.--variant-default {
-  gap: var(--vex-spacing-1);
+.--variant-default {
+  &.vex-accordion {
+    gap: var(--vex-spacing-1);
+  }
 
   .vex-accordion-item-header-button:enabled:hover {
     background-color: var(--vex-clr-neutral-100);
   }
-  .vex-accordion-item.--open {
+  .vex-accordion-item.--expanded {
     background-color: var(--vex-clr-neutral-100);
   }
 }
 
 //------ variant ladder ------//
 
-.vex-accordion.--variant-ladder {
+.--variant-ladder {
   .vex-accordion-item {
     border-bottom-color: var(--vex-clr-neutral-200);
 
-    &.--open {
+    &.--expanded {
       background-color: var(--vex-clr-neutral-100);
     }
+  }
 
-    &-header-button:enabled:hover {
-      background-color: var(--vex-clr-neutral-100);
-    }
+  .vex-accordion-item-header-button:enabled:hover {
+    background-color: var(--vex-clr-neutral-100);
   }
 }
 
 //------ variant outline ------//
 
-.vex-accordion.--variant-outline {
-  border: 1px solid var(--vex-clr-neutral-200);
+.--variant-outline {
+  &.vex-accordion {
+    border: 1px solid var(--vex-border-clr-base);
+  }
 
   .vex-accordion-item ~ .vex-accordion-item {
-    border-top-color: var(--vex-clr-neutral-200);
+    border-top-color: var(--vex-border-clr-base);
   }
   .vex-accordion-item-header-button:enabled:hover {
-    background-color: var(--vex-clr-neutral-100);
-  }
-  .vex-accordion-item.--open {
     background-color: var(--vex-clr-neutral-100);
   }
 }
 
 //------ variant light ------//
 
-.vex-accordion.--variant-light {
-  gap: var(--vex-spacing-2);
-
+.--variant-light {
+  &.vex-accordion {
+    gap: var(--vex-spacing-2);
+  }
   .vex-accordion-item {
     background-color: var(--vex-clr-neutral-50);
   }
-  .vex-accordion-item.--open {
+  .vex-accordion-item.--expanded {
     background-color: white;
-    border-color: rgba(209, 213, 219);
+    border-color: var(--vex-border-clr-base);
   }
 }
 </style>

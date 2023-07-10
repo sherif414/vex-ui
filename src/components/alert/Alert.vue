@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getRandomString } from '@/composables/helpers'
+import { Button } from '@/components'
 import {
   IconDangerSign,
   IconWarn,
@@ -18,20 +19,20 @@ const p = withDefaults(
     /**
      * specifies the alert title text
      */
-    title?: string
+    header?: string
 
     /**
-     * specifies the alert color
+     * specifies the alert variant
      */
-    color?: 'success' | 'warning' | 'danger' | 'info' | 'primary'
+    variant?: 'success' | 'warning' | 'danger' | 'info' | 'plain'
 
     /**
      * whether to show the close button
      */
-    closable?: boolean
+    dismissible?: boolean
   }>(),
   {
-    color: 'info',
+    variant: 'info',
   }
 )
 
@@ -39,121 +40,150 @@ const emit = defineEmits<{
   (event: 'close'): void
 }>()
 
-//==================================================
-// 📌 attributes
-//==================================================
+const slots = defineSlots<{
+  default?: (props: {}) => any
+  header?: (props: {}) => any
+  icon?: (props: {}) => any
+}>()
 
-const titleId = `alert-title-${getRandomString(6)}`
-const bodyId = `alert-body-${getRandomString(6)}`
+const HEADER_ID = `alert-header-${getRandomString(6)}`
+const CONTENT_ID = `alert-content-${getRandomString(6)}`
 
 //==================================================
 // 📌 icon
 //==================================================
 
-const icon = computed(() => {
+const IconComponent = computed(() => {
   return {
     danger: IconDangerSign,
     success: IconCheckCircle,
     info: IconBell,
-    primary: IconBell,
+    plain: IconBell,
     warning: IconWarn,
-  }[p.color]
+  }[p.variant]
 })
 
 //==================================================
 // 📌 classes
 //==================================================
 
-const colorClass = computed(() => `vex-alert-${p.color}`)
+const classes = computed(() => ['vex-alert', `--variant-${p.variant}`])
 </script>
 
 <template>
   <div
     role="alert"
-    :class="['vex-alert', colorClass]"
-    :aria-labelledby="titleId"
-    :aria-describedby="bodyId"
+    :class="classes"
+    :aria-labelledby="HEADER_ID"
+    :aria-describedby="CONTENT_ID"
   >
+    <!-- icon -->
+
     <span class="vex-alert-icon">
-      <Component width="20" height="20" :is="icon" />
+      <slot name="icon">
+        <Component :is="IconComponent" width="20" height="20" />
+      </slot>
     </span>
 
-    <div class="vex-alert-wrapper">
-      <span v-if="p.title" :id="titleId" class="vex-alert-title">{{ p.title }}</span>
+    <!-- header -->
 
-      <p :id="bodyId" class="vex-alert-body">
-        <slot />
-      </p>
+    <div v-if="p.header || slots.header" :id="HEADER_ID" class="vex-alert-header">
+      <slot name="header">
+        {{ p.header }}
+      </slot>
     </div>
 
-    <span
-      v-if="p.closable"
-      role="button"
-      aria-label="close alert"
-      tabindex="0"
-      class="vex-alert-close-button"
+    <!-- content -->
+
+    <div :id="CONTENT_ID" class="vex-alert-content">
+      <slot />
+    </div>
+
+    <!-- close button -->
+
+    <button
+      v-if="p.dismissible"
+      type="button"
+      class="vex-alert-close"
+      aria-label="close"
       @click="emit('close')"
     >
-      <IconXMark width="18" height="18" />
-    </span>
+      <IconXMark width="16" height="16" />
+    </button>
   </div>
 </template>
 
 <style lang="scss">
 .vex-alert {
-  display: flex;
+  display: grid;
+  position: relative;
+  grid-template-areas:
+    'icon header'
+    'icon content';
   align-items: flex-start;
-  gap: var(--vex-spacing-3);
+  gap: var(--vex-spacing-2);
   padding: var(--vex-spacing-4);
   border-radius: var(--vex-border-radius-sm);
   border-inline-start: 3px solid currentColor;
-
-  &-wrapper {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    gap: var(--vex-spacing-2);
-  }
-
-  &-title {
-    font-weight: 500;
-    font-size: var(--vex-font-size-md);
-  }
-
-  &-body {
-    font-size: var(--vex-font-size-sm);
-    margin: 0;
-    padding: 0;
-  }
-
-  &-close-button {
-    cursor: pointer;
-  }
 }
 
-// variants
+//------ icon ------//
 
-.vex-alert-danger {
-  // TODO: danger-100 is too opaque
-  background-color: var(--vex-clr-danger-200);
+.vex-alert-icon {
+  grid-area: icon;
+}
+
+//------ header ------//
+
+.vex-alert-header {
+  grid-area: header;
+  font-weight: 500;
+  font-size: var(--vex-font-size-md);
+}
+
+//------ content ------//
+
+.vex-alert-content {
+  grid-area: content;
+  font-size: var(--vex-font-size-sm);
+  margin: 0;
+  padding: 0;
+}
+
+//------ close button ------//
+
+.vex-alert-close {
+  all: unset;
+  cursor: pointer;
+  position: absolute;
+  inset-block-start: var(--vex-spacing-2);
+  inset-inline-end: var(--vex-spacing-2);
+}
+
+//------ variants ------//
+
+.vex-alert.--variant-danger {
+  background-color: var(--vex-clr-danger-100);
   color: var(--vex-clr-danger-500);
 }
-.vex-alert-warning {
+
+.vex-alert.--variant-warning {
   background-color: var(--vex-clr-warning-100);
   color: var(--vex-clr-warning-500);
 }
-.vex-alert-success {
+
+.vex-alert.--variant-success {
   background-color: var(--vex-clr-success-100);
   color: var(--vex-clr-success-500);
 }
-.vex-alert-info {
+
+.vex-alert.--variant-info {
   background-color: var(--vex-clr-info-100);
   color: var(--vex-clr-info-500);
 }
 
-//TODO: is primary color needed?
-.vex-alert-primary {
-  background-color: var(--vex-clr-primary-200);
-  color: var(--vex-clr-primary-500);
+.vex-alert-plain {
+  background-color: var(--vex-clr-plain-200);
+  color: var(--vex-clr-plain-500);
 }
 </style>

@@ -72,7 +72,7 @@ if (!ctx) {
   throw new Error('[vex] <AccordionItem> is missing an <Accordion> parent component.')
 }
 
-const hideArrow = toRef(ctx.arrow)
+const isChevron = toRef(ctx.isChevron)
 const arrowPosition = toRef(ctx.arrowPosition)
 const activeIndex = toRef(ctx.activeIndex)
 const index = toValue(ctx.getIndex())
@@ -105,10 +105,18 @@ function onToggle() {
   }
   emit('toggle', isExpanded.value)
 }
+
+//==================================================
+// 📌 classes
+//==================================================
+
+const classes = computed(() => {
+  return ['vex-accordion-item', { '--expanded': isExpanded }]
+})
 </script>
 
 <template>
-  <div :class="['vex-accordion-item', { '--open': isExpanded }]">
+  <div :class="classes">
     <!-- header -->
 
     <Component :is="heading" class="vex-accordion-item-header">
@@ -124,7 +132,7 @@ function onToggle() {
       >
         <slot name="iconPrepend" :isExpanded="isExpanded">
           <IconArrowDown
-            v-if="arrowPosition === 'start' && !hideArrow"
+            v-if="isChevron && arrowPosition === 'start'"
             class="vex-accordion-item-header-chevron"
             aria-hidden="true"
           />
@@ -136,7 +144,7 @@ function onToggle() {
         </span>
         <slot name="iconAppend" :isExpanded="isExpanded">
           <IconArrowDown
-            v-if="arrowPosition === 'end' && !hideArrow"
+            v-if="isChevron && arrowPosition === 'end'"
             class="vex-accordion-item-header-chevron"
             aria-hidden="true"
           />
@@ -174,7 +182,6 @@ function onToggle() {
   flex-direction: column;
   align-items: stretch;
   border-radius: var(--vex-border-radius-sm);
-  gap: 0;
 }
 
 //------ header ------//
@@ -223,7 +230,7 @@ function onToggle() {
     height: 16px;
     flex-shrink: 0;
 
-    .vex-accordion-item.--open & {
+    .vex-accordion-item.--expanded & {
       transform: rotate(180deg);
     }
   }

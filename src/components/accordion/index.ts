@@ -7,7 +7,7 @@ export type ActiveIndex = number | Set<number> | undefined
 
 export interface AccordionContext {
   activeIndex: Ref<ActiveIndex>
-  arrow: Getter<boolean>
+  isChevron: Getter<boolean>
   arrowPosition: Getter<'start' | 'end'>
   getIndex: () => number
 }
