@@ -102,10 +102,8 @@ const classes = computed(() => {
 
 //------ variant default ------//
 
-.--variant-default {
-  &.vex-accordion {
-    gap: var(--vex-spacing-1);
-  }
+.vex-accordion.--variant-default {
+  gap: var(--vex-spacing-1);
 
   .vex-accordion-item-header-button:enabled:hover {
     background-color: var(--vex-clr-neutral-100);
@@ -117,7 +115,7 @@ const classes = computed(() => {
 
 //------ variant ladder ------//
 
-.--variant-ladder {
+.vex-accordion.--variant-ladder {
   .vex-accordion-item {
     border-bottom-color: var(--vex-clr-neutral-200);
 
@@ -133,10 +131,8 @@ const classes = computed(() => {
 
 //------ variant outline ------//
 
-.--variant-outline {
-  &.vex-accordion {
-    border: 1px solid var(--vex-border-clr-base);
-  }
+.vex-accordion.--variant-outline {
+  border: 1px solid var(--vex-border-clr-base);
 
   .vex-accordion-item ~ .vex-accordion-item {
     border-top-color: var(--vex-border-clr-base);
@@ -148,10 +144,9 @@ const classes = computed(() => {
 
 //------ variant light ------//
 
-.--variant-light {
-  &.vex-accordion {
-    gap: var(--vex-spacing-2);
-  }
+.vex-accordion.--variant-light {
+  gap: var(--vex-spacing-2);
+
   .vex-accordion-item {
     background-color: var(--vex-clr-neutral-50);
   }
