@@ -86,7 +86,12 @@ function handleClick(e: Event) {
     :aria-disabled="p.disabled || p.loading || undefined"
     :class="classes"
   >
-    <Loader style="position: absolute" v-if="p.loading" />
+    <Loader
+      role="progressbar"
+      aria-valuetext="loading"
+      style="position: absolute"
+      v-if="p.loading"
+    />
     <span class="vex-button-content">
       <slot />
     </span>
@@ -140,7 +145,7 @@ function handleClick(e: Event) {
   &.vex-button-loading {
     cursor: default;
     .vex-button-content {
-      opacity: 0;
+      visibility: hidden;
     }
   }
 
