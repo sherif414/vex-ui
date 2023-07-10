@@ -10,31 +10,31 @@ import { ACCORDION_INJECTION_KEY, type ActiveIndex } from '.'
 const p = withDefaults(
   defineProps<{
     /**
-     * specifies the accordion variant, which changes how the accordion looks
+     * specifies the accordion variant.
      * @default 'default'
      */
     variant?: 'outline' | 'ladder' | 'default' | 'light'
 
     /**
-     * specifies the chevron arrow position
+     * specifies the chevron arrow position.
      * @default 'end'
      */
     arrowPosition?: 'start' | 'end'
 
     /**
-     * whether to hide the chevron arrow
+     * whether to hide the chevron arrow.
      * @default true
      */
     hideArrow?: boolean
 
     /**
-     * whether to allow multiple active accordion-items at the same time or not
+     * whether to allow multiple accordion-items to be expanded at the same time
      */
     multiple?: boolean
 
     /**
      * whether to loop back to the other end of the list upon reaching the end,
-     * only relevant when navigating with keyboard
+     * only relevant when navigating with keyboard.
      */
     loop?: boolean
   }>(),
