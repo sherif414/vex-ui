@@ -182,8 +182,8 @@ const classes = computed(() => ['vex-alert', `--variant-${p.variant}`])
   color: var(--vex-clr-info-500);
 }
 
-.vex-alert-plain {
-  background-color: var(--vex-clr-plain-200);
+.vex-alert.--variant-plain {
+  background-color: var(--vex-clr-plain-100);
   color: var(--vex-clr-plain-500);
 }
 </style>
