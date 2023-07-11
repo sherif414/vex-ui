@@ -57,12 +57,12 @@ const emit = defineEmits<{
 
 const classes = computed(() => [
   'vex-button',
-  `vex-button-variant-${p.variant}`,
+  `--variant-${p.variant}`,
   {
-    'vex-button-icon-only': p.iconOnly,
-    'vex-button-compact': p.compact,
-    'vex-button-loading': p.loading,
-    'vex-button-destructive': p.destructive,
+    '--icon-only': p.iconOnly,
+    '--compact': p.compact,
+    '--loading': p.loading,
+    '--destructive': p.destructive,
   },
 ])
 
@@ -70,7 +70,7 @@ const classes = computed(() => [
 // 📌 event handlers
 //==================================================
 
-function handleClick(e: Event) {
+function onClick(e: Event) {
   if (p.disabled || p.loading) {
     e.preventDefault()
     return
@@ -81,7 +81,7 @@ function handleClick(e: Event) {
 
 <template>
   <button
-    @click="handleClick"
+    @click="onClick"
     :disabled="p.disabled"
     :aria-disabled="p.disabled || p.loading || undefined"
     :class="classes"
@@ -142,20 +142,20 @@ function handleClick(e: Event) {
     gap: var(--vex-spacing-2);
   }
 
-  &.vex-button-loading {
+  &.--loading {
     cursor: default;
     .vex-button-content {
       visibility: hidden;
     }
   }
 
-  &.vex-button-compact {
+  &.--compact {
     height: 2rem;
     font-size: var(--vex-font-size-xs);
     padding-inline: var(--vex-spacing-3);
   }
 
-  &-icon-only {
+  &.--icon-only {
     aspect-ratio: 1/1;
     padding-inline: 0 !important;
   }
@@ -163,7 +163,7 @@ function handleClick(e: Event) {
 
 // normal button
 
-.vex-button-variant-filled {
+.vex-button.--variant-filled {
   background-color: var(--vex-clr-primary-400);
   color: white;
   outline-offset: 2px;
@@ -174,7 +174,7 @@ function handleClick(e: Event) {
   }
 }
 
-.vex-button-variant-light {
+.vex-button.--variant-light {
   background-color: var(--vex-clr-primary-200);
   color: var(--vex-clr-on-primary-500);
   border: none;
@@ -184,7 +184,7 @@ function handleClick(e: Event) {
   }
 }
 
-.vex-button-variant-outline {
+.vex-button.--variant-outline {
   background-color: transparent;
   color: var(--vex-clr-primary-400);
   border: 1px solid var(--vex-border-clr-base);
@@ -198,7 +198,7 @@ function handleClick(e: Event) {
   }
 }
 
-.vex-button-variant-text {
+.vex-button.--variant-text {
   background-color: transparent;
   color: var(--vex-clr-primary-400);
   border: none;
@@ -214,12 +214,12 @@ function handleClick(e: Event) {
 
 // destructive button
 
-.vex-button-destructive {
-  &.vex-button:focus-visible {
+.vex-button.--destructive {
+  &:focus-visible {
     outline-color: var(--vex-clr-danger-400);
   }
 
-  &.vex-button-variant-filled {
+  &.--variant-filled {
     background-color: var(--vex-clr-danger-400);
     color: white;
     outline-offset: 2px;
@@ -230,7 +230,7 @@ function handleClick(e: Event) {
     }
   }
 
-  &.vex-button-variant-light {
+  &.--variant-light {
     background-color: var(--vex-clr-danger-200);
     color: var(--vex-clr-danger-500);
     border: none;
@@ -240,7 +240,7 @@ function handleClick(e: Event) {
     }
   }
 
-  &.vex-button-variant-outline {
+  &.--variant-outline {
     background-color: transparent;
     color: var(--vex-clr-danger-400);
     border: 1px solid var(--vex-border-clr-base);
@@ -254,7 +254,7 @@ function handleClick(e: Event) {
     }
   }
 
-  &.vex-button-variant-text {
+  &.--variant-text {
     background-color: transparent;
     color: var(--vex-clr-danger-400);
     border: none;
