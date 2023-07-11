@@ -60,14 +60,14 @@ const emit = defineEmits<{
 // TODO: add credit
 //==================================================
 
-const reduceMotion = usePreferredReducedMotion()
+const isMotionReduced = usePreferredReducedMotion()
 
 watch(
   () => p.modelValue,
   (value) => {
-    if (reduceMotion.value === 'reduce') return
-
-    value ? animateCheck() : animateUnCheck()
+    if (isMotionReduced.value !== 'reduce') {
+      value ? animateCheck() : animateUnCheck()
+    }
   }
 )
 
@@ -83,7 +83,7 @@ async function animateCheck() {
       inputEl.value,
       {
         boxShadow: [
-          'inset 0 0 0 2px var(--vex-clr-neutral-200)',
+          'inset 0 0 0 2px var(--vex-border-clr-base)',
           'inset 0 0 0 16px var(--vex-clr-primary-400)',
         ],
       },
@@ -114,7 +114,7 @@ async function animateUnCheck() {
     {
       boxShadow: [
         'inset 0 0 0 16px var(--vex-clr-primary-400)',
-        'inset 0 0 0 2px var(--vex-clr-neutral-200)',
+        'inset 0 0 0 2px var(--vex-border-clr-base)',
       ],
     },
     { duration: 0.3 }
