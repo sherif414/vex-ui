@@ -12,16 +12,13 @@
   border: 1px solid var(--vex-border-clr-base);
   background-color: transparent;
   color: var(--vex-text-clr-default);
+  cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 
   &.--checked {
     background-color: var(--vex-clr-primary-200);
     color: var(--vex-clr-primary-400);
     border-color: transparent;
-  }
-
-  &.--checkable {
-    cursor: pointer;
   }
 
   input:focus-visible + & {

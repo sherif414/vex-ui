@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, inject, toRef } from 'vue'
 import { IconCheck } from '@/icons'
-import { CHIP_GROUP_INJECTION_KEY } from '..'
+import { CHIP_GROUP_INJECTION_KEY } from '.'
 import { TransitionExpand } from '@/transitions'
 import { getRandomString } from '@/composables/helpers'
 
@@ -66,8 +66,6 @@ const isChecked = computed<boolean>(() => {
 })
 
 function onChange(e: Event): void {
-  if (!p.value) return
-
   isWithinGroup
     ? ctx?.onEmit((e.target as HTMLInputElement).value)
     : emit('update:modelValue', (e.target as HTMLInputElement).checked)
@@ -82,11 +80,10 @@ const inputType = computed<'checkbox' | 'radio'>(() =>
   !isWithinGroup || isMultiple.value ? 'checkbox' : 'radio'
 )
 
-const rootClasses = computed(() => [
+const modifierClasses = computed(() => [
   'vex-chip',
   {
     '--checked': isChecked.value,
-    '--checkable': !!p.value,
   },
 ])
 </script>
@@ -103,7 +100,7 @@ const rootClasses = computed(() => [
     :checked="isChecked"
   />
 
-  <label :for="INPUT_ID" :class="rootClasses" v-bind="$attrs">
+  <label :for="INPUT_ID" :class="modifierClasses" v-bind="$attrs">
     <!-- check icon -->
 
     <TransitionExpand transition-prop="width">
