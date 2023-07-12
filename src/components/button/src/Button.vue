@@ -55,7 +55,7 @@ const emit = defineEmits<{
 // 📌 classes
 //==================================================
 
-const classes = computed(() => [
+const modifierClasses = computed(() => [
   'vex-button',
   `--variant-${p.variant}`,
   {
@@ -84,7 +84,7 @@ function onClick(e: Event) {
     @click="onClick"
     :disabled="p.disabled"
     :aria-disabled="p.disabled || p.loading || undefined"
-    :class="classes"
+    :class="modifierClasses"
   >
     <Loader
       role="progressbar"

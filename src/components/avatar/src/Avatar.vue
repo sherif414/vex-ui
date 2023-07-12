@@ -98,7 +98,7 @@ onMounted(() => {
 // 📌 classes
 //==================================================
 
-const classes = computed(() => {
+const modifierClasses = computed(() => {
   return [
     p.class,
     'vex-avatar',
@@ -113,7 +113,7 @@ const classes = computed(() => {
 </script>
 
 <template>
-  <div :class="classes" :style="p.style">
+  <div :class="modifierClasses" :style="p.style">
     <!-- error -->
 
     <span v-if="loadStatus === 'error'" class="vex-avatar-error">
