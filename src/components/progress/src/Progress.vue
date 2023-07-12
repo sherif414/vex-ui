@@ -3,9 +3,9 @@ import { animate, type AnimationControls } from 'motion'
 import { onMounted, ref, watch } from 'vue'
 import type { ProgressProps } from './props'
 
-//==================================================
+//----------------------------------------------------------------------------------------------------
 // 📌 component meta
-//==================================================
+//----------------------------------------------------------------------------------------------------
 
 const props = withDefaults(defineProps<ProgressProps>(), {
   value: 0,
@@ -18,11 +18,11 @@ const emit = defineEmits<{
   (event: 'finished'): void
 }>()
 
-//==================================================
+//----------------------------------------------------------------------------------------------------
 // 📌 animation
 //
 // TODO: add reduced motion
-//==================================================
+//----------------------------------------------------------------------------------------------------
 
 const progressEl = ref<HTMLElement | null>(null)
 let animationControls: AnimationControls | null = null

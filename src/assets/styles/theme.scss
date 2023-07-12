@@ -1,5 +1,4 @@
 :root {
-
   /* border */
 
   --vex-border-radius-sm: 4px;
@@ -32,14 +31,14 @@
   --vex-clr-primary-200: var(--vex-clr-neutral-200);
   --vex-clr-primary-100: var(--vex-clr-neutral-100);
 
-  --vex-clr-primary-500: #4c1d95;
+  /*   --vex-clr-primary-500: #4c1d95;
   --vex-clr-primary-400: #7c3aed;
   --vex-clr-primary-300: #c4b5fd;
   --vex-clr-primary-200: #ddd6fe;
-  --vex-clr-primary-100: #ede9fe;
+  --vex-clr-primary-100: #ede9fe; */
 
   --vex-clr-danger-500: #b91c1c;
-  --vex-clr-danger-400: #DA2030;
+  --vex-clr-danger-400: #da2030;
   --vex-clr-danger-300: #f87171;
   --vex-clr-danger-200: #f9cdcd;
   /* TODO: this color is too bright its basically white */
@@ -49,7 +48,7 @@
   /* 400 on white is not accessible */
   --vex-clr-warning-500: #92400e;
   --vex-clr-warning-400: #f59e0b;
-  --vex-clr-warning-300: #FCD34D;
+  --vex-clr-warning-300: #fcd34d;
   --vex-clr-warning-200: #fef08a;
   --vex-clr-warning-100: #fef3c7;
 
@@ -72,7 +71,6 @@
   --vex-clr-plain-200: var(--vex-clr-neutral-200);
   /* TODO: this color is too bright its basically white */
   --vex-clr-plain-100: var(--vex-clr-neutral-100);
-
 
   --vex-surface-disabled: #1d1b1e1f;
   --vex-surface-base: #fff;

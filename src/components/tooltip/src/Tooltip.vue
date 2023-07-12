@@ -3,9 +3,9 @@ import type { Placement } from '@floating-ui/vue'
 import { computed, ref } from 'vue'
 import { Floating } from '@/components'
 
-//==================================================
+//----------------------------------------------------------------------------------------------------
 // 📌 component meta
-//==================================================
+//----------------------------------------------------------------------------------------------------
 
 const props = withDefaults(
   defineProps<{
@@ -69,9 +69,9 @@ const rootEl = ref<HTMLDivElement | null>(null)
 const triggerEl = computed(() => (rootEl.value?.firstElementChild as HTMLElement) || null)
 const isFloatingElVisible = ref(false)
 
-//==================================================
+//----------------------------------------------------------------------------------------------------
 // 📌 background color
-//==================================================
+//----------------------------------------------------------------------------------------------------
 
 const backgroundColor = computed(() => {
   return ['black', 'white'].includes(props.color)

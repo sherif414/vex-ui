@@ -110,8 +110,8 @@ const p = withDefaults(
   }
 )
 const emit = defineEmits<{
-  (event: 'update:modelValue', value?: Option | Option[])
-  (event: 'search', query: string)
+  'update:modelValue': [value: Option | Option[]]
+  search: [query: string]
 }>()
 
 //===============================================

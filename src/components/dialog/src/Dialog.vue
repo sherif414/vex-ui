@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { dialogStore } from '@/components/dialog'
+import { useFocusTrap } from '@/composables'
 import { ref, onMounted, onUnmounted, watch, readonly } from 'vue'
 
-//==================================================
+//----------------------------------------------------------------------------------------------------
 // 📌 component meta
-//==================================================
+//----------------------------------------------------------------------------------------------------
 
 defineOptions({
   inheritAttrs: false,
@@ -12,6 +13,9 @@ defineOptions({
 
 const p = withDefaults(
   defineProps<{
+    /**
+     * whether to blur the background overlay
+     */
     blurOverlay?: boolean
   }>(),
   {}
@@ -22,9 +26,9 @@ defineSlots<{
   default: (slotProps: { isOpen: boolean; close: (returnValue?: string) => void }) => any
 }>()
 
-//==================================================
+//----------------------------------------------------------------------------------------------------
 // 📌 visibility
-//==================================================
+//----------------------------------------------------------------------------------------------------
 
 const dialogEl = ref<HTMLDialogElement | null>(null)
 const isDialogOpen = ref(false)
@@ -41,16 +45,16 @@ onMounted(() => {
     isDialogOpen.value = (mutations[0].target as HTMLDialogElement).open
   })
 
-  observer.observe(dialogEl.value, { attributeFilter: ['open'] })
+  observer.observe(dialogEl.value!, { attributeFilter: ['open'] })
 
   onUnmounted(() => {
     observer.disconnect()
   })
 })
 
-//==================================================
+//----------------------------------------------------------------------------------------------------
 // 📌 hide body-scrollbar
-//==================================================
+//----------------------------------------------------------------------------------------------------
 
 function hideBodyScrollbar() {
   if (dialogStore.openDialogsCount === 1) {
@@ -62,8 +66,8 @@ function hideBodyScrollbar() {
 
 function showBodyScrollbar() {
   if (dialogStore.openDialogsCount === 0) {
-    document.body.style.width = null
-    document.body.style.overflow = null
+    document.body.style.width = ''
+    document.body.style.overflow = ''
   }
 }
 
@@ -80,21 +84,22 @@ watch(
 )
 onUnmounted(showBodyScrollbar)
 
-//==================================================
-// 📌 focus management
-//==================================================
+//----------------------------------------------------------------------------------------------------
+// 📌 focus trap
+//----------------------------------------------------------------------------------------------------
 
 function onAfterEnter() {
-  /**
-   * by default browsers will focus the first form control or button inside
-   * the dialog, but this will make screen readers skip important context like
-   * title and description so we bring focus back to the dialog element
-   * to make sure screen readers read it top to down
-   */
-  dialogEl.value.focus()
+  trap.activate()
 }
 
-//==================================================
+function onAfterLeave() {
+  showBodyScrollbar()
+  trap.deactivate()
+}
+
+const trap = useFocusTrap(dialogEl)
+
+//----------------------------------------------------------------------------------------------------
 
 defineExpose({
   show,
@@ -106,11 +111,7 @@ defineExpose({
 
 <template>
   <slot name="trigger" :show="show" :is-open="isDialogOpen" />
-  <Transition
-    @after-leave="showBodyScrollbar"
-    @after-enter="onAfterEnter"
-    name="vex-t-dialog"
-  >
+  <Transition @after-leave="onAfterLeave" @after-enter="onAfterEnter" name="vex-t-dialog">
     <dialog
       ref="dialogEl"
       v-show="isDialogOpen"
@@ -118,6 +119,7 @@ defineExpose({
       :class="['vex-dialog', { 'vex-dialog-blur': p.blurOverlay }]"
       role="dialog"
       aria-modal="true"
+      @keydown.esc.exact="close()"
     >
       <slot :close="close" :is-open="isDialogOpen" />
     </dialog>
