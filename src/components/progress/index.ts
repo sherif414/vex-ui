@@ -1,1 +1,2 @@
-export { default as Progress } from './Progress.vue'
+export * from './src'
+import './style/index.scss'

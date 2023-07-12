@@ -1,1 +1,3 @@
-export { default as Alert } from './Alert.vue'
+export * from './src'
+
+import './style/index.scss'

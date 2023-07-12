@@ -1,1 +1,2 @@
-export { default as Badge } from './Badge.vue'
+export * from './src'
+import './style/index.scss'

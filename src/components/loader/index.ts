@@ -1,1 +1,2 @@
-export { default as Loader } from './Loader.vue'
+export * from './src'
+import './style/index.scss'

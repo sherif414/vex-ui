@@ -1,1 +1,2 @@
-export { default as Input } from './Input.vue'
+export * from './src'
+import './style/index.scss'

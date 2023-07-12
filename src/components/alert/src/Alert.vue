@@ -1,0 +1,108 @@
+<script setup lang="ts">
+import { getRandomString } from '@/composables/helpers'
+import { Button } from '@/components'
+import { IconDangerSign, IconWarn, IconCheckCircle, IconBell, IconXMark } from '@/icons'
+import { computed } from 'vue'
+
+//==================================================
+// 📌 component meta
+//==================================================
+
+const p = withDefaults(
+  defineProps<{
+    /**
+     * specifies the alert title text
+     */
+    header?: string
+
+    /**
+     * specifies the alert variant
+     */
+    variant?: 'success' | 'warning' | 'danger' | 'info' | 'plain'
+
+    /**
+     * whether to show the close button
+     */
+    dismissible?: boolean
+  }>(),
+  {
+    variant: 'info',
+  }
+)
+
+const emit = defineEmits<{
+  (event: 'close'): void
+}>()
+
+const slots = defineSlots<{
+  default?: (props: {}) => any
+  header?: (props: {}) => any
+  icon?: (props: {}) => any
+}>()
+
+const HEADER_ID = `alert-header-${getRandomString(6)}`
+const CONTENT_ID = `alert-content-${getRandomString(6)}`
+
+//==================================================
+// 📌 icon
+//==================================================
+
+const IconComponent = computed(() => {
+  return {
+    danger: IconDangerSign,
+    success: IconCheckCircle,
+    info: IconBell,
+    plain: IconBell,
+    warning: IconWarn,
+  }[p.variant]
+})
+
+//==================================================
+// 📌 classes
+//==================================================
+
+const modifierClasses = computed(() => ['vex-alert', `--variant-${p.variant}`])
+</script>
+
+<template>
+  <div
+    role="alert"
+    :class="modifierClasses"
+    :aria-labelledby="HEADER_ID"
+    :aria-describedby="CONTENT_ID"
+  >
+    <!-- icon -->
+
+    <span class="vex-alert-icon">
+      <slot name="icon">
+        <Component :is="IconComponent" width="20" height="20" />
+      </slot>
+    </span>
+
+    <!-- header -->
+
+    <div v-if="p.header || slots.header" :id="HEADER_ID" class="vex-alert-header">
+      <slot name="header">
+        {{ p.header }}
+      </slot>
+    </div>
+
+    <!-- content -->
+
+    <div :id="CONTENT_ID" class="vex-alert-content">
+      <slot />
+    </div>
+
+    <!-- close button -->
+
+    <button
+      v-if="p.dismissible"
+      type="button"
+      class="vex-alert-close"
+      aria-label="close"
+      @click="emit('close')"
+    >
+      <IconXMark width="16" height="16" />
+    </button>
+  </div>
+</template>

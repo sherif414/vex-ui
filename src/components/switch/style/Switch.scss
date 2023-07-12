@@ -1,0 +1,75 @@
+.vex-switch-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--vex-spacing-2);
+  --vex-switch-size: v-bind(sizeModifier);
+}
+
+.vex-switch {
+  position: relative;
+  border-radius: 999px;
+  cursor: pointer;
+  width: calc(2.75rem * var(--vex-switch-size));
+  height: calc(1.5rem * var(--vex-switch-size));
+
+  &-label {
+    font-size: var(--vex-font-size-sm);
+  }
+}
+
+.vex-switch-input {
+  transition: background-color 500ms var(--vex-transition-easing);
+  background-color: var(--vex-clr-neutral-200);
+  cursor: pointer;
+  appearance: none;
+  outline: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  border-radius: inherit;
+  width: calc(2.75rem * var(--vex-switch-size));
+  height: calc(1.5rem * var(--vex-switch-size));
+
+  &:checked {
+    background-color: var(--vex-clr-primary-400);
+  }
+
+  &:checked:disabled {
+    background-color: var(--vex-clr-primary-200) !important;
+  }
+
+  &:disabled {
+    background-color: var(--vex-clr-disabled) !important;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--vex-border-clr-active);
+  }
+}
+
+.vex-switch-svg {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  fill: white;
+  width: calc(2.75rem * var(--vex-switch-size));
+  height: calc(1.5rem * var(--vex-switch-size));
+}
+
+.vex-switch-dot-left {
+  transform-origin: center center;
+  transform: translateX(0px) scale(1);
+}
+.vex-switch-dot-right {
+  transform-origin: center center;
+  transform: translateX(-30%) scale(0);
+}
+.vex-switch-input:checked + .vex-switch-svg .vex-switch-dot-left {
+  transform: translateX(30%) scale(0);
+}
+.vex-switch-input:checked + .vex-switch-svg .vex-switch-dot-right {
+  transform: translateX(0px) scale(1);
+}

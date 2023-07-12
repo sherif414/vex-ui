@@ -1,0 +1,215 @@
+<script setup lang="ts">
+import { useFocus } from '@vueuse/core'
+import { useAttrs, computed, ref } from 'vue'
+import { getRandomString } from '@/composables/helpers'
+import { IconDangerSign } from '@/icons'
+import { Tooltip } from '@/components/tooltip'
+import { Loader } from '@/components/loader'
+
+//==================================================
+// 📌 component meta
+//==================================================
+
+defineOptions({
+  inheritAttrs: false,
+})
+
+const p = withDefaults(
+  defineProps<{
+    /**
+     * specifies the label text
+     */
+    label?: string
+
+    /**
+     * specifies the input value
+     */
+    modelValue?: string | number
+
+    /**
+     * specifies the input type attribute
+     * @default 'text'
+     */
+    type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'time' | 'url' | 'button'
+
+    /**
+     * specifies v-model modifiers
+     */
+    modelModifiers?: { lazy?: boolean }
+
+    /**
+     * whether the input is disabled
+     */
+    disabled?: boolean
+
+    /**
+     * whether the input is loading
+     */
+    loading?: boolean
+
+    /**
+     * whether the input is readonly
+     */
+    readonly?: boolean
+
+    /**
+     * whether the input value is invalid
+     */
+    error?: boolean
+
+    /**
+     * specifies the error text
+     */
+    errorMessage?: string
+
+    /**
+     * specifies the hint text
+     */
+    hint?: string
+
+    /**
+     * the class attribute for the root element
+     */
+    class?: string
+
+    /**
+     * the class attribute for the internal input
+     */
+    inputClass?: string
+
+    /**
+     * the class attribute for the input wrapper element
+     */
+    inputWrapperClass?: string
+
+    /**
+     * shows a smaller input
+     */
+    compact?: boolean
+
+    /**
+     * specifies the input `id` and `<label>` element `for` attribute
+     * @default auto generated random string
+     */
+    id?: string
+  }>(),
+  {
+    type: 'text',
+  }
+)
+
+const emit = defineEmits<{
+  (event: 'click'): void
+  (event: 'update:modelValue', value?: string): void
+}>()
+
+const slots = defineSlots<{
+  icon(props: {}): any
+  suffix(props: {}): any
+  dropdown(props: {}): any
+  inputContent(props: {}): any
+}>()
+
+const { class: _, ...fallThroughAttrs } = useAttrs()
+
+//==================================================
+// 📌 input attributes
+//==================================================
+
+// custom v-model.lazy implementation
+const updateModel = computed(() => (p.modelModifiers?.lazy ? 'change' : 'input'))
+const inputId = `${p.label}-${getRandomString(6)}`
+
+const inputEl = ref<HTMLInputElement>()
+const inputWrapperEl = ref<HTMLDivElement>()
+
+const { focused: isFocused } = useFocus(inputEl)
+
+//==================================================
+// 📌 icons
+//==================================================
+
+const showSuffix = computed<boolean>(() => !!slots.suffix || p.error)
+const showIcon = computed<boolean>(() => !!slots.icon)
+
+defineExpose({
+  inputEl,
+  inputWrapperEl,
+})
+</script>
+
+<template>
+  <div
+    :class="[
+      'vex-input-container',
+      p.class,
+      {
+        'vex-input-container-error': p.error,
+        'vex-input-container-focus': isFocused,
+        'vex-input-compact': p.compact,
+      },
+    ]"
+  >
+    <!-- label -->
+
+    <label :for="p.id || inputId" v-if="p.label" class="vex-input-label">
+      {{ p.label }}
+    </label>
+
+    <!-- input wrapper -->
+
+    <div
+      ref="inputWrapperEl"
+      @click="emit('click')"
+      :class="[p.inputWrapperClass, 'vex-input-wrapper']"
+    >
+      <!-- icon -->
+
+      <div v-if="showIcon" aria-hidden="true" class="vex-input-icon">
+        <slot name="icon" />
+      </div>
+
+      <!-- suffix -->
+
+      <div v-if="showSuffix" aria-hidden="true" class="vex-input-suffix">
+        <Loader v-if="p.loading" />
+        <Tooltip v-else-if="p.error" color="danger" :content="p.errorMessage">
+          <IconDangerSign
+            width="18"
+            height="18"
+            style="color: var(--vex-clr-danger-400); pointer-events: auto"
+          />
+        </Tooltip>
+        <slot v-else name="suffix" />
+      </div>
+
+      <!-- input -->
+
+      <input
+        ref="inputEl"
+        v-bind="fallThroughAttrs"
+        :class="['vex-input', p.inputClass]"
+        :id="p.id || inputId"
+        :type="p.type"
+        :disabled="p.disabled"
+        :readonly="p.readonly"
+        :value="p.modelValue"
+        @[updateModel]="
+          emit('update:modelValue', ($event.target as HTMLInputElement).value)
+        "
+      />
+
+      <slot name="inputContent" />
+    </div>
+
+    <!-- dropdown -->
+
+    <slot name="dropdown" />
+
+    <!-- hint -->
+
+    <small v-if="p.hint" class="vex-input-hint">
+      {{ p.hint }}
+    </small>
+  </div>
+</template>

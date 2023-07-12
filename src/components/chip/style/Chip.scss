@@ -1,0 +1,39 @@
+.vex-chip {
+  padding: 0 var(--vex-spacing-3);
+  border-radius: var(--vex-border-radius-rounded);
+  height: 2rem;
+  font-size: var(--vex-font-size-sm);
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  transition: all 150ms ease;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border: 1px solid var(--vex-border-clr-base);
+  background-color: transparent;
+  color: var(--vex-text-clr-default);
+  -webkit-tap-highlight-color: transparent;
+
+  &.--checked {
+    background-color: var(--vex-clr-primary-200);
+    color: var(--vex-clr-primary-400);
+    border-color: transparent;
+  }
+
+  &.--checkable {
+    cursor: pointer;
+  }
+
+  input:focus-visible + & {
+    outline-color: var(--vex-border-clr-active);
+  }
+
+  &-content {
+    padding-inline: var(--vex-spacing-1);
+  }
+
+  &-icon {
+    width: 18px;
+    height: 18px;
+  }
+}

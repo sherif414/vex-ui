@@ -1,0 +1,21 @@
+.vex-tooltip {
+  padding: var(--vex-spacing-1) var(--vex-spacing-2);
+  font-size: var(--vex-font-size-sm);
+  color: white;
+  white-space: nowrap;
+  width: max-content;
+  border-radius: var(--vex-border-radius-sm);
+
+  .vex-floating-arrow {
+    width: 8px;
+    height: 8px;
+    background: inherit;
+    transform: rotate(45deg);
+  }
+}
+
+.vex-tooltip-reference {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}

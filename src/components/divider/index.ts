@@ -1,1 +1,2 @@
-export { default as Divider } from './Divider.vue'
+export * from './src'
+import './style/index.scss'

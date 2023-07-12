@@ -1,0 +1,80 @@
+.vex-radio-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--vex-spacing-2);
+}
+
+.vex-radio {
+  border-radius: 999px;
+  position: relative;
+  width: 1.5rem;
+  height: 1.5rem;
+
+  &-label {
+    font-size: var(--vex-font-size-sm);
+  }
+
+  .vex-radio-input {
+    appearance: none;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+    border-radius: inherit;
+    width: 1.5rem;
+    height: 1.5rem;
+    box-shadow: inset 0px 0px 0px 2px var(--vex-clr-neutral-200);
+
+    &:checked {
+      box-shadow: inset 0px 0px 0px 6.75px var(--vex-clr-primary-400);
+    }
+
+    &:checked:disabled {
+      box-shadow: inset 0px 0px 0px 6.75px var(--vex-clr-primary-200) !important;
+    }
+
+    &:not(:checked):disabled {
+      box-shadow: inset 0px 0px 0px 12px var(--vex-clr-neutral-200) !important;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--vex-clr-primary-400);
+    }
+
+    &:hover:not(:checked):enabled {
+      box-shadow: inset 0px 0px 0px 3px var(--vex-clr-primary-400);
+    }
+
+    &:not(:checked) {
+      transition: box-shadow 150ms var(--vex-transition-easing);
+    }
+  }
+}
+
+.vex-radio-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  fill: white;
+  width: 1.5rem;
+  height: 1.5rem;
+
+  &-top {
+    transform: translateZ(0) translateY(0) scaleX(1.75) scaleY(1);
+    transform-origin: 12px -12px;
+  }
+
+  &-dot {
+    transform: translateY(-17px);
+  }
+
+  &-drop {
+    transform: translateY(-14px);
+  }
+}

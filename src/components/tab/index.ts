@@ -1,1 +1,2 @@
-export { default as Tab } from './Tab.vue'
+export * from './src'
+import './style/index.scss'

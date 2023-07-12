@@ -1,1 +1,2 @@
-export { default as Avatar } from './Avatar.vue'
+export * from './src'
+import './style/index.scss'

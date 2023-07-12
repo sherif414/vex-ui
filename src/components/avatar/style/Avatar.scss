@@ -1,0 +1,110 @@
+.vex-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--vex-clr-info-100);
+  color: var(--vex-clr-info-400);
+  border: 0px solid;
+}
+
+//------ fallback ------//
+
+.vex-avatar-fallback {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background-color: var(--vex-clr-neutral-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+//------ img ------//
+
+.vex-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-position: center;
+  object-fit: cover;
+  aspect-ratio: 1/1;
+}
+
+//------ error ------//
+
+.vex-avatar-error {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background-color: var(--vex-clr-danger-100);
+  color: var(--vex-clr-danger-400);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  & > svg {
+    width: 50%;
+    height: 50%;
+  }
+}
+
+//------ size ------//
+
+.vex-avatar.--size-sm {
+  height: 2rem;
+  width: 2rem;
+}
+.vex-avatar.--size-md {
+  height: 3rem;
+  width: 3rem;
+}
+.vex-avatar.--size-lg {
+  height: 4rem;
+  width: 4rem;
+}
+
+//------ ring ------//
+
+.vex-avatar.--ring {
+  border-width: 2px;
+}
+
+.vex-avatar.--ring-black {
+  border-color: black;
+}
+.vex-avatar.--ring-white {
+  border-color: white;
+}
+.vex-avatar.--ring-info {
+  border-color: var(--vex-clr-info-400);
+}
+.vex-avatar.--ring-primary {
+  border-color: var(--vex-clr-primary-400);
+}
+.vex-avatar.--ring-danger {
+  border-color: var(--vex-clr-danger-400);
+}
+.vex-avatar.--ring-warning {
+  border-color: var(--vex-clr-warning-400);
+}
+.vex-avatar.--ring-success {
+  border-color: var(--vex-clr-success-400);
+}
+
+//------ border radius ------//
+
+.vex-avatar.--radius-sm {
+  border-radius: var(--vex-border-radius-sm);
+}
+.vex-avatar.--radius-md {
+  border-radius: var(--vex-border-radius-md);
+}
+.vex-avatar.--radius-lg {
+  border-radius: var(--vex-border-radius-lg);
+}
+.vex-avatar.--radius-square {
+  border-radius: var(--vex-border-radius-square);
+}
+.vex-avatar.--radius-rounded {
+  border-radius: var(--vex-border-radius-rounded);
+}

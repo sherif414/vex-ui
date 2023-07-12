@@ -1,1 +1,2 @@
-export { default as Floating } from './Floating.vue'
+export * from './src'
+import './style/index.scss'

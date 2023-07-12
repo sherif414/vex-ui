@@ -1,0 +1,10 @@
+.vex-divider {
+  display: block;
+  height: 1px;
+  border-width: 0;
+  border: none;
+  background-color: var(--vex-border-clr-base);
+  box-sizing: content-box;
+  margin-block: var(--vex-spacing-2);
+  flex-shrink: 0;
+}

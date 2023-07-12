@@ -1,1 +1,2 @@
-export { default as Tag } from './Tag.vue'
+export * from './src'
+import './style/index.scss'

@@ -1,1 +1,2 @@
-export { default as Radio } from './Radio.vue'
+export * from './src'
+import './style/index.scss'
