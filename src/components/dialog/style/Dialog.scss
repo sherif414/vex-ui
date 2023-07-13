@@ -1,10 +1,7 @@
 .vex-dialog {
-  all: unset;
-  position: fixed;
-  z-index: 9999;
+  position: absolute;
   inset: 0;
   margin: auto;
-  padding: var(--vex-spacing-4);
   max-width: calc(100vw - 4rem);
   max-height: calc(100vh - 4rem);
   width: fit-content;
@@ -13,22 +10,43 @@
   background-color: white;
   border: none;
   border-radius: var(--vex-border-radius-sm);
-
-  &-blur {
-    &::backdrop {
-      backdrop-filter: blur(2px);
-    }
-  }
 }
 
-.vex-t-dialog {
-  &-enter-active,
-  &-leave-active {
-    transition: opacity 150ms;
+//------ overlay ------//
+
+.vex-overlay {
+  position: fixed;
+  z-index: 9999;
+  width: 100vw;
+  height: 100vh;
+  inset: 0;
+  background-color: rgb(0, 0, 0, 0.3);
+  // backdrop-filter: blur(2px);
+}
+
+//------ close ------//
+
+.vex-dialog-close {
+  all: unset;
+  position: absolute;
+  top: var(--vex-spacing-2);
+  right: var(--vex-spacing-2);
+  border-radius: var(--vex-border-radius-rounded);
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--vex-spacing-1);
+  outline: 2px solid transparent;
+  box-sizing: border-box;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--vex-clr-neutral-200);
   }
 
-  &-enter-from,
-  &-leave-to {
-    opacity: 0;
+  &:focus-visible {
+    outline-color: var(--vex-border-clr-active);
   }
 }
