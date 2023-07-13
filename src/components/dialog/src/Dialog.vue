@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { dialogStore } from '@/components/dialog'
 import { useFocusTrap } from '@/composables'
-import { ref, onMounted, onUnmounted, watch, readonly } from 'vue'
+import { ref, onUnmounted, readonly, computed } from 'vue'
+import { IconXMark } from '@/icons'
+import { timeline } from 'motion'
+import { useEventListener } from '@vueuse/core'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -17,13 +20,21 @@ const p = withDefaults(
      * whether to blur the background overlay
      */
     blurOverlay?: boolean
+
+    /**
+     * whether the dialog is open
+     */
+    open?: boolean
   }>(),
   {}
 )
 
 defineSlots<{
-  trigger: (slotProps: { isOpen: boolean; show: () => void }) => any
-  default: (slotProps: { isOpen: boolean; close: (returnValue?: string) => void }) => any
+  default: (props: {}) => any
+}>()
+
+const emit = defineEmits<{
+  'update:open': [value: boolean]
 }>()
 
 //----------------------------------------------------------------------------------------------------
@@ -31,97 +42,109 @@ defineSlots<{
 //----------------------------------------------------------------------------------------------------
 
 const dialogEl = ref<HTMLDialogElement | null>(null)
-const isDialogOpen = ref(false)
 
-function show() {
-  dialogEl.value?.showModal()
-}
-function close(returnValue?: string) {
-  dialogEl.value?.close(returnValue)
-}
-
-onMounted(() => {
-  const observer = new MutationObserver((mutations) => {
-    isDialogOpen.value = (mutations[0].target as HTMLDialogElement).open
-  })
-
-  observer.observe(dialogEl.value!, { attributeFilter: ['open'] })
-
-  onUnmounted(() => {
-    observer.disconnect()
-  })
+useEventListener(dialogEl, 'keydown', (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && p.open) {
+    emit('update:open', false)
+  }
 })
 
 //----------------------------------------------------------------------------------------------------
 // 📌 hide body-scrollbar
 //----------------------------------------------------------------------------------------------------
 
-function hideBodyScrollbar() {
+function hideBodyScrollbar(): void {
+  dialogStore.openDialogsCount++
   if (dialogStore.openDialogsCount === 1) {
     let scrollBarWidth = window.innerWidth - document.documentElement.clientWidth
-    document.body.style.width = `calc(100% - ${scrollBarWidth}px)`
+    document.body.style.marginRight = `${scrollBarWidth}px`
     document.body.style.overflow = 'hidden'
   }
 }
 
-function showBodyScrollbar() {
+function showBodyScrollbar(): void {
+  dialogStore.openDialogsCount--
   if (dialogStore.openDialogsCount === 0) {
-    document.body.style.width = ''
+    document.body.style.marginRight = ''
     document.body.style.overflow = ''
   }
 }
 
-watch(
-  isDialogOpen,
-  (_isDialogOpen) => {
-    if (!_isDialogOpen) dialogStore.openDialogsCount--
-    else {
-      dialogStore.openDialogsCount++
-      hideBodyScrollbar()
-    }
-  },
-  { flush: 'pre' }
-)
 onUnmounted(showBodyScrollbar)
 
 //----------------------------------------------------------------------------------------------------
-// 📌 focus trap
+// 📌 focus
 //----------------------------------------------------------------------------------------------------
 
-function onAfterEnter() {
+const trap = useFocusTrap(dialogEl, null, {
+  escapeDeactivates: false,
+})
+
+//----------------------------------------------------------------------------------------------------
+// 📌 animation
+//----------------------------------------------------------------------------------------------------
+
+const overlayEl = ref<HTMLElement | null>(null)
+
+async function onEnter(_: Element, done: () => void) {
+  await timeline([
+    [overlayEl.value!, { opacity: [0, 1] }, { duration: 0.3 }],
+    [dialogEl.value!, { scale: [0.95, 1] }, { duration: 0.3, at: 0 }],
+  ]).finished
+
+  done()
   trap.activate()
 }
 
-function onAfterLeave() {
-  showBodyScrollbar()
+async function onLeave(_: Element, done: () => void) {
+  await timeline([
+    [overlayEl.value!, { opacity: [1, 0] }, { duration: 0.3 }],
+    [dialogEl.value!, { scale: [1, 0.95] }, { duration: 0.3, at: 0 }],
+  ]).finished
+
+  done()
   trap.deactivate()
 }
 
-const trap = useFocusTrap(dialogEl)
-
 //----------------------------------------------------------------------------------------------------
 
+const modifierClasses = computed(() => [
+  'vex-dialog',
+  {
+    '--blur': p.blurOverlay,
+  },
+])
+
 defineExpose({
-  show,
-  close,
   dialogEl,
-  isOpen: readonly(isDialogOpen),
 })
 </script>
 
 <template>
-  <slot name="trigger" :show="show" :is-open="isDialogOpen" />
-  <Transition @after-leave="onAfterLeave" @after-enter="onAfterEnter" name="vex-t-dialog">
-    <dialog
-      ref="dialogEl"
-      v-show="isDialogOpen"
-      v-bind="$attrs"
-      :class="['vex-dialog', { 'vex-dialog-blur': p.blurOverlay }]"
-      role="dialog"
-      aria-modal="true"
-      @keydown.esc.exact="close()"
+  <Teleport to="body">
+    <Transition
+      @before-enter="hideBodyScrollbar"
+      @before-leave="showBodyScrollbar"
+      @enter="onEnter"
+      @leave="onLeave"
+      :css="false"
+      name="vex-t-dialog"
     >
-      <slot :close="close" :is-open="isDialogOpen" />
-    </dialog>
-  </Transition>
+      <div v-show="p.open" ref="overlayEl" class="vex-overlay">
+        <div
+          tabindex="-1"
+          ref="dialogEl"
+          v-bind="$attrs"
+          :class="modifierClasses"
+          role="dialog"
+          aria-modal="true"
+        >
+          <slot />
+          <button aria-label="close" class="vex-dialog-close" @click="emit('update:open', false)">
+            <IconXMark aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
