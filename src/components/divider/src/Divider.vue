@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
 //----------------------------------------------------------------------------------------------------
@@ -12,12 +14,19 @@ const p = withDefaults(
     orientation: 'horizontal',
   }
 )
+
+const modifierClasses = computed(() => [
+  'vex-divider',
+  {
+    '--vertical': p.orientation === 'vertical',
+  },
+])
 </script>
 
 <template>
   <div
-    class="vex-divider"
-    :role="decorative ? 'none' : 'separator'"
-    :aria-orientation="decorative ? undefined : orientation"
+    :class="modifierClasses"
+    :role="p.decorative ? 'none' : 'separator'"
+    :aria-orientation="p.decorative ? undefined : p.orientation"
   />
 </template>

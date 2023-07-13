@@ -1,10 +1,19 @@
 .vex-divider {
-  display: block;
-  height: 1px;
   border-width: 0;
-  border: none;
-  background-color: var(--vex-border-clr-base);
-  box-sizing: content-box;
-  margin-block: var(--vex-spacing-2);
   flex-shrink: 0;
+
+  &:not(.--vertical) {
+    height: 0;
+    border-top: 1px solid var(--vex-border-clr-base);
+    display: block;
+    margin-block: var(--vex-spacing-1);
+  }
+
+  &.--vertical {
+    width: 0;
+    height: 100%;
+    border-left: 1px solid var(--vex-border-clr-base);
+    display: inline-block;
+    margin-inline: var(--vex-spacing-1);
+  }
 }
