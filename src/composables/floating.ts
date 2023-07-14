@@ -99,6 +99,12 @@ export function useFloating(
   // 📌 visibility
   //----------------------------------------------------------------------------------------------------
 
+  useEventListener(FloatingEl, 'click', () => {
+    if (opt.hideOnClick) {
+      isFloatingElVisible.value = false
+    }
+  })
+
   if (opt.toggleAction === 'click') {
     useEventListener(TriggerEl, 'click', () => {
       isFloatingElVisible.value = !isFloatingElVisible.value
@@ -114,42 +120,27 @@ export function useFloating(
   }
 
   if (opt.toggleAction === 'hover') {
-    let timeoutId: ReturnType<typeof setTimeout>
+    let timeoutId: number
 
-    useEventListener(TriggerEl, 'mouseenter', () => {
-      clearTimeout(timeoutId)
-      if (!isFloatingElVisible.value) isFloatingElVisible.value = true
-    })
-    useEventListener(TriggerEl, 'mouseleave', () => {
-      timeoutId = _setInvisible()
-    })
-
-    useEventListener(FloatingEl, 'mouseenter', () => {
-      clearTimeout(timeoutId)
-    })
-    useEventListener(FloatingEl, 'mouseleave', () => {
-      timeoutId = _setInvisible()
-    })
-
-    // we debounce to avoid toggling isFloatingElVisible (v-show)
-    // when hover is moved from referenceEl to floatingEl
-    // which will fire Transition hooks and animations
-    function _setInvisible() {
-      return setTimeout(() => {
-        if (isFloatingElVisible.value) isFloatingElVisible.value = false
-      }, 25)
+    function setInvisible(e: Event) {
+      timeoutId = setTimeout(() => (isFloatingElVisible.value = false), 100)
     }
+
+    function setVisible(e: Event) {
+      clearTimeout(timeoutId)
+      isFloatingElVisible.value = true
+    }
+
+    useEventListener(TriggerEl, 'mouseenter', setVisible)
+    useEventListener(TriggerEl, 'mouseleave', setInvisible)
+
+    useEventListener(FloatingEl, 'mouseenter', setVisible)
+    useEventListener(FloatingEl, 'mouseleave', setInvisible)
 
     onScopeDispose(() => {
       clearTimeout(timeoutId)
     })
   }
-
-  useEventListener(FloatingEl, 'click', () => {
-    if (opt.hideOnClick) {
-      isFloatingElVisible.value = false
-    }
-  })
 
   //----------------------------------------------------------------------------------------------------
   // 📌 middleware
