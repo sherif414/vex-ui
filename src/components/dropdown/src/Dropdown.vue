@@ -1,10 +1,9 @@
 <script lang="ts" setup>
-import { getRandomString } from '@/composables/helpers'
 import { useFloating, type UseFloatingOptions } from '@/composables'
-import type { Placement } from '@floating-ui/vue'
+import { getRandomString } from '@/composables/helpers'
 import { useEventListener } from '@vueuse/core'
-import { computed, onMounted, reactive, shallowReactive, type VNode, type VNodeTypes } from 'vue'
-import { Comment, Fragment, Text, cloneVNode, nextTick, ref, watchEffect } from 'vue'
+import type { VNode, VNodeTypes } from 'vue'
+import { cloneVNode, Comment, computed, Fragment, nextTick, ref, Text } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -50,8 +49,12 @@ const TRIGGER_ID = 'vex-trigger-' + getRandomString(6)
 
 const _isOpen = ref(false)
 const isFloatingElVisible = computed<boolean>({
-  get: () => _isOpen.value && !p.disabled,
-  set: (val) => (_isOpen.value = val),
+  get() {
+    return _isOpen.value && !p.disabled
+  },
+  set(val) {
+    if (val !== _isOpen.value) _isOpen.value = val
+  },
 })
 
 //----------------------------------------------------------------------------------------------------
@@ -62,8 +65,8 @@ const TriggerEl = ref<HTMLElement | null>(null)
 const INVALID_VNODE_TYPES: VNodeTypes[] = [Fragment, Comment, Text, 'template']
 
 function TriggerVNode(): VNode {
-  const vNodes = slots.trigger?.({}).filter((node) => !INVALID_VNODE_TYPES.includes(node.type))
-  if (!vNodes || vNodes.length !== 1) {
+  const vNodes = slots.trigger?.({})
+  if (!vNodes || vNodes?.length !== 1 || INVALID_VNODE_TYPES.includes(vNodes[0].type)) {
     throw new Error(
       '[vex] <Dropdown> trigger slot requires exactly a single root child at all times'
     )
@@ -120,17 +123,21 @@ defineExpose({
 <template>
   <Component :is="TriggerVNode" />
 
-  <div
-    ref="FloatingEl"
-    v-bind="$attrs"
-    v-show.lazy="isFloatingElVisible"
-    tabindex="-1"
-    class="vex-dropdown"
-    :id="DROPDOWN_ID"
-    :aria-labelledby="TRIGGER_ID"
-    :role="p.role"
-    :style="floatingStyles"
-  >
-    <slot />
-  </div>
+  <Transition name="vex-fade">
+    <Teleport to="body">
+      <div
+        ref="FloatingEl"
+        v-bind="$attrs"
+        v-show.lazy="isFloatingElVisible"
+        tabindex="-1"
+        class="vex-dropdown"
+        :id="DROPDOWN_ID"
+        :aria-labelledby="TRIGGER_ID"
+        :role="p.role"
+        :style="floatingStyles"
+      >
+        <slot />
+      </div>
+    </Teleport>
+  </Transition>
 </template>
