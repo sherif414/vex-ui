@@ -3,8 +3,7 @@ import { useFocus } from '@vueuse/core'
 import { useAttrs, computed, ref } from 'vue'
 import { getRandomString } from '@/composables/helpers'
 import { IconDangerSign } from '@/icons'
-import { Tooltip } from '@/components/tooltip'
-import { Loader } from '@/components/loader'
+import { Tooltip, Loader } from '@/components'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -118,60 +117,50 @@ const { class: _, ...fallThroughAttrs } = useAttrs()
 
 // custom v-model.lazy implementation
 const updateModel = computed(() => (p.modelModifiers?.lazy ? 'change' : 'input'))
-const inputId = `${p.label}-${getRandomString(6)}`
+const INPUT_ID = `vex-input-${getRandomString(6)}`
 
-const inputEl = ref<HTMLInputElement>()
-const inputWrapperEl = ref<HTMLDivElement>()
+const InputEl = ref<HTMLInputElement | null>(null)
+const InputWrapperEl = ref<HTMLDivElement | null>(null)
 
-const { focused: isFocused } = useFocus(inputEl)
+const { focused: isFocused } = useFocus(InputEl)
 
 //----------------------------------------------------------------------------------------------------
-// 📌 icons
-//----------------------------------------------------------------------------------------------------
 
-const showSuffix = computed<boolean>(() => !!slots.suffix || p.error)
-const showIcon = computed<boolean>(() => !!slots.icon)
+const hasSuffix = computed<boolean>(() => !!slots.suffix || p.error)
+const hasIcon = computed<boolean>(() => !!slots.icon)
+
+const modifierClasses = computed(() => [
+  'vex-textfield',
+  p.class,
+  {
+    '--error': p.error,
+    '--focus': isFocused.value,
+    '--compact': p.compact,
+  },
+])
 
 defineExpose({
-  inputEl,
-  inputWrapperEl,
+  InputEl,
+  InputWrapperEl,
 })
 </script>
 
 <template>
-  <div
-    :class="[
-      'vex-input-container',
-      p.class,
-      {
-        'vex-input-container-error': p.error,
-        'vex-input-container-focus': isFocused,
-        'vex-input-compact': p.compact,
-      },
-    ]"
-  >
+  <div class="vex-textfield-container">
     <!-- label -->
 
-    <label :for="p.id || inputId" v-if="p.label" class="vex-input-label">
+    <label :for="p.id || INPUT_ID" v-if="p.label" class="vex-label">
       {{ p.label }}
     </label>
 
     <!-- input wrapper -->
 
-    <div
-      ref="inputWrapperEl"
-      @click="emit('click')"
-      :class="[p.inputWrapperClass, 'vex-input-wrapper']"
-    >
-      <!-- icon -->
-
-      <div v-if="showIcon" aria-hidden="true" class="vex-input-icon">
+    <div ref="InputWrapperEl" @click="emit('click')" :class="modifierClasses">
+      <div v-if="hasIcon" aria-hidden="true" class="vex-textfield-icon">
         <slot name="icon" />
       </div>
 
-      <!-- suffix -->
-
-      <div v-if="showSuffix" aria-hidden="true" class="vex-input-suffix">
+      <div v-if="hasSuffix" aria-hidden="true" class="vex-textfield-suffix">
         <Loader v-if="p.loading" />
         <Tooltip v-else-if="p.error" color="danger" :content="p.errorMessage">
           <IconDangerSign
@@ -183,20 +172,16 @@ defineExpose({
         <slot v-else name="suffix" />
       </div>
 
-      <!-- input -->
-
       <input
-        ref="inputEl"
+        ref="InputEl"
         v-bind="fallThroughAttrs"
-        :class="['vex-input', p.inputClass]"
-        :id="p.id || inputId"
+        class="vex-textfield-input"
+        :id="p.id || INPUT_ID"
         :type="p.type"
         :disabled="p.disabled"
         :readonly="p.readonly"
         :value="p.modelValue"
-        @[updateModel]="
-          emit('update:modelValue', ($event.target as HTMLInputElement).value)
-        "
+        @[updateModel]="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
       />
 
       <slot name="inputContent" />
@@ -208,7 +193,7 @@ defineExpose({
 
     <!-- hint -->
 
-    <small v-if="p.hint" class="vex-input-hint">
+    <small v-if="p.hint" class="vex-textfield-hint">
       {{ p.hint }}
     </small>
   </div>
