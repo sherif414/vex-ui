@@ -73,6 +73,9 @@ const modifierClasses = computed(() => [
 function onClick(e: Event) {
   if (p.disabled || p.loading) {
     e.preventDefault()
+
+    // stops click event listeners added using `el.addEventListener`
+    e.stopImmediatePropagation()
     return
   }
   emit('click', e)
