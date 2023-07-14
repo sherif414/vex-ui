@@ -1,18 +1,14 @@
 {
   "extends": "@vue/tsconfig/tsconfig.dom.json",
-  "include": [
-    "env.d.ts",
-    "src/**/*",
-    "src/**/*.vue",
-    "playground/**/*",
-    "playground/**/*.vue"
-  ],
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue", "playground/**/*", "playground/**/*.vue"],
   "exclude": ["src/**/__tests__/*"],
   "compilerOptions": {
     "composite": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "noImplicitReturns": true,
+    "strictFunctionTypes": true
   }
 }
