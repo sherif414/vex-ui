@@ -1,161 +1,136 @@
 <script lang="ts" setup>
+import { getRandomString } from '@/composables/helpers'
+import { useFloating, type UseFloatingOptions } from '@/composables'
 import type { Placement } from '@floating-ui/vue'
 import { useEventListener } from '@vueuse/core'
-import { computed, nextTick, ref, toRef, watch } from 'vue'
-import { Floating } from '@/components'
-import { getRandomString } from '@/composables/helpers'
+import { computed, onMounted, reactive, shallowReactive, type VNode, type VNodeTypes } from 'vue'
+import { Comment, Fragment, Text, cloneVNode, nextTick, ref, watchEffect } from 'vue'
 
-//===============================================
+//----------------------------------------------------------------------------------------------------
 // 📌 component meta
-//===============================================
+//----------------------------------------------------------------------------------------------------
 
 const p = withDefaults(
-  defineProps<{
-    /**
-     * should the dropdown be triggered by click or mouse hover
-     * @default 'click'
-     */
-    trigger?: 'hover' | 'click'
+  defineProps<
+    {
+      /**
+       * floatingEl aria role.
+       */
+      role?: 'menu' | 'listbox'
 
-    /**
-     * specifies the dropdown placement relative to the reference element
-     * @default 'bottom-start'
-     */
-    placement?: Placement
-
-    /**
-     * the dropdown will be positioned relative to this element.
-     * note that if this is `undefined` - only undefined and not null -
-     * the el.previousElement will be used
-     * @default defaults to element.previousElement
-     */
-    referenceEl?: HTMLElement | null
-
-    /**
-     * whether to disable the dropdown.
-     */
-    disabled?: boolean
-
-    /**
-     * whether to hide the dropdown when clicked
-     * @default true
-     */
-    hideOnClick?: boolean
-
-    /**
-     * whether to render the arrow
-     */
-    withArrow?: boolean
-
-    /**
-     * role
-     */
-    role?: 'menu' | 'listbox'
-    id: string
-    ariaLabelledby: string
-  }>(),
+      /**
+       * whether to disable visibility
+       */
+      disabled?: boolean
+    } & Pick<
+      UseFloatingOptions,
+      'placement' | 'hideOnClick' | 'autoMinWidth' | 'toggleAction' | 'offset'
+    >
+  >(),
   {
-    trigger: 'click',
+    toggleAction: 'click',
     placement: 'bottom-start',
     hideOnClick: true,
+    autoMinWidth: true,
+    offset: 4,
     role: 'menu',
   }
 )
 
-//===============================================
-// 📌 positioning & visibility
-//===============================================
-
-// currently there is no way for the dropdown to know if the referenceEl
-// is removed from the dom, if you have to remove the referenceEL and
-// readd it prefer removing both the referenceEl and the dropdown
-const anchor = ref<HTMLElement>()
-const _referenceEl =
-  p.referenceEl === undefined
-    ? computed(() => anchor.value?.previousElementSibling as HTMLElement)
-    : toRef(() => p.referenceEl)
-
-const isDropdownVisible = ref(false)
-
-function updateVisibility(value: boolean) {
-  isDropdownVisible.value = value
-}
-
-function onClick() {
-  if (p.hideOnClick) nextTick(() => updateVisibility(false))
-}
+const slots = defineSlots<{
+  default?: (props: {}) => any
+  trigger?: (props: {}) => VNode[]
+}>()
 
 //----------------------------------------------------------------------------------------------------
-// 📌 aria attributes
-//----------------------------------------------------------------------------------------------------
 
-watch(isDropdownVisible, (val) => {
-  if (_referenceEl.value) _referenceEl.value.ariaExpanded = `${val}`
+const DROPDOWN_ROLE = p.role
+const DROPDOWN_ID = 'vex-dropdown-' + getRandomString(6)
+const TRIGGER_ID = 'vex-trigger-' + getRandomString(6)
+
+const _isOpen = ref(false)
+const isFloatingElVisible = computed<boolean>({
+  get: () => _isOpen.value && !p.disabled,
+  set: (val) => (_isOpen.value = val),
 })
 
-watch(_referenceEl, (el) => {
-  if (el) {
-    el.ariaExpanded = `${isDropdownVisible.value}`
-    el.ariaHasPopup = p.role
+//----------------------------------------------------------------------------------------------------
+// 📌 Trigger
+//----------------------------------------------------------------------------------------------------
+
+const TriggerEl = ref<HTMLElement | null>(null)
+const INVALID_VNODE_TYPES: VNodeTypes[] = [Fragment, Comment, Text, 'template']
+
+function TriggerVNode(): VNode {
+  const vNodes = slots.trigger?.({}).filter((node) => !INVALID_VNODE_TYPES.includes(node.type))
+  if (!vNodes || vNodes.length !== 1) {
+    throw new Error(
+      '[vex] <Dropdown> trigger slot requires exactly a single root child at all times'
+    )
   }
-})
-//===============================================
+  return cloneVNode(
+    vNodes[0],
+    {
+      ref: TriggerEl,
+      id: TRIGGER_ID,
+      'aria-controls': DROPDOWN_ID,
+      'aria-haspopup': DROPDOWN_ROLE,
+      'aria-expanded': `${isFloatingElVisible.value}`,
+    },
+    true
+  )
+}
+
+//----------------------------------------------------------------------------------------------------
 // 📌 focus management
-//===============================================
+//----------------------------------------------------------------------------------------------------
 
-const floatingInstance = ref<InstanceType<typeof Floating> | null>(null)
+const FloatingEl = ref<HTMLElement | null>(null)
 
-useEventListener(_referenceEl, 'keydown', (e: KeyboardEvent) => {
+useEventListener(TriggerEl, 'keydown', (e: KeyboardEvent) => {
   if (e.shiftKey || e.altKey || e.ctrlKey) return
 
   if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
     e.preventDefault()
-    updateVisibility(true)
+    isFloatingElVisible.value = true
     focusFirstChild()
   }
 
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault()
-    updateVisibility(true)
+    isFloatingElVisible.value = true
     focusFirstChild()
   }
 })
 
-function focusFirstChild() {
-  // because we use v-show.lazy, children may not be available
-  // on initial render.
-  nextTick(() => {
-    ;(floatingInstance.value?.floatingEl as HTMLElement)?.focus()
-  })
+function focusFirstChild(): void {
+  nextTick(() => (FloatingEl.value as HTMLElement)?.focus())
 }
 
+//----------------------------------------------------------------------------------------------------
+
+const { floatingStyles } = useFloating(isFloatingElVisible, TriggerEl, FloatingEl, p)
+
 defineExpose({
-  isDropdownVisible,
-  floatingInstance,
+  isDropdownVisible: isFloatingElVisible,
+  FloatingEl: FloatingEl,
 })
 </script>
 
 <template>
-  <span style="display: none" ref="anchor" />
-  <Floating
-    ref="floatingInstance"
-    @keydown.esc.exact="updateVisibility(false)"
-    @update:visible="updateVisibility"
-    @click="onClick"
-    :visible="p.disabled ? false : isDropdownVisible"
-    :trigger="p.trigger"
-    :reference="_referenceEl"
-    :placement="p.placement"
-    :offset="p.withArrow ? 6 : 4"
-    :arrow="p.withArrow"
-    :id="p.id"
-    :aria-labelledby="p.ariaLabelledby"
-    :role="p.role"
-    tabindex="-1"
+  <Component :is="TriggerVNode" />
+
+  <div
+    ref="FloatingEl"
     v-bind="$attrs"
+    v-show.lazy="isFloatingElVisible"
+    tabindex="-1"
     class="vex-dropdown"
-    transition="vex-fade"
+    :id="DROPDOWN_ID"
+    :aria-labelledby="TRIGGER_ID"
+    :role="p.role"
+    :style="floatingStyles"
   >
     <slot />
-  </Floating>
+  </div>
 </template>
