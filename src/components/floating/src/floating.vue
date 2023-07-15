@@ -55,7 +55,7 @@ const p = withDefaults(
      * sets the floating element min-width to the width of the reference element,
      * @default true
      */
-    autoWidth?: boolean
+    autoMinWidth?: boolean
 
     /**
      * whether to render the arrow
@@ -74,12 +74,17 @@ const p = withDefaults(
      * @default 'div'
      */
     tag?: string
+
+    /**
+     * whether to hide the floatingEl when its clicked
+     */
+    hideOnClick?: boolean
   }>(),
   {
     trigger: 'click',
     placement: 'bottom-start',
     offset: 0,
-    autoWidth: true,
+    autoMinWidth: true,
     tag: 'div',
     arrowPadding: 0,
   }
@@ -100,17 +105,19 @@ const isFloatingElVisible = useVModel(p, 'visible', emit, {
 // 📌 trigger
 //----------------------------------------------------------------------------------------------------
 
-useEventListener(referenceEl, 'click', () => {
-  isFloatingElVisible.value = !isFloatingElVisible.value
-})
+if (p.trigger === 'click') {
+  useEventListener(referenceEl, 'click', () => {
+    isFloatingElVisible.value = !isFloatingElVisible.value
+  })
 
-onClickOutside(
-  floatingEl,
-  () => {
-    isFloatingElVisible.value = false
-  },
-  { ignore: [referenceEl] }
-)
+  onClickOutside(
+    floatingEl,
+    () => {
+      isFloatingElVisible.value = false
+    },
+    { ignore: [referenceEl] }
+  )
+}
 
 if (p.trigger === 'hover') {
   let timeoutId: ReturnType<typeof setTimeout>
@@ -146,6 +153,12 @@ if (p.trigger === 'hover') {
   })
 }
 
+useEventListener(floatingEl, 'click', () => {
+  if (p.hideOnClick) {
+    isFloatingElVisible.value = false
+  }
+})
+
 //----------------------------------------------------------------------------------------------------
 // 📌 middleware
 //----------------------------------------------------------------------------------------------------
@@ -153,7 +166,7 @@ if (p.trigger === 'hover') {
 const middleware = computed(() => {
   const mw = [offset(p.offset), flip(), shift({ padding: 8 })]
 
-  if (p.autoWidth) {
+  if (p.autoMinWidth) {
     mw.unshift(
       size({
         apply({ rects, elements }) {
