@@ -49,7 +49,7 @@ const CHILDREN_SELECTOR = '.vex-accordion-item-header-button:enabled'
 // 📌 keyboard & focus management
 //----------------------------------------------------------------------------------------------------
 
-const { eventListener: onKeydown } = useListNavigation(CHILDREN_SELECTOR, p.loop)
+const { onKeydown } = useListNavigation(CHILDREN_SELECTOR, p.loop)
 
 //----------------------------------------------------------------------------------------------------
 // 📌 context provider

@@ -66,7 +66,7 @@ provide(LIST_INJECTION_KEY, {
 //===============================================
 
 const childrenSelector = '.vex-list-item:not([inert])'
-const { eventListener: onKeydown } = useListNavigation(childrenSelector, true)
+const { onKeydown } = useListNavigation(childrenSelector, true)
 
 function onFocus(e: Event) {
   // ;(e.currentTarget as HTMLElement).querySelector<HTMLElement>(childrenSelector)?.focus()

@@ -5,28 +5,19 @@
  * @param  loop - Whether to loop back to the beginning/end of the list when reaching the end/beginning.
  * @param  [activateOnFocus=false] - Whether to activate the element when focused.
  */
-export function useListNavigation(
-  childrenSelector: string,
-  loop: boolean = false,
-  activateOnFocus: boolean = false
-) {
-  // TODO: look for a way to cache children
+export function useListNavigation(childrenSelector: string, loop: boolean = false) {
   /**
    * must be bound to a keydown event on the parent element
    * and the parent must not be focusable by `tab`.
    *
    * @param e - The keyboard event that triggered the navigation.
    */
-  function eventListener(e: KeyboardEvent) {
-    if (
-      e.altKey ||
-      e.ctrlKey ||
-      e.shiftKey ||
-      !['ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)
-    )
-      return
+  function onKeydown(e: KeyboardEvent) {
+    if (!['ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) return
+    if (e.altKey || e.ctrlKey || e.shiftKey || e.metaKey) return
 
-    const parent = e.currentTarget
+    const parent = e.currentTarget as HTMLElement
+    // TODO: look for a way to cache children
     const children = Array.from(parent.querySelectorAll<HTMLElement>(childrenSelector))
     if (!children.length) return
     e.preventDefault()
@@ -60,6 +51,6 @@ export function useListNavigation(
   }
 
   return {
-    eventListener,
+    onKeydown,
   }
 }
