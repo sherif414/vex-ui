@@ -15,18 +15,14 @@ export function useListSelection(selectedItems: Ref<SelectedItems>, multiple: Ma
   const isMultiple = toRef(multiple)
 
   function onSelect(value: string): void {
-    // single-select
-    if (!Array.isArray(selectedItems.value)) {
-      if (selectedItems.value === value) return
-      selectedItems.value = value
+    if (Array.isArray(selectedItems.value)) {
+      selectedItems.value = selectedItems.value.includes(value)
+        ? selectedItems.value.filter((v) => v !== value)
+        : [...selectedItems.value, value]
     }
-    // multi-select
-    else {
-      if (selectedItems.value.includes(value)) {
-        selectedItems.value = selectedItems.value.filter((v) => v !== value)
-      } else {
-        selectedItems.value = [...selectedItems.value, value]
-      }
+    //
+    else if (selectedItems.value !== value) {
+      selectedItems.value = value
     }
   }
 
