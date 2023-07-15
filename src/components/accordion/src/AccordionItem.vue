@@ -82,15 +82,11 @@ const index = toValue(ctx.getIndex())
 //----------------------------------------------------------------------------------------------------
 
 if (p.initiallyExpanded) {
-  activeIndex.value instanceof Set
-    ? activeIndex.value.add(index)
-    : (activeIndex.value = index)
+  activeIndex.value instanceof Set ? activeIndex.value.add(index) : (activeIndex.value = index)
 }
 
 const isActive = computed<boolean>(() =>
-  activeIndex.value instanceof Set
-    ? activeIndex.value.has(index)
-    : activeIndex.value === index
+  activeIndex.value instanceof Set ? activeIndex.value.has(index) : activeIndex.value === index
 )
 
 const isExpanded = computed<boolean>(() => p.alwaysExpanded || isActive.value)
@@ -111,7 +107,7 @@ function onToggle() {
 //----------------------------------------------------------------------------------------------------
 
 const modifierClasses = computed(() => {
-  return ['vex-accordion-item', { '--expanded': isExpanded }]
+  return ['vex-accordion-item', { '--expanded': isExpanded.value }]
 })
 </script>
 
