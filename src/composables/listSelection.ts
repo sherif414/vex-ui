@@ -48,4 +48,8 @@ export function useListSelection(selectedItems: Ref<SelectedItems>, multiple: Ma
       items.delete(itemValue)
     },
   })
+
+  return {
+    items,
+  }
 }
