@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { computed, inject, onBeforeUnmount, onUnmounted } from 'vue'
 import { SELECTION_INJECTION_KEY } from '@/composables'
 import { IconCheckCircle, IconCheck } from '@/icons'
 
@@ -24,24 +24,26 @@ const p = withDefaults(
   {}
 )
 
-const ctx = inject(SELECTION_INJECTION_KEY, null)
+const listContext = inject(SELECTION_INJECTION_KEY, null)
 
-if (!ctx) {
+if (!listContext) {
   throw new Error(`[vex] <SelectItem> is missing a <Select> parent component.`)
 }
+listContext.register(p.value)
+onUnmounted(() => listContext.unRegister(p.value))
 
 //----------------------------------------------------------------------------------------------------
 // 📌 selection
 //----------------------------------------------------------------------------------------------------
 
 const isSelected = computed<boolean>(() =>
-  Array.isArray(ctx.selected.value)
-    ? ctx.selected.value.includes(p.value)
-    : ctx.selected.value === p.value
+  Array.isArray(listContext.selectedItems.value)
+    ? listContext.selectedItems.value.includes(p.value)
+    : listContext.selectedItems.value === p.value
 )
 
 function select() {
-  ctx.onSelect(p.value)
+  listContext?.onSelect(p.value)
 }
 
 function onKeydown(e: KeyboardEvent) {

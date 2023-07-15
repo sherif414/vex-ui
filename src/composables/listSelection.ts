@@ -1,83 +1,51 @@
-import {
-  watch,
-  provide,
-  toRef,
-  type InjectionKey,
-  type Ref,
-  reactive,
-  computed,
-  ref,
-  toValue,
-} from 'vue'
+import { watch, provide, toRef, reactive } from 'vue'
+import type { InjectionKey, Ref, MaybeRefOrGetter } from 'vue'
+
+export type SelectedItems = string | string[] | undefined
 
 export const SELECTION_INJECTION_KEY = Symbol() as InjectionKey<{
-  onSelect: (value: string) => void
-  selected: Ref<string | string[]>
+  selectedItems: Ref<SelectedItems>
+  onSelect: (itemValue: string) => void
+  register: (itemValue: string) => void
+  unRegister: (itemValue: string) => void
 }>
 
-export interface SelectionProps {
-  modelValue?: string | string[]
-  multiple?: boolean
-  items: { label: string; value: string }[]
-}
-
-export type SelectionEmits = (e: 'update:modelValue', value?: string | string[]) => void
-
-export function useListSelection(props: SelectionProps, emit: SelectionEmits) {
-  const multiple = toRef(() => props.multiple)
-  const selected = computed({
-    get: () => props.modelValue,
-    set: (val) => emit('update:modelValue', val),
-  })
-
-  const itemsMap = computed(() => {
-    const map = new Map<string, string>()
-    props.items.forEach((i) => {
-      map.set(i.value, i.label)
-    })
-    return map
-  })
-
-  const selectedLabels = computed<string | string[]>(() => {
-    if (!Array.isArray(selected.value)) {
-      return itemsMap.value.get(selected.value)
-    }
-    return selected.value.map((i) => itemsMap.value.get(i))
-  })
+export function useListSelection(selectedItems: Ref<SelectedItems>, multiple: MaybeRefOrGetter) {
+  const items = reactive<Set<string>>(new Set())
+  const isMultiple = toRef(multiple)
 
   function onSelect(value: string): void {
     // single-select
-    if (!multiple.value && !Array.isArray(selected.value)) {
-      if (selected.value === value) return
-      selected.value = value
+    if (!Array.isArray(selectedItems.value)) {
+      if (selectedItems.value === value) return
+      selectedItems.value = value
     }
-
     // multi-select
-    else if (multiple.value && Array.isArray(selected.value)) {
-      if (selected.value.includes(value)) {
-        selected.value = selected.value.filter((v) => v !== value)
-      } else {
-        selected.value = [...selected.value, value]
-      }
-    }
-
-    // fallback to fix multiple + non array modelValue
     else {
-      selected.value = multiple.value ? [value] : value
+      if (selectedItems.value.includes(value)) {
+        selectedItems.value = selectedItems.value.filter((v) => v !== value)
+      } else {
+        selectedItems.value = [...selectedItems.value, value]
+      }
     }
   }
 
-  watch(multiple, (val) => {
-    selected.value = val ? [] : undefined
-  })
+  watch(
+    isMultiple,
+    (val) => {
+      selectedItems.value = val ? [] : undefined
+    },
+    { immediate: true }
+  )
 
   provide(SELECTION_INJECTION_KEY, {
     onSelect,
-    selected,
+    selectedItems: selectedItems,
+    register: (itemValue: string) => {
+      items.add(itemValue)
+    },
+    unRegister: (itemValue: string) => {
+      items.delete(itemValue)
+    },
   })
-
-  return {
-    selected,
-    selectedLabels,
-  }
 }

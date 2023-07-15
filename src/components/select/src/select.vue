@@ -3,8 +3,9 @@ import { Input, Tag } from '@/components'
 import { useFloating, useListNavigation, useListSelection } from '@/composables'
 import { getRandomString } from '@/composables/helpers'
 import { useElementSize, useEventListener } from '@vueuse/core'
-import { nextTick, reactive, ref, computed, toRef } from 'vue'
+import { nextTick, reactive, ref, computed, toRef, watch } from 'vue'
 import { IconArrowDown } from '@/icons'
+import type { SelectedItems } from '@/composables/listSelection'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -65,14 +66,10 @@ const p = withDefaults(
      * whether multiple options can be selected at a time
      */
     multiple?: boolean
-
-    /**
-     * all the select items
-     */
-    items: { label: string; value: string }[]
   }>(),
   {}
 )
+
 const emit = defineEmits<{
   (e: 'update:modelValue', value?: string | string[]): void
 }>()
@@ -136,10 +133,14 @@ function onFloatingElFocus() {
 //----------------------------------------------------------------------------------------------------
 
 const inputSize = useElementSize(InputEl)
-const { selectedLabels } = useListSelection(p, emit)
+const selected = computed<SelectedItems>({
+  get: () => p.modelValue,
+  set: (val) => emit('update:modelValue', val),
+})
+useListSelection(selected, () => p.multiple)
 
-const inputValue = computed<string>(() =>
-  Array.isArray(selectedLabels.value) ? '' : selectedLabels.value
+const inputValue = computed<string | undefined>(() =>
+  Array.isArray(selected.value) ? '' : selected.value
 )
 
 defineExpose({
@@ -183,7 +184,7 @@ defineExpose({
 
     <template #inputContent>
       <div
-        v-if="Array.isArray(selectedLabels) && selectedLabels.length"
+        v-if="Array.isArray(selected) && selected.length"
         class="vex-select-tag-wrapper"
         :style="{
           width: inputSize.width.value + 'px',
@@ -191,11 +192,11 @@ defineExpose({
           background: '',
         }"
       >
-        <Tag border-radius="sm" size="md" v-show="selectedLabels.length">
-          {{ selectedLabels[0] }}
+        <Tag border-radius="sm" size="md" v-show="selected.length">
+          {{ selected[0] }}
         </Tag>
-        <Tag border-radius="sm" size="md" v-show="selectedLabels.length > 1">
-          +{{ selectedLabels.length - 1 }}
+        <Tag border-radius="sm" size="md" v-show="selected.length > 1">
+          +{{ selected.length - 1 }}
         </Tag>
       </div>
     </template>
