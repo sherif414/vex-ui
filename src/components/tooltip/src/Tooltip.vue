@@ -91,7 +91,7 @@ const backgroundColor = computed(() => {
     :hover-el="props.referenceEl ?? rootEl"
     :placement="props.placement"
     :offset="8"
-    :auto-width="false"
+    :auto-min-width="false"
     :arrow="props.arrow"
     :style="{
       width,
