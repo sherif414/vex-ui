@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { Floating, Input, Tag } from '@/components'
-import { useListNavigation, useListSelection } from '@/composables'
+import { Input, Tag } from '@/components'
+import { useFloating, useListNavigation, useListSelection } from '@/composables'
 import { getRandomString } from '@/composables/helpers'
 import { useElementSize, useEventListener } from '@vueuse/core'
-import { nextTick, ref, watch } from 'vue'
+import { nextTick, reactive, ref, computed, toRef } from 'vue'
 import { IconArrowDown } from '@/icons'
 
 //----------------------------------------------------------------------------------------------------
@@ -77,114 +77,97 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value?: string | string[]): void
 }>()
 
+//----------------------------------------------------------------------------------------------------
+
 const CONTROLS_ID = 'select-controls-' + getRandomString(6)
 const COMBOBOX_ID = 'select-' + getRandomString(6)
 const CHILDREN_SELECTOR = '.vex-list-item:not([inert])'
 
 //----------------------------------------------------------------------------------------------------
-// 📌 selection
+// 📌 floating
 //----------------------------------------------------------------------------------------------------
 
-const { selectedLabels } = useListSelection(p, emit)
+const FloatingEl = ref<HTMLElement | null>(null)
+const InputEl = ref<HTMLElement | null>(null)
+const isFloatingElVisible = ref(false)
 
-//----------------------------------------------------------------------------------------------------
-// 📌 floating listbox
-//----------------------------------------------------------------------------------------------------
-
-const isFloatingVisible = ref(false)
-const floatingEl = ref<HTMLElement | null>(null)
-
-function updateVisibility(val: boolean) {
-  isFloatingVisible.value = val
-}
-
-function onFloatingElClick() {
-  if (!p.multiple) {
-    nextTick(() => (isFloatingVisible.value = false))
-  }
-}
-
-//----------------------------------------------------------------------------------------------------
-// 📌 input element
-//----------------------------------------------------------------------------------------------------
-
-const inputEl = ref<HTMLElement | null>(null)
-const inputSize = useElementSize(inputEl)
-
-watch(isFloatingVisible, (val) => {
-  if (inputEl.value) inputEl.value.ariaExpanded = `${val}`
+const _options = reactive({
+  placement: 'bottom-start' as const,
+  toggleAction: 'click' as const,
+  autoMinWidth: true,
+  offset: 4,
+  hideOnClick: toRef(() => !p.multiple),
 })
 
+const { floatingStyles } = useFloating(isFloatingElVisible, InputEl, FloatingEl, _options)
+
 //----------------------------------------------------------------------------------------------------
-// 📌 focus management
+// 📌 focus & keyboard interactions
 //----------------------------------------------------------------------------------------------------
 
-const { eventListener: onKeydown } = useListNavigation(CHILDREN_SELECTOR, true)
+const { onKeydown } = useListNavigation(CHILDREN_SELECTOR, true)
 
-useEventListener(inputEl, 'keydown', (e: KeyboardEvent) => {
-  if (e.shiftKey || e.ctrlKey || e.metaKey) return
+useEventListener(InputEl, 'keydown', (e: KeyboardEvent) => {
+  if (!['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key)) return
+  if (e.shiftKey || e.ctrlKey || e.metaKey || e.altKey) return
 
-  if (e.altKey && e.key === 'ArrowDown') {
-    isFloatingVisible.value = true
-    return
-  }
-
-  if (e.altKey && e.key === 'ArrowUp') {
-    isFloatingVisible.value = false
-    return
-  }
-
-  if (!e.altKey && ['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key)) {
-    e.preventDefault()
-    updateVisibility(true)
-    nextTick(() => floatingEl.value?.focus())
-    return
-  }
+  e.preventDefault()
+  isFloatingElVisible.value = true
+  nextTick(() => FloatingEl.value?.focus())
 })
 
-useEventListener(floatingEl, 'keydown', (e: KeyboardEvent) => {
-  if (e.shiftKey || e.ctrlKey || e.metaKey) return
+useEventListener(FloatingEl, 'keydown', (e: KeyboardEvent) => {
+  if (e.key !== 'Escape') return
+  if (e.shiftKey || e.ctrlKey || e.metaKey || e.altKey) return
 
-  if (e.altKey && e.key === 'ArrowUp') {
-    inputEl.value?.focus()
-    return
-  }
-
-  if (!e.altKey && e.key === 'Escape') {
-    e.preventDefault()
-    updateVisibility(false)
-    inputEl.value?.focus()
-  }
+  e.preventDefault()
+  isFloatingElVisible.value = true
+  InputEl.value?.focus()
 })
 
 function onFloatingElFocus() {
-  const selectedEl = floatingEl.value?.querySelector<HTMLElement>(
+  const selectedEl = FloatingEl.value?.querySelector<HTMLElement>(
     '.vex-list-item.vex-selected:not([inert])'
   )
   if (selectedEl) selectedEl.focus()
-  else floatingEl.value?.querySelector<HTMLElement>(CHILDREN_SELECTOR)?.focus()
+  else FloatingEl.value?.querySelector<HTMLElement>(CHILDREN_SELECTOR)?.focus()
 }
+
+//----------------------------------------------------------------------------------------------------
+
+const inputSize = useElementSize(InputEl)
+const { selectedLabels } = useListSelection(p, emit)
+
+const inputValue = computed<string>(() =>
+  Array.isArray(selectedLabels.value) ? '' : selectedLabels.value
+)
+
+defineExpose({
+  isFloatingElVisible,
+  FloatingEl,
+  InputEl,
+})
 </script>
 
 <template>
   <Input
-    :ref="(vm)=> inputEl = (vm as InstanceType<typeof Input>)?.inputEl ?? null"
+    :ref="(vm)=> InputEl = (vm as InstanceType<typeof Input>)?.InputEl ?? null"
     v-bind="$attrs"
-    type="button"
+    readonly
     role="combobox"
     aria-haspopup="listbox"
     autocomplete="none"
     :loading="p.loading"
     :id="COMBOBOX_ID"
     :aria-controls="CONTROLS_ID"
-    :aria-expanded="isFloatingVisible"
+    :aria-expanded="isFloatingElVisible"
     :error="p.error"
     :error-message="p.errorMessage"
     :disabled="p.disabled"
     :label="p.label"
     :hint="p.hint"
     :compact="p.compact"
-    :model-value="!Array.isArray(selectedLabels) ? selectedLabels : ''"
+    :model-value="inputValue"
   >
     <template v-if="$slots.icon" #icon>
       <slot name="icon" />
@@ -194,52 +177,49 @@ function onFloatingElFocus() {
       <IconArrowDown
         aria-hidden="true"
         class="vex-select-arrow"
-        :class="{ 'vex-select-arrow-active': isFloatingVisible }"
+        :class="{ 'vex-select-arrow-active': isFloatingElVisible }"
       />
     </template>
 
     <template #inputContent>
       <div
-        v-if="Array.isArray(selectedLabels)"
+        v-if="Array.isArray(selectedLabels) && selectedLabels.length"
+        class="vex-select-tag-wrapper"
         :style="{
           width: inputSize.width.value + 'px',
           height: inputSize.height.value + 'px',
+          background: '',
         }"
-        class="vex-select-tag-wrapper"
       >
-        <Tag border-radius="sm" size="sm" v-show="selectedLabels.length">{{
-          selectedLabels[0]
-        }}</Tag>
-        <Tag border-radius="sm" size="sm" v-show="selectedLabels.length > 1"
-          >+{{ selectedLabels.length - 1 }}</Tag
-        >
+        <Tag border-radius="sm" size="md" v-show="selectedLabels.length">
+          {{ selectedLabels[0] }}
+        </Tag>
+        <Tag border-radius="sm" size="md" v-show="selectedLabels.length > 1">
+          +{{ selectedLabels.length - 1 }}
+        </Tag>
       </div>
     </template>
+  </Input>
 
-    <!-- dropdown -->
+  <!-- dropdown -->
 
-    <template #dropdown>
-      <!-- TODO: aria-labelledby is illegal here? -->
-      <Floating
-        tag="ul"
-        tabindex="-1"
+  <Teleport to="body">
+    <Transition name="vex-fade">
+      <ul
+        v-show="isFloatingElVisible"
+        ref="FloatingEl"
         class="vex-list vex-dropdown"
+        tabindex="-1"
         role="listbox"
-        transition="vex-fade"
-        :ref="(vm )=> floatingEl = (vm as InstanceType<typeof Floating>)?.floatingEl ?? null"
-        @click="onFloatingElClick"
-        @update:visible="updateVisibility"
         @focus="onFloatingElFocus"
         @keydown="onKeydown"
         :aria-multiselectable="p.multiple"
-        :visible="!p.disabled ? isFloatingVisible : false"
-        :reference="inputEl || null"
-        :offset="4"
         :aria-labelledby="COMBOBOX_ID"
         :id="CONTROLS_ID"
+        :style="floatingStyles"
       >
         <slot />
-      </Floating>
-    </template>
-  </Input>
+      </ul>
+    </Transition>
+  </Teleport>
 </template>
