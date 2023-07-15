@@ -28,5 +28,9 @@ const modifierClasses = computed(() => [
     :class="modifierClasses"
     :role="p.decorative ? 'none' : 'separator'"
     :aria-orientation="p.decorative ? undefined : p.orientation"
-  />
+  >
+    <span class="vex-divider-content">
+      <slot />
+    </span>
+  </div>
 </template>
