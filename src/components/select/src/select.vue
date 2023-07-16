@@ -130,8 +130,9 @@ function onFloatingElFocus() {
 }
 
 //----------------------------------------------------------------------------------------------------
+// 📌 items selection
+//----------------------------------------------------------------------------------------------------
 
-const inputSize = useElementSize(InputEl)
 const selected = computed<typeof p.modelValue>({
   get: () => p.modelValue,
   set: (val) => emit('update:modelValue', val),
@@ -143,6 +144,9 @@ if (!p.multiple && Array.isArray(selected.value)) selected.value = undefined
 
 useListSelection(selected, () => p.multiple)
 
+//----------------------------------------------------------------------------------------------------
+
+const inputSize = useElementSize(InputEl)
 const inputValue = computed<string | undefined>(() =>
   Array.isArray(selected.value) ? '' : selected.value
 )
