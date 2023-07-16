@@ -39,7 +39,7 @@ const progressEl = ref<InstanceType<typeof Progress> | null>(null)
 const progressValue = ref(0)
 // we add 300ms to compensate for the lost time during enter transition
 const _duration = props.duration + 300
-const timer = !props.persist ? useTimer(_duration, handleClose) : undefined
+const timer = !props.persist ? useTimer(_duration, onClose) : undefined
 
 // TODO: this is too expensive for its usage
 // find a better solution
@@ -52,18 +52,18 @@ if (timer) {
   })
 }
 
-function handleClose() {
+function onClose() {
   timer?.stop()
   emit('close')
 }
 
-function handleMouseLeave() {
+function onMouseLeave() {
   if (document.activeElement !== rootEl.value) {
     resumeTimer()
   }
 }
 
-function handleBlur() {
+function onBlur() {
   if (isMouseOutside.value) {
     resumeTimer()
   }
@@ -127,7 +127,7 @@ useEventListener(rootEl, 'touchend', (e: TouchEvent) => {
   // else reset the element's transform to 0
   const delta = Math.abs(prevX - initialX)
   if (delta > Math.floor(rootEl.value!.offsetWidth / 3)) {
-    handleClose()
+    onClose()
     return
   }
 
@@ -154,11 +154,11 @@ const icon = computed(() => {
     tabindex="0"
     role="status"
     aria-atomic
-    @keydown.esc="handleClose"
+    @keydown.esc="onClose"
     @mouseenter="pauseTimer"
-    @mouseleave="handleMouseLeave"
+    @mouseleave="onMouseLeave"
     @focus="pauseTimer"
-    @blur="handleBlur"
+    @blur="onBlur"
     :class="[
       $slots.default
         ? 'vex-notification-item-custom'
@@ -193,12 +193,7 @@ const icon = computed(() => {
 
     <!-- close button -->
 
-    <button
-      type="button"
-      aria-label="close"
-      class="vex-notification-item-close"
-      @click="handleClose"
-    >
+    <button type="button" aria-label="close" class="vex-notification-item-close" @click="onClose">
       <IconXMark />
     </button>
 
