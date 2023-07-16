@@ -35,8 +35,6 @@ context.register(p.value)
 onBeforeUnmount(() => context.unRegister(p.value))
 
 //----------------------------------------------------------------------------------------------------
-// 📌 selection
-//----------------------------------------------------------------------------------------------------
 
 const isSelected = computed<boolean>(() =>
   Array.isArray(context.selectedItems.value)
