@@ -24,6 +24,7 @@ export default defineConfig({
       // the proper extensions will be added
       fileName: 'vex-ui',
     },
+    copyPublicDir: false,
     rollupOptions: {
       external: ['vue'],
       output: {
@@ -33,6 +34,7 @@ export default defineConfig({
       },
     },
   },
+  publicDir: 'playground/public',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
