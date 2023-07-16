@@ -117,7 +117,7 @@ useEventListener(FloatingEl, 'keydown', (e: KeyboardEvent) => {
   if (e.shiftKey || e.ctrlKey || e.metaKey || e.altKey) return
 
   e.preventDefault()
-  isFloatingElVisible.value = true
+  isFloatingElVisible.value = false
   InputEl.value?.focus()
 })
 
