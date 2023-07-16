@@ -12,7 +12,6 @@ export const SELECTION_INJECTION_KEY = Symbol() as InjectionKey<{
 
 export function useListSelection(selectedItems: Ref<SelectedItems>, multiple: MaybeRefOrGetter) {
   const items = reactive<Set<string>>(new Set())
-  const isMultiple = toRef(multiple)
 
   function onSelect(value: string): void {
     if (Array.isArray(selectedItems.value)) {
@@ -26,7 +25,7 @@ export function useListSelection(selectedItems: Ref<SelectedItems>, multiple: Ma
     }
   }
 
-  watch(isMultiple, (val) => {
+  watch(multiple, (val) => {
     selectedItems.value = val ? [] : undefined
   })
 
