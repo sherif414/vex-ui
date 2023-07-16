@@ -17,11 +17,6 @@ defineOptions({
 const p = withDefaults(
   defineProps<{
     /**
-     * specifies the select label text
-     */
-    label?: string
-
-    /**
      * specifies the currently selected option/options
      */
     modelValue?: string | string[]
@@ -42,21 +37,6 @@ const p = withDefaults(
     readonly?: boolean
 
     /**
-     * whether the selected option is invalid
-     */
-    error?: boolean
-
-    /**
-     * specifies the error message text
-     */
-    errorMessage?: string
-
-    /**
-     * specifies the hint text
-     */
-    hint?: string
-
-    /**
      * shows a smaller input
      */
     compact?: boolean
@@ -65,6 +45,7 @@ const p = withDefaults(
      * whether multiple options can be selected at a time
      */
     multiple?: boolean
+    id?: string
   }>(),
   {}
 )
@@ -75,8 +56,8 @@ const emit = defineEmits<{
 
 //----------------------------------------------------------------------------------------------------
 
+const SELECT_ID = computed(() => p.id || 'select-' + getRandomString(6))
 const CONTROLS_ID = 'select-controls-' + getRandomString(6)
-const COMBOBOX_ID = 'select-' + getRandomString(6)
 const CHILDREN_SELECTOR = '.vex-list-item:not([inert])'
 
 //----------------------------------------------------------------------------------------------------
@@ -155,6 +136,7 @@ defineExpose({
   isFloatingElVisible,
   FloatingEl,
   InputEl,
+  SELECT_ID,
 })
 </script>
 
@@ -167,14 +149,10 @@ defineExpose({
     aria-haspopup="listbox"
     autocomplete="none"
     :loading="p.loading"
-    :id="COMBOBOX_ID"
+    :id="SELECT_ID"
     :aria-controls="CONTROLS_ID"
     :aria-expanded="isFloatingElVisible"
-    :error="p.error"
-    :error-message="p.errorMessage"
     :disabled="p.disabled"
-    :label="p.label"
-    :hint="p.hint"
     :compact="p.compact"
     :model-value="inputValue"
   >
@@ -223,7 +201,7 @@ defineExpose({
         @focus="onFloatingElFocus"
         @keydown="onKeydown"
         :aria-multiselectable="p.multiple"
-        :aria-labelledby="COMBOBOX_ID"
+        :aria-labelledby="SELECT_ID"
         :id="CONTROLS_ID"
         :style="floatingStyles"
       >
