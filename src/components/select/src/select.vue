@@ -5,7 +5,6 @@ import { getRandomString } from '@/composables/helpers'
 import { useElementSize, useEventListener } from '@vueuse/core'
 import { nextTick, reactive, ref, computed, toRef, watch } from 'vue'
 import { IconArrowDown } from '@/icons'
-import type { SelectedItems } from '@/composables/listSelection'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -71,7 +70,7 @@ const p = withDefaults(
 )
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value?: string | string[]): void
+  (e: 'update:modelValue', value?: typeof p.modelValue): void
 }>()
 
 //----------------------------------------------------------------------------------------------------
@@ -133,10 +132,15 @@ function onFloatingElFocus() {
 //----------------------------------------------------------------------------------------------------
 
 const inputSize = useElementSize(InputEl)
-const selected = computed<SelectedItems>({
+const selected = computed<typeof p.modelValue>({
   get: () => p.modelValue,
   set: (val) => emit('update:modelValue', val),
 })
+
+// reset invalid modelValues
+if (p.multiple && !Array.isArray(selected.value)) selected.value = []
+if (!p.multiple && Array.isArray(selected.value)) selected.value = undefined
+
 useListSelection(selected, () => p.multiple)
 
 const inputValue = computed<string | undefined>(() =>
