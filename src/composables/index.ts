@@ -1,5 +1,5 @@
 export { useTimer } from './timer'
 export { useListNavigation } from './listNavigation'
-export { useListSelection, SELECTION_INJECTION_KEY } from './listSelection'
+export { useListSelection, SELECTION_INJECTION_KEY } from './list-selection'
 export { useFocusTrap } from './focus-trap'
 export * from './floating'
