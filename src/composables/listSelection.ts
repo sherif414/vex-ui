@@ -26,13 +26,9 @@ export function useListSelection(selectedItems: Ref<SelectedItems>, multiple: Ma
     }
   }
 
-  watch(
-    isMultiple,
-    (val) => {
-      selectedItems.value = val ? [] : undefined
-    },
-    { immediate: true }
-  )
+  watch(isMultiple, (val) => {
+    selectedItems.value = val ? [] : undefined
+  })
 
   provide(SELECTION_INJECTION_KEY, {
     onSelect,
