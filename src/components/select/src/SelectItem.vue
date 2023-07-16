@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, onBeforeUnmount, onUnmounted } from 'vue'
+import { computed, inject, onBeforeUnmount } from 'vue'
 import { SELECTION_INJECTION_KEY } from '@/composables'
 import { IconCheckCircle, IconCheck } from '@/icons'
 
@@ -24,34 +24,32 @@ const p = withDefaults(
   {}
 )
 
-const listContext = inject(SELECTION_INJECTION_KEY, null)
+//----------------------------------------------------------------------------------------------------
 
-if (!listContext) {
+const context = inject(SELECTION_INJECTION_KEY, null)
+
+if (!context) {
   throw new Error(`[vex] <SelectItem> is missing a <Select> parent component.`)
 }
-listContext.register(p.value)
-onUnmounted(() => listContext.unRegister(p.value))
+context.register(p.value)
+onBeforeUnmount(() => context.unRegister(p.value))
 
 //----------------------------------------------------------------------------------------------------
 // 📌 selection
 //----------------------------------------------------------------------------------------------------
 
 const isSelected = computed<boolean>(() =>
-  Array.isArray(listContext.selectedItems.value)
-    ? listContext.selectedItems.value.includes(p.value)
-    : listContext.selectedItems.value === p.value
+  Array.isArray(context.selectedItems.value)
+    ? context.selectedItems.value.includes(p.value)
+    : context.selectedItems.value === p.value
 )
-
-function select() {
-  listContext?.onSelect(p.value)
-}
 
 function onKeydown(e: KeyboardEvent) {
   if (e.ctrlKey || e.altKey || e.shiftKey || e.metaKey) return
 
   if (e.key === ' ' || e.key === 'Enter') {
     e.preventDefault()
-    select()
+    context?.onSelect(p.value)
   }
 }
 </script>
@@ -60,7 +58,7 @@ function onKeydown(e: KeyboardEvent) {
   <div
     tabindex="-1"
     role="option"
-    @click="select"
+    @click="context?.onSelect(p.value)"
     @keydown="onKeydown"
     :inert="p.disabled"
     :aria-selected="isSelected"
