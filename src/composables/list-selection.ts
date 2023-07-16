@@ -10,7 +10,11 @@ export const SELECTION_INJECTION_KEY = Symbol() as InjectionKey<{
   unRegister: (itemValue: string) => void
 }>
 
-export function useListSelection(selectedItems: Ref<SelectedItems>, multiple: MaybeRefOrGetter) {
+export function useListSelection(
+  selectedItems: Ref<SelectedItems>,
+  multiple: MaybeRefOrGetter,
+  DeSelectOnReSelect?: boolean
+) {
   const items = reactive<Set<string>>(new Set())
 
   function onSelect(value: string): void {
@@ -22,6 +26,10 @@ export function useListSelection(selectedItems: Ref<SelectedItems>, multiple: Ma
     //
     else if (selectedItems.value !== value) {
       selectedItems.value = value
+    }
+    //
+    else if (DeSelectOnReSelect) {
+      selectedItems.value = undefined
     }
   }
 
