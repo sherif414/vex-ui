@@ -1,59 +1,26 @@
-// outer container
-.vex-textfield-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--vex-spacing-1);
-  // width: 100%;
-}
-
-.vex-textfield {
+.vex-field {
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   height: 2.5rem;
   font-size: var(--vex-font-size-sm);
 
-  &-icon ~ &-input {
+  &.--with-icon &-input {
     padding-inline-start: 2.5rem;
   }
 
-  &-suffix ~ &-input {
+  &.--with-suffix &-input {
     padding-inline-end: 2.5rem;
   }
 }
 
-//------ icon & suffix ------//
-
-.vex-textfield-suffix,
-.vex-textfield-icon {
-  aspect-ratio: 1/1;
-  height: 100%;
-  gap: var(--vex-spacing-2);
-  position: absolute;
-  inset-block-start: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  font-size: var(--vex-font-size-xs);
-  color: var(--vex-text-clr-muted);
-}
-
-.vex-textfield-icon {
-  inset-inline-start: 0;
-}
-.vex-textfield-suffix {
-  inset-inline-end: 0;
-}
-
 //------ input ------//
 
-.vex-textfield-input {
+.vex-field-input {
   all: unset;
   width: 100%;
   min-width: 0;
   border-style: none;
-  height: 100%;
   outline: 1px solid var(--vex-border-clr-base);
   border-radius: var(--vex-border-radius-sm);
   transition-property: color, background-color, border-color, outline-color;
@@ -78,59 +45,60 @@
     outline-color: var(--vex-border-clr-active);
     outline-width: 2px;
   }
-}
 
-//------ hint & label ------//
-
-.vex-textfield-hint {
-  font-size: var(--vex-font-size-xs);
-  color: var(--vex-on-surface-muted);
-  padding-inline-start: var(--vex-spacing-2);
-}
-
-.vex-label {
-  font-size: var(--vex-font-size-sm);
-}
-
-//------ compact ------//
-
-.vex-textfield.--compact {
-  $textfield-height: 2rem;
-
-  height: $textfield-height;
-  font-size: var(--vex-font-size-xs);
-
-  .vex-textfield-input {
-    padding-inline: var(--vex-spacing-3);
-  }
-
-  .vex-textfield-icon ~ .vex-textfield-input {
-    padding-inline-start: $textfield-height;
-  }
-
-  .vex-textfield-suffix ~ .vex-textfield-input {
-    padding-inline-end: $textfield-height;
-  }
-}
-
-//------ error ------//
-
-.vex-textfield.--error {
-  .vex-textfield-icon,
-  .vex-textfield-suffix {
-    color: var(--vex-clr-danger-400);
-  }
-
-  .vex-textfield-input {
+  &:invalid {
     outline-color: var(--vex-clr-danger-400);
   }
 }
 
-//------ focus ------//
+//------ icon & suffix ------//
 
-.vex-textfield.--focus {
-  .vex-textfield-suffix,
-  .vex-textfield-icon {
+.vex-field-suffix,
+.vex-field-icon {
+  aspect-ratio: 1/1;
+  height: 100%;
+  gap: var(--vex-spacing-2);
+  position: absolute;
+  inset-block-start: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  font-size: var(--vex-font-size-xs);
+  color: var(--vex-text-clr-muted);
+
+  .vex-field-input:focus ~ & {
     color: var(--vex-clr-primary-400);
+  }
+  .vex-field-input:invalid ~ & {
+    color: var(--vex-clr-danger-400);
+  }
+}
+
+.vex-field-icon {
+  inset-inline-start: 0;
+}
+.vex-field-suffix {
+  inset-inline-end: 0;
+}
+
+//------ compact ------//
+
+.vex-field.--compact {
+  $field-height: 2rem;
+
+  height: $field-height;
+  font-size: var(--vex-font-size-xs);
+
+  .vex-field-input {
+    padding-inline: var(--vex-spacing-3);
+  }
+
+  &.--with-icon .vex-field-input {
+    padding-inline-start: $field-height;
+  }
+
+  &.--with-suffix .vex-field-input {
+    padding-inline-end: $field-height;
   }
 }

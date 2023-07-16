@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { useFocus } from '@vueuse/core'
-import { useAttrs, computed, ref } from 'vue'
+import { useAttrs, computed, ref, onMounted, watch } from 'vue'
 import { getRandomString } from '@/composables/helpers'
 import { IconDangerSign } from '@/icons'
 import { Tooltip, Loader } from '@/components'
@@ -16,11 +15,6 @@ defineOptions({
 const p = withDefaults(
   defineProps<{
     /**
-     * specifies the label text
-     */
-    label?: string
-
-    /**
      * specifies the input value
      */
     modelValue?: string | number
@@ -29,6 +23,7 @@ const p = withDefaults(
      * specifies the input type attribute
      * @default 'text'
      */
+    //TODO: time is broken
     type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'time' | 'url' | 'button'
 
     /**
@@ -52,45 +47,15 @@ const p = withDefaults(
     readonly?: boolean
 
     /**
-     * whether the input value is invalid
-     */
-    error?: boolean
-
-    /**
-     * specifies the error text
-     */
-    errorMessage?: string
-
-    /**
-     * specifies the hint text
-     */
-    hint?: string
-
-    /**
-     * the class attribute for the root element
-     */
-    class?: string
-
-    /**
      * the class attribute for the internal input
      */
     inputClass?: string
 
     /**
-     * the class attribute for the input wrapper element
-     */
-    inputWrapperClass?: string
-
-    /**
      * shows a smaller input
      */
     compact?: boolean
-
-    /**
-     * specifies the input `id` and `<label>` element `for` attribute
-     * @default auto generated random string
-     */
-    id?: string
+    class?: string
   }>(),
   {
     type: 'text',
@@ -98,8 +63,8 @@ const p = withDefaults(
 )
 
 const emit = defineEmits<{
-  (event: 'click'): void
-  (event: 'update:modelValue', value?: string): void
+  click: [e: Event]
+  'update:modelValue': [value?: string]
 }>()
 
 const slots = defineSlots<{
@@ -109,35 +74,28 @@ const slots = defineSlots<{
   inputContent(props: {}): any
 }>()
 
-const { class: _, ...fallThroughAttrs } = useAttrs()
-
-//----------------------------------------------------------------------------------------------------
-// 📌 input attributes
 //----------------------------------------------------------------------------------------------------
 
 // custom v-model.lazy implementation
 const updateModel = computed(() => (p.modelModifiers?.lazy ? 'change' : 'input'))
-const INPUT_ID = `vex-input-${getRandomString(6)}`
 
 const InputEl = ref<HTMLInputElement | null>(null)
 const InputWrapperEl = ref<HTMLDivElement | null>(null)
 
-const { focused: isFocused } = useFocus(InputEl)
-
-//----------------------------------------------------------------------------------------------------
-
-const hasSuffix = computed<boolean>(() => !!slots.suffix || p.error)
+const hasSuffix = computed<boolean>(() => !!slots.suffix)
 const hasIcon = computed<boolean>(() => !!slots.icon)
 
 const modifierClasses = computed(() => [
-  'vex-textfield',
+  'vex-field',
   p.class,
   {
-    '--error': p.error,
-    '--focus': isFocused.value,
     '--compact': p.compact,
+    '--with-icon': hasIcon.value,
+    '--with-suffix': hasSuffix.value,
   },
 ])
+
+//----------------------------------------------------------------------------------------------------
 
 defineExpose({
   InputEl,
@@ -146,55 +104,35 @@ defineExpose({
 </script>
 
 <template>
-  <div class="vex-textfield-container">
-    <!-- label -->
+  <div ref="InputWrapperEl" @click="emit('click', $event)" :class="modifierClasses">
+    <input
+      v-bind="$attrs"
+      :type="p.type"
+      :disabled="p.disabled"
+      :readonly="p.readonly"
+      :value="p.modelValue"
+      @[updateModel]="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+      ref="InputEl"
+      title=""
+      class="vex-field-input"
+    />
 
-    <label :for="p.id || INPUT_ID" v-if="p.label" class="vex-label">
-      {{ p.label }}
-    </label>
-
-    <!-- input wrapper -->
-
-    <div ref="InputWrapperEl" @click="emit('click')" :class="modifierClasses">
-      <div v-if="hasIcon" aria-hidden="true" class="vex-textfield-icon">
-        <slot name="icon" />
-      </div>
-
-      <div v-if="hasSuffix" aria-hidden="true" class="vex-textfield-suffix">
-        <Loader v-if="p.loading" />
-        <Tooltip v-else-if="p.error" color="danger" :content="p.errorMessage">
-          <IconDangerSign
-            width="18"
-            height="18"
-            style="color: var(--vex-clr-danger-400); pointer-events: auto"
-          />
-        </Tooltip>
-        <slot v-else name="suffix" />
-      </div>
-
-      <input
-        ref="InputEl"
-        v-bind="fallThroughAttrs"
-        class="vex-textfield-input"
-        :id="p.id || INPUT_ID"
-        :type="p.type"
-        :disabled="p.disabled"
-        :readonly="p.readonly"
-        :value="p.modelValue"
-        @[updateModel]="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
-      />
-
-      <slot name="inputContent" />
+    <div v-if="hasIcon" aria-hidden="true" class="vex-field-icon">
+      <slot name="icon" />
     </div>
 
-    <!-- dropdown -->
+    <div v-if="hasSuffix" aria-hidden="true" class="vex-field-suffix">
+      <Loader v-if="p.loading" />
+      <!-- <Tooltip v-else-if="isInvalid" color="danger" :content="errorMessage">
+        <IconDangerSign
+          width="18"
+          height="18"
+          style="color: var(--vex-clr-danger-400); pointer-events: auto"
+        />
+      </Tooltip> -->
+      <slot v-else name="suffix" />
+    </div>
 
-    <slot name="dropdown" />
-
-    <!-- hint -->
-
-    <small v-if="p.hint" class="vex-textfield-hint">
-      {{ p.hint }}
-    </small>
+    <slot name="inputContent" />
   </div>
 </template>
