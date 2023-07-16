@@ -22,8 +22,8 @@
     cursor: not-allowed;
   }
 
-  &.vex-selected {
-    // background-color: var(--vex-clr-neutral-200) !important;
-    color: var(--vex-clr-primary);
+  &.--selected {
+    background-color: var(--vex-clr-neutral-100);
+    color: var(--vex-clr-primary-400);
   }
 }

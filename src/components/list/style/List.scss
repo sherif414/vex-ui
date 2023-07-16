@@ -1,13 +1,10 @@
 .vex-list {
   margin: 0;
   padding: var(--vex-spacing-1);
-  max-height: 14rem;
   display: flex;
   flex-direction: column;
   gap: var(--vex-spacing-1);
   list-style-type: none;
-  overflow-y: auto;
-  border-radius: var(--vex-border-radius-md);
-  font-size: var(--vex-font-size-sm);
+  border-radius: inherit;
   background-color: white;
 }

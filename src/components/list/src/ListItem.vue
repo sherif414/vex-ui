@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue'
-import { LIST_INJECTION_KEY } from '.'
+import { computed, inject, onBeforeUnmount } from 'vue'
+import { SELECTION_INJECTION_KEY } from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -23,44 +23,48 @@ const p = withDefaults(
   {}
 )
 
-const ctx = inject(LIST_INJECTION_KEY)
+defineSlots<{
+  default: (props: { isSelected: boolean }) => any
+}>()
 
 //----------------------------------------------------------------------------------------------------
-// 📌 selection
+
+const context = inject(SELECTION_INJECTION_KEY, null)
+
+if (!context) {
+  throw new Error(`[vex] <ListItem> is missing a <List> parent component.`)
+}
+context.register(p.value)
+onBeforeUnmount(() => context.unRegister(p.value))
+
 //----------------------------------------------------------------------------------------------------
 
-const selected = computed(() =>
-  Array.isArray(ctx.selectedItems.value)
-    ? ctx.selectedItems.value.includes(p.value)
-    : ctx.selectedItems.value === p.value
+const isSelected = computed<boolean>(() =>
+  Array.isArray(context.selectedItems.value)
+    ? context.selectedItems.value.includes(p.value)
+    : context.selectedItems.value === p.value
 )
 
-function onSelect() {
-  ctx.select(p.value)
-}
-
-//----------------------------------------------------------------------------------------------------
-// 📌 keyboard interactions
-//----------------------------------------------------------------------------------------------------
-
 function onKeydown(e: KeyboardEvent) {
+  if (e.key === ' ' || e.key === 'Enter') return
   if (e.ctrlKey || e.altKey || e.shiftKey || e.metaKey) return
-  if (e.key === ' ' || e.key === 'Enter') {
-    e.preventDefault()
-    ctx.select(p.value)
-  }
+
+  e.preventDefault()
+  context?.onSelect(p.value)
 }
+
+const modifierClasses = computed(() => ['vex-list-item', { '--selected': isSelected.value }])
 </script>
 
 <template>
   <li
     tabindex="0"
-    @click="onSelect"
+    @click="context?.onSelect(p.value)"
     @keydown="onKeydown"
     :inert="p.disabled"
-    :aria-selected="selected"
-    :class="['vex-list-item', { 'vex-selected': selected }]"
+    :aria-selected="isSelected"
+    :class="modifierClasses"
   >
-    <slot />
+    <slot :isSelected="isSelected" />
   </li>
 </template>

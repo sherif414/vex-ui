@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { LIST_INJECTION_KEY } from '.'
-import { useListNavigation } from '@/composables'
-import { provide, watch, toRef } from 'vue'
+import { useListNavigation, useListSelection } from '@/composables'
+import { computed } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -23,47 +22,27 @@ const p = withDefaults(
 )
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: string | string[]): void
+  (e: 'update:modelValue', value: typeof p.modelValue): void
 }>()
 
-//===============================================
+//----------------------------------------------------------------------------------------------------
 // 📌 items selection
-//===============================================
+//----------------------------------------------------------------------------------------------------
 
-function select(value: string): void {
-  // single-select
-  if (!p.multiple && !Array.isArray(p.modelValue)) {
-    if (p.modelValue === value) return
-    emit('update:modelValue', value)
-  }
-
-  // multi-select
-  else if (p.multiple && Array.isArray(p.modelValue)) {
-    p.modelValue.includes(value)
-      ? emit(
-          'update:modelValue',
-          p.modelValue.filter((v) => v !== value)
-        )
-      : emit('update:modelValue', [...p.modelValue, value])
-  }
-
-  // fallback to fix multiple + non array modelValue
-  else emit('update:modelValue', p.multiple ? [value] : value)
-}
-
-watch(
-  () => p.multiple,
-  (val) => emit('update:modelValue', val ? [] : undefined)
-)
-
-provide(LIST_INJECTION_KEY, {
-  select,
-  selectedItems: toRef(() => p.modelValue),
+const selected = computed<typeof p.modelValue>({
+  get: () => p.modelValue,
+  set: (val) => emit('update:modelValue', val),
 })
 
-//===============================================
-// 📌 focus management
-//===============================================
+// reset invalid modelValues
+if (p.multiple && !Array.isArray(selected.value)) selected.value = []
+if (!p.multiple && Array.isArray(selected.value)) selected.value = undefined
+
+useListSelection(selected, () => p.multiple)
+
+//----------------------------------------------------------------------------------------------------
+// 📌 focus & keyboard interactions
+//----------------------------------------------------------------------------------------------------
 
 const childrenSelector = '.vex-list-item:not([inert])'
 const { onKeydown } = useListNavigation(childrenSelector, true)
