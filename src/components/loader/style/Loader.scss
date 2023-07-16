@@ -1,7 +1,9 @@
 .vex-loader {
+  flex: none;
   position: relative;
-  display: grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
   &::after,
   &::before {
@@ -30,7 +32,9 @@
   }
 }
 
-.vex-loader-size {
+//------ size ------//
+
+.vex-loader.--size {
   &-sm {
     height: 1rem;
     width: 1rem;
@@ -45,20 +49,24 @@
   }
 }
 
-.vex-loader-clr {
+//------ color ------//
+
+.vex-loader.--color {
   &-primary {
-    color: var(--vex-clr-primary);
+    color: var(--vex-clr-primary-400);
   }
   &-success {
-    color: var(--vex-clr-success);
+    color: var(--vex-clr-success-400);
   }
   &-warning {
-    color: var(--vex-clr-warning);
+    color: var(--vex-clr-warning-400);
   }
   &-danger {
-    color: var(--vex-clr-danger);
+    color: var(--vex-clr-danger-400);
   }
 }
+
+//------ animation ------//
 
 @keyframes vex-spin {
   from {

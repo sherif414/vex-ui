@@ -1,16 +1,23 @@
 <script setup lang="ts">
-const props = withDefaults(
+import { computed } from 'vue'
+
+//----------------------------------------------------------------------------------------------------
+// 📌 component meta
+//
+// TODO: FunctionalComponent candidate
+//----------------------------------------------------------------------------------------------------
+
+const p = withDefaults(
   defineProps<{
     /**
      * specifies the loader color,
-     * `current` is the css `currentColor` value
-     * @default 'current'
+     * @default 'currentColor'
      */
     color?: 'primary' | 'currentColor' | 'success' | 'warning' | 'error'
 
     /**
      * specifies the loader size
-     * @default 'md'
+     * @default 'sm'
      */
     size?: 'sm' | 'md' | 'lg'
 
@@ -26,13 +33,12 @@ const props = withDefaults(
     ariaLabel: 'Loading',
   }
 )
+
+//----------------------------------------------------------------------------------------------------
+
+const modifierClasses = computed(() => ['vex-loader', `--size-${p.size}`, `--color-${p.color}`])
 </script>
 
 <template>
-  <span
-    role="status"
-    :aria-label="ariaLabel"
-    class="vex-loader"
-    :class="[`vex-loader-size-${size}`, `vex-loader-clr-${color}`]"
-  />
+  <div role="status" :aria-label="ariaLabel" :class="modifierClasses" />
 </template>
