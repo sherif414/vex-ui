@@ -50,6 +50,8 @@ function onKeydown(e: KeyboardEvent) {
     context?.onSelect(p.value)
   }
 }
+
+const modifierClasses = computed(() => ['vex-select-item', { '--selected': isSelected.value }])
 </script>
 
 <template>
@@ -60,7 +62,7 @@ function onKeydown(e: KeyboardEvent) {
     @keydown="onKeydown"
     :inert="p.disabled"
     :aria-selected="isSelected"
-    :class="['vex-list-item', { 'vex-selected': isSelected }]"
+    :class="modifierClasses"
   >
     <slot />
     <!-- <IconCheckCircle v-show.lazy="isSelected" /> -->

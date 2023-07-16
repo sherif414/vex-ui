@@ -217,7 +217,7 @@ defineExpose({
       <ul
         v-show="isFloatingElVisible"
         ref="FloatingEl"
-        class="vex-list vex-dropdown"
+        class="vex-select-listbox"
         tabindex="-1"
         role="listbox"
         @focus="onFloatingElFocus"
