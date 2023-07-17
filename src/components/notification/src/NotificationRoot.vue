@@ -12,12 +12,12 @@ import { ref } from 'vue'
 
 const items = ref<NotificationItem[]>([])
 
-function addItem(item: NotificationItem) {
-  items.value.unshift(item)
+function addNotification(notification: NotificationItem) {
+  items.value.unshift(notification)
 }
 
-function removeItem(item: NotificationItem) {
-  const idx = items.value.findIndex((_item) => _item === item)
+function removeNotification(notification: NotificationItem) {
+  const idx = items.value.findIndex((_notification) => _notification === notification)
   items.value.splice(idx, 1)
 }
 
@@ -27,7 +27,7 @@ function removeItem(item: NotificationItem) {
 
 useEventListener('keydown', (e: KeyboardEvent) => {
   if (e.key === 'F8' && !e.altKey && !e.shiftKey && !e.ctrlKey) {
-    const el = document.querySelector<HTMLElement>('.vex-notification-group')
+    const el = document.querySelector<HTMLElement>('.vex-notification-root')
     el?.focus()
   }
 })
@@ -36,7 +36,7 @@ useEventListener('keydown', (e: KeyboardEvent) => {
 // 📌 animation
 //----------------------------------------------------------------------------------------------------
 
-async function AnimateEnter(el: HTMLElement, done: () => void) {
+async function onEnter(el: HTMLElement, done: () => void) {
   const children = el.querySelectorAll<HTMLElement>('.vex-notification-item > *')
   const { opacity, transform } = getComputedStyle(el)
 
@@ -57,7 +57,7 @@ async function AnimateEnter(el: HTMLElement, done: () => void) {
   done()
 }
 
-function beforeLeave(el: HTMLElement) {
+function onBeforeLeave(el: HTMLElement) {
   // make the element retain its position
   const rect = el.getBoundingClientRect()
   el.style.top = `${rect.top}px`
@@ -65,7 +65,7 @@ function beforeLeave(el: HTMLElement) {
   el.style.position = 'absolute'
 }
 
-async function AnimateLeave(el: HTMLElement, done: () => void) {
+async function onLeave(el: HTMLElement, done: () => void) {
   await animate(el, { opacity: 0, x: '100%' }, { duration: 0.3 }).finished
   done()
 }
@@ -73,53 +73,55 @@ async function AnimateLeave(el: HTMLElement, done: () => void) {
 //----------------------------------------------------------------------------------------------------
 
 defineExpose({
-  add: addItem,
-  remove: removeItem,
+  addNotification,
+  removeNotification,
 })
 </script>
 
 <template>
-  <TransitionGroup
-    tag="div"
-    id="vex-notification-group"
-    class="vex-notification-group"
-    moveClass="vex-notification-move-class"
-    leaveActiveClass="vex-notification-leave-active"
-    @beforeLeave="(el)=> beforeLeave(el as HTMLElement)"
-    @enter="(el, done)=> AnimateEnter(el as HTMLElement, done)"
-    @leave="(el, done)=> AnimateLeave(el as HTMLElement, done)"
-    aria-label="Notifications (F8)"
-    tabindex="-1"
-    role="region"
-    aria-live="polite"
-  >
-    <Notification
-      v-for="item in items"
-      :key="item.key"
-      :title="isString(item.title) ? item.title : undefined"
-      :body="isString(item.body) ? item.body : undefined"
-      :duration="item.duration"
-      :type="item.type"
-      :persist="item.persist"
-      :show-progress="item.showProgress"
-      :closeable="item.closable"
-      @close="removeItem(item)"
+  <Teleport to="body">
+    <TransitionGroup
+      tag="div"
+      id="vex-notification-root"
+      class="vex-notification-root"
+      moveClass="vex-notification-move-class"
+      leaveActiveClass="vex-notification-leave-active"
+      @beforeLeave="(el)=> onBeforeLeave(el as HTMLElement)"
+      @enter="(el, done)=> onEnter(el as HTMLElement, done)"
+      @leave="(el, done)=> onLeave(el as HTMLElement, done)"
+      aria-label="Notifications (F8)"
+      tabindex="-1"
+      role="region"
+      aria-live="polite"
     >
-      <template v-if="item.customContent" #default>
-        <Component :is="item.customContent" />
-      </template>
+      <Notification
+        v-for="item in items"
+        :key="item.key"
+        :title="isString(item.title) ? item.title : undefined"
+        :body="isString(item.body) ? item.body : undefined"
+        :duration="item.duration"
+        :type="item.type"
+        :persist="item.persist"
+        :hide-progress="item.hideProgress"
+        :closeable="item.closable"
+        @close="removeNotification(item)"
+      >
+        <template v-if="item.customContent" #default>
+          <Component :is="item.customContent" />
+        </template>
 
-      <template v-if="!isString(item.title)" #title>
-        <Component :is="item.title" />
-      </template>
+        <template v-if="!isString(item.title)" #title>
+          <Component :is="item.title" />
+        </template>
 
-      <template v-if="!isString(item.body)" #body>
-        <Component :is="item.body" />
-      </template>
+        <template v-if="!isString(item.body)" #body>
+          <Component :is="item.body" />
+        </template>
 
-      <template v-if="item.icon" #icon>
-        <Component :is="item.icon" />
-      </template>
-    </Notification>
-  </TransitionGroup>
+        <template v-if="item.icon" #icon>
+          <Component :is="item.icon" />
+        </template>
+      </Notification>
+    </TransitionGroup>
+  </Teleport>
 </template>

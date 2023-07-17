@@ -1,61 +1,52 @@
 import { h, markRaw, render } from 'vue'
-import type { VNode, Component, FunctionalComponent } from 'vue'
-
-import Notification from './Notification.vue'
-import NotificationGroup from './NotificationGroup.vue'
+import type { VNode, Component } from 'vue'
+import NotificationRoot from './NotificationRoot.vue'
 import { getRandomString } from '@/composables/helpers'
 
-export interface NotifyArgs {
-  title?: string | VNode | Component | FunctionalComponent
-  body?: string | VNode | Component | FunctionalComponent
-  icon?: VNode | Component | FunctionalComponent
-  type?: 'success' | 'danger' | 'warning' | 'primary'
-  customContent?: VNode | Component | FunctionalComponent
+export interface NotifyProps {
+  title?: string | Component
+  body?: string | Component
+  type?: 'success' | 'danger' | 'warning' | 'primary' | 'info'
+  icon?: Component
+  customContent?: Component
 }
 
 export interface NotifyOptions {
   duration?: number
   persist?: boolean
   closable?: boolean
-  showProgress?: boolean
+  hideProgress?: boolean
 }
 
-export interface NotificationItem extends NotifyArgs, NotifyOptions {
+export interface NotificationItem extends NotifyProps, NotifyOptions {
   key: string
 }
 
-let group: VNode | null = null
+let Root: VNode | null = null
 
-/**
- * @returns notify - a function that creates new notification items
- */
 function useNotification() {
-  if (!group) {
-    group = h(NotificationGroup)
-    const groupFragment = document.createDocumentFragment() as unknown as Element
-
-    render(group, groupFragment)
-    document.body.appendChild(groupFragment)
+  if (!Root) {
+    Root = h(NotificationRoot)
+    render(Root, document.createDocumentFragment() as unknown as Element)
   }
 
   /**
-   * adds a new notification item
-   * @returns A function that removes the notification item
+   * adds a new notification.
+   * @returns A function that removes the notification.
    */
-  function notify(args: NotifyArgs = {}, options: NotifyOptions = {}) {
-    const item: NotificationItem = markRaw({
+  function notify(args: NotifyProps = {}, options: NotifyOptions = {}) {
+    const notification: NotificationItem = markRaw({
       key: getRandomString(6),
       ...args,
       ...options,
     })
-
-    group.component?.exposed?.add(item)
+    Root?.component?.exposed?.addNotification(notification)
 
     /**
-     * @description removes the notification
+     * removes the notification.
      */
     const remove = () => {
-      group.component?.exposed?.remove(item)
+      Root?.component?.exposed?.removeNotification(notification)
     }
 
     return remove
@@ -66,4 +57,4 @@ function useNotification() {
   }
 }
 
-export { useNotification, Notification }
+export { useNotification }
