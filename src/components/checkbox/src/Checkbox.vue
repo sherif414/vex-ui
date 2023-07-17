@@ -12,7 +12,7 @@ defineOptions({
 const p = withDefaults(
   defineProps<{
     /**
-     * specifies the checkbox `checked` attribute
+     * whether the checkbox is checked
      */
     modelValue?: boolean
 
@@ -59,12 +59,7 @@ defineExpose({
       :checked="p.modelValue"
       @change="emit('update:modelValue', ($event.target as HTMLInputElement).checked)"
     />
-    <svg
-      class="vex-checkbox-svg"
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      filter="url(#goo-light)"
-    >
+    <svg class="vex-checkbox-svg" aria-hidden="true" viewBox="0 0 24 24" filter="url(#goo-light)">
       <path
         stroke-linecap="round"
         stroke-linejoin="round"
