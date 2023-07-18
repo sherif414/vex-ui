@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { getRandomString } from '@/composables/helpers'
 import { computed } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
