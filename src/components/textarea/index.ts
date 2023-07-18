@@ -1,2 +1,2 @@
-export * from './src'
-import './style/index.scss'
+export { default as Textarea } from './Textarea.vue'
+import './Textarea.scss'
