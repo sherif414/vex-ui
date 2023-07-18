@@ -3,4 +3,4 @@ export * from './composables'
 export * from './directives'
 export { vex } from './plugin'
 
-import './assets/styles/index.scss'
+import './styles/index.scss'
