@@ -1,2 +1,2 @@
-export * from './src'
-import './style/index.scss'
+export { default as Tag } from './Tag'
+import './Tag.scss'
