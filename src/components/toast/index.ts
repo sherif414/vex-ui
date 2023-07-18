@@ -1,2 +1,3 @@
-export * from './src'
-import './style/index.scss'
+export * from './use-toast'
+import './Toast.scss'
+import './ToastRoot.scss'
