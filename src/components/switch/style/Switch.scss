@@ -10,10 +10,6 @@
     width: 2.75rem * 0.75;
     height: 1.5rem * 0.75;
   }
-
-  &-label {
-    font-size: var(--vex-font-size-sm);
-  }
 }
 
 .vex-switch-input {
@@ -22,6 +18,7 @@
   height: 100%;
   margin: 0;
   padding: 0;
+
   outline: none;
   border: none;
   border-radius: inherit;
@@ -33,13 +30,17 @@
     background-color: var(--vex-clr-primary-400);
   }
 
-  &:checked:disabled {
-    background-color: var(--vex-clr-primary-200) !important;
-  }
-
   &:disabled {
     background-color: var(--vex-clr-disabled) !important;
+    opacity: 0.5;
+    + svg {
+      fill: var(--vex-clr-neutral-300) !important;
+    }
     cursor: not-allowed;
+  }
+
+  &:checked:disabled {
+    background-color: var(--vex-clr-primary-200) !important;
   }
 
   &:focus-visible {
@@ -58,17 +59,26 @@
   height: 100%;
 }
 
+//------ animation ------//
+
 .vex-switch-svg-leftcircle {
-  transform-origin: center center;
+  transform-origin: 12px 12px;
   transform: translateX(0px) scale(1);
+  transition: transform 500ms;
 }
 .vex-switch-svg-rightcircle {
-  transform-origin: center center;
+  transform-origin: 26px 12px;
   transform: translateX(-30%) scale(0);
+  transition: transform 500ms 250ms;
 }
-.vex-switch-input:checked + .vex-switch-svg .vex-switch-svg-leftcircle {
-  transform: translateX(30%) scale(0);
-}
-.vex-switch-input:checked + .vex-switch-svg .vex-switch-svg-rightcircle {
-  transform: translateX(0px) scale(1);
+
+.vex-switch-input:checked + .vex-switch-svg {
+  .vex-switch-svg-leftcircle {
+    transform: translateX(30%) scale(0);
+    transition: transform 500ms 250ms;
+  }
+  .vex-switch-svg-rightcircle {
+    transform: translateX(0px) scale(1);
+    transition: transform 500ms;
+  }
 }

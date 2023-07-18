@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { usePreferredReducedMotion } from '@vueuse/core'
-import { animate } from 'motion'
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -14,7 +12,7 @@ defineOptions({
 const p = withDefaults(
   defineProps<{
     /**
-     * whether the switch is on
+     * whether the switch is on/off
      */
     modelValue?: boolean
 
@@ -34,37 +32,6 @@ const p = withDefaults(
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
 }>()
-
-//----------------------------------------------------------------------------------------------------
-// 📌 animations
-//----------------------------------------------------------------------------------------------------
-
-const reduceMotion = usePreferredReducedMotion()
-
-watch(
-  () => p.modelValue,
-  (value) => {
-    if (reduceMotion.value === 'reduce') return
-    value ? animateOn() : animateOff()
-  }
-)
-
-const LeftCircleEl = ref<HTMLElement>()
-const RightCircleEl = ref<HTMLElement>()
-
-async function animateOff() {
-  if (!RightCircleEl.value || !LeftCircleEl.value) return
-
-  animate(LeftCircleEl.value, { scale: [0, 1], x: ['30%', 0] }, { duration: 0.5 })
-  animate(RightCircleEl.value, { scale: [1, 0], x: [0, '-30%'] }, { duration: 0.5, delay: 0.25 })
-}
-
-async function animateOn() {
-  if (!RightCircleEl.value || !LeftCircleEl.value) return
-
-  animate(RightCircleEl.value, { scale: [0, 1], x: ['-30%', 0] }, { duration: 0.5 })
-  animate(LeftCircleEl.value, { scale: [1, 0], x: [0, '30%'] }, { duration: 0.5, delay: 0.25 })
-}
 
 //----------------------------------------------------------------------------------------------------
 
@@ -93,8 +60,8 @@ const modifierClasses = computed(() => [
     <!-- svg -->
 
     <svg class="vex-switch-svg" viewBox="0 0 48 24" filter="url(#goo)">
-      <circle ref="LeftCircleEl" class="vex-switch-svg-leftcircle" cx="27.5%" cy="50%" r="30%" />
-      <circle ref="RightCircleEl" class="vex-switch-svg-rightcircle" cx="72.5%" cy="50%" r="30%" />
+      <circle class="vex-switch-svg-leftcircle" cx="27.5%" cy="50%" r="30%" />
+      <circle class="vex-switch-svg-rightcircle" cx="72.5%" cy="50%" r="30%" />
     </svg>
 
     <!-- gooey effect filter -->
