@@ -45,10 +45,6 @@
   &:hover:not(:checked):enabled {
     box-shadow: inset 0px 0px 0px 3px var(--vex-clr-primary-400);
   }
-
-  &:not(:checked) {
-    transition: box-shadow 150ms var(--vex-transition-easing);
-  }
 }
 
 //------ svg ------//
@@ -121,5 +117,33 @@
   }
   100% {
     transform: translateY(0);
+  }
+}
+
+//------ reduce motion ------//
+
+.vex-reduce-motion {
+  .vex-radio-svg-top {
+    animation: none !important;
+  }
+  .vex-radio-svg-dot {
+    animation: none !important;
+  }
+  .vex-radio-svg-drop {
+    animation: none !important;
+  }
+
+  .vex-radio-input {
+    &:checked {
+      box-shadow: inset 0px 0px 0px 6.75px var(--vex-clr-primary-400);
+    }
+
+    &:checked:disabled {
+      box-shadow: inset 0px 0px 0px 6.75px var(--vex-clr-primary-200) !important;
+    }
+
+    &:not(:checked):disabled {
+      box-shadow: inset 0px 0px 0px 6.75px var(--vex-clr-neutral-200) !important;
+    }
   }
 }
