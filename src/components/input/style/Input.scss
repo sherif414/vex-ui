@@ -46,9 +46,9 @@
     outline-width: 2px;
   }
 
-  &:invalid {
-    outline-color: var(--vex-clr-danger-400);
-  }
+  // &:invalid {
+  //   outline-color: var(--vex-clr-danger-400);
+  // }
 }
 
 //------ icon & suffix ------//
@@ -70,9 +70,9 @@
   .vex-field-input:focus ~ & {
     color: var(--vex-clr-primary-400);
   }
-  .vex-field-input:invalid ~ & {
-    color: var(--vex-clr-danger-400);
-  }
+  // .vex-field-input:invalid ~ & {
+  //   color: var(--vex-clr-danger-400);
+  // }
 }
 
 .vex-field-icon {
