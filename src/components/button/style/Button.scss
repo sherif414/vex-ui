@@ -31,7 +31,7 @@
   }
 
   &:focus-visible {
-    outline-color: var(--vex-clr-primary-400);
+    outline-color: var(--vex-c-primary-500);
   }
 
   &-content {
@@ -64,37 +64,37 @@
 //------ normal button ------//
 
 .vex-button.--variant-filled {
-  background-color: var(--vex-clr-primary-400);
+  background-color: var(--vex-c-primary-500);
   color: white;
   outline-offset: 2px;
   border: none;
 
   &:not([aria-disabled='true']):active {
-    background-color: var(--vex-clr-primary-500);
+    background-color: var(--vex-c-primary-600);
   }
 }
 
 .vex-button.--variant-light {
-  background-color: var(--vex-clr-primary-100);
-  color: var(--vex-clr-on-primary-500);
+  background-color: var(--vex-c-primary-100);
+  color: var(--vex-clr-on-primary-800);
   border: none;
 
   &:not([aria-disabled='true']):active {
-    background-color: var(--vex-clr-primary-200);
+    background-color: var(--vex-c-primary-200);
   }
 }
 
 .vex-button.--variant-outline {
   background-color: transparent;
-  color: var(--vex-clr-primary-400);
+  color: var(--vex-c-primary-600);
   border: 1px solid var(--vex-border-clr-base);
 
   &:not([aria-disabled='true']):hover {
-    background-color: var(--vex-clr-primary-100);
+    background-color: var(--vex-c-primary-100);
   }
 
   &:not([aria-disabled='true']):active {
-    background-color: var(--vex-clr-primary-200);
+    background-color: var(--vex-c-primary-200);
   }
 
   &:focus-visible {
@@ -104,15 +104,15 @@
 
 .vex-button.--variant-text {
   background-color: transparent;
-  color: var(--vex-clr-primary-400);
+  color: var(--vex-c-primary-600);
   border: none;
 
   &:not([aria-disabled='true']):hover {
-    background-color: var(--vex-clr-primary-100);
+    background-color: var(--vex-c-primary-100);
   }
 
   &:not([aria-disabled='true']):active {
-    background-color: var(--vex-clr-primary-200);
+    background-color: var(--vex-c-primary-200);
   }
 }
 
@@ -120,41 +120,41 @@
 
 .vex-button.--destructive {
   &:focus-visible {
-    outline-color: var(--vex-clr-danger-400);
+    outline-color: var(--vex-c-danger-500);
   }
 
   &.--variant-filled {
-    background-color: var(--vex-clr-danger-400);
+    background-color: var(--vex-c-danger-500);
     color: white;
     outline-offset: 2px;
     border: none;
 
     &:not([aria-disabled='true']):active {
-      background-color: var(--vex-clr-danger-500);
+      background-color: var(--vex-c-danger-600);
     }
   }
 
   &.--variant-light {
-    background-color: var(--vex-clr-danger-200);
-    color: var(--vex-clr-danger-500);
+    background-color: var(--vex-c-danger-100);
+    color: var(--vex-c-danger-800);
     border: none;
 
     &:not([aria-disabled='true']):active {
-      background-color: var(--vex-clr-danger-300);
+      background-color: var(--vex-c-danger-200);
     }
   }
 
   &.--variant-outline {
     background-color: transparent;
-    color: var(--vex-clr-danger-400);
+    color: var(--vex-c-danger-600);
     border: 1px solid var(--vex-border-clr-base);
 
     &:not([aria-disabled='true']):hover {
-      background-color: var(--vex-clr-danger-100);
+      background-color: var(--vex-c-danger-100);
     }
 
     &:not([aria-disabled='true']):active {
-      background-color: var(--vex-clr-danger-200);
+      background-color: var(--vex-c-danger-200);
     }
 
     &:focus-visible {
@@ -164,15 +164,15 @@
 
   &.--variant-text {
     background-color: transparent;
-    color: var(--vex-clr-danger-400);
+    color: var(--vex-c-danger-600);
     border: none;
 
     &:not([aria-disabled='true']):hover {
-      background-color: var(--vex-clr-danger-100);
+      background-color: var(--vex-c-danger-100);
     }
 
     &:not([aria-disabled='true']):active {
-      background-color: var(--vex-clr-danger-200);
+      background-color: var(--vex-c-danger-200);
     }
   }
 }

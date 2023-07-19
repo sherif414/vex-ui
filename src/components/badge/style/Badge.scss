@@ -46,19 +46,19 @@
 
 .vex-badge {
   &.--color-info {
-    background-color: var(--vex-clr-info-400);
+    background-color: var(--vex-c-accent-500);
     color: white;
   }
   &.--color-danger {
-    background-color: var(--vex-clr-danger-400);
+    background-color: var(--vex-c-danger-500);
     color: white;
   }
   &.--color-warning {
-    background-color: var(--vex-clr-warning-300);
+    background-color: var(--vex-c-warning-300);
     color: black;
   }
   &.--color-success {
-    background-color: var(--vex-clr-success-300);
+    background-color: var(--vex-c-success-300);
     color: black;
   }
 }

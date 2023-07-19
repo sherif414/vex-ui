@@ -47,23 +47,23 @@
 //------ variants ------//
 
 .vex-alert.--variant-danger {
-  background-color: var(--vex-clr-danger-100);
-  color: var(--vex-clr-danger-500);
+  background-color: var(--vex-c-danger-100);
+  color: var(--vex-c-danger-800);
 }
 
 .vex-alert.--variant-warning {
-  background-color: var(--vex-clr-warning-100);
-  color: var(--vex-clr-warning-500);
+  background-color: var(--vex-c-warning-100);
+  color: var(--vex-c-warning-800);
 }
 
 .vex-alert.--variant-success {
-  background-color: var(--vex-clr-success-100);
-  color: var(--vex-clr-success-500);
+  background-color: var(--vex-c-success-100);
+  color: var(--vex-c-success-800);
 }
 
 .vex-alert.--variant-info {
-  background-color: var(--vex-clr-info-100);
-  color: var(--vex-clr-info-500);
+  background-color: var(--vex-c-accent-100);
+  color: var(--vex-c-accent-800);
 }
 
 .vex-alert.--variant-plain {

@@ -22,25 +22,25 @@
   outline: none;
   border: none;
   border-radius: inherit;
-  background-color: var(--vex-clr-neutral-200);
+  background-color: var(--vex-c-neutral-200);
   cursor: pointer;
   transition: background-color 500ms var(--vex-transition-easing);
 
   &:checked {
-    background-color: var(--vex-clr-primary-400);
+    background-color: var(--vex-c-primary-500);
   }
 
   &:disabled {
     background-color: var(--vex-clr-disabled) !important;
     opacity: 0.5;
     + svg {
-      fill: var(--vex-clr-neutral-300) !important;
+      fill: var(--vex-c-neutral-300) !important;
     }
     cursor: not-allowed;
   }
 
   &:checked:disabled {
-    background-color: var(--vex-clr-primary-200) !important;
+    background-color: var(--vex-c-primary-200) !important;
   }
 
   &:focus-visible {

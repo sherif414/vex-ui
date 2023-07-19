@@ -20,18 +20,18 @@
   width: 1.5rem;
   height: 1.5rem;
   transition: box-shadow 300ms ease-out;
-  box-shadow: inset 0px 0px 0px 2px var(--vex-clr-neutral-200);
+  box-shadow: inset 0px 0px 0px 2px var(--vex-c-neutral-200);
 
   &:checked {
-    box-shadow: inset 0px 0px 0px 12px var(--vex-clr-primary-400);
+    box-shadow: inset 0px 0px 0px 12px var(--vex-c-primary-500);
   }
 
   &:checked:disabled {
-    box-shadow: inset 0px 0px 0px 12px var(--vex-clr-primary-200) !important;
+    box-shadow: inset 0px 0px 0px 12px var(--vex-c-primary-200) !important;
   }
 
   &:not(:checked):disabled {
-    box-shadow: inset 0px 0px 0px 12px var(--vex-clr-neutral-200) !important;
+    box-shadow: inset 0px 0px 0px 12px var(--vex-c-neutral-200) !important;
   }
 
   &:disabled {
@@ -39,11 +39,11 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--vex-clr-primary-400);
+    outline: 2px solid var(--vex-c-primary-500);
   }
 
   &:hover:not(:checked):enabled {
-    box-shadow: inset 0px 0px 0px 3px var(--vex-clr-primary-400);
+    box-shadow: inset 0px 0px 0px 3px var(--vex-c-primary-500);
   }
 }
 
@@ -135,15 +135,15 @@
 
   .vex-radio-input {
     &:checked {
-      box-shadow: inset 0px 0px 0px 6.75px var(--vex-clr-primary-400);
+      box-shadow: inset 0px 0px 0px 6.75px var(--vex-c-primary-500);
     }
 
     &:checked:disabled {
-      box-shadow: inset 0px 0px 0px 6.75px var(--vex-clr-primary-200) !important;
+      box-shadow: inset 0px 0px 0px 6.75px var(--vex-c-primary-200) !important;
     }
 
     &:not(:checked):disabled {
-      box-shadow: inset 0px 0px 0px 6.75px var(--vex-clr-neutral-200) !important;
+      box-shadow: inset 0px 0px 0px 6.75px var(--vex-c-neutral-200) !important;
     }
   }
 }

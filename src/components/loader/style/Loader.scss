@@ -53,16 +53,16 @@
 
 .vex-loader.--color {
   &-primary {
-    color: var(--vex-clr-primary-400);
+    color: var(--vex-c-primary-500);
   }
   &-success {
-    color: var(--vex-clr-success-400);
+    color: var(--vex-c-success-500);
   }
   &-warning {
-    color: var(--vex-clr-warning-400);
+    color: var(--vex-c-warning-500);
   }
   &-danger {
-    color: var(--vex-clr-danger-400);
+    color: var(--vex-c-danger-500);
   }
 }
 

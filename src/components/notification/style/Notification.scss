@@ -72,7 +72,7 @@
   border-radius: var(--vex-border-radius-rounded);
 
   &:hover {
-    background-color: var(--vex-clr-neutral-100);
+    background-color: var(--vex-c-neutral-100);
   }
 }
 
@@ -81,35 +81,35 @@
 .vex-notification.--type-primary {
   .vex-notification-icon,
   .vex-notification-content-title {
-    color: var(--vex-clr-primary-400);
+    color: var(--vex-c-primary-500);
   }
 }
 
 .vex-notification.--type-danger {
   .vex-notification-icon,
   .vex-notification-content-title {
-    color: var(--vex-clr-danger-400);
+    color: var(--vex-c-danger-500);
   }
 }
 
 .vex-notification.--type-warning {
   .vex-notification-icon,
   .vex-notification-content-title {
-    color: var(--vex-clr-warning-400);
+    color: var(--vex-c-warning-500);
   }
 }
 
 .vex-notification.--type-success {
   .vex-notification-icon,
   .vex-notification-content-title {
-    color: var(--vex-clr-success-400);
+    color: var(--vex-c-success-500);
   }
 }
 
 .vex-notification.--type-info {
   .vex-notification-icon,
   .vex-notification-content-title {
-    color: var(--vex-clr-info-400);
+    color: var(--vex-c-accent-500);
   }
 }
 

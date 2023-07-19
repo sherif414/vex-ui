@@ -41,7 +41,7 @@
     }
 
     &:focus-visible {
-      outline: 1px solid var(--vex-clr-primary-400);
+      outline: 1px solid var(--vex-c-primary-500);
     }
 
     &-content {
@@ -68,7 +68,6 @@
   font-size: var(--vex-font-size-sm);
 
   &-wrapper {
-    padding: var(--vex-spacing-1) var(--vex-spacing-4) var(--vex-spacing-3)
-      var(--vex-spacing-4);
+    padding: var(--vex-spacing-1) var(--vex-spacing-4) var(--vex-spacing-3) var(--vex-spacing-4);
   }
 }

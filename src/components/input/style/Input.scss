@@ -47,7 +47,7 @@
   }
 
   // &:invalid {
-  //   outline-color: var(--vex-clr-danger-400);
+  //   outline-color: var(--vex-c-danger-500);
   // }
 }
 
@@ -68,10 +68,10 @@
   color: var(--vex-text-clr-muted);
 
   .vex-field-input:focus ~ & {
-    color: var(--vex-clr-primary-400);
+    color: var(--vex-c-primary-500);
   }
   // .vex-field-input:invalid ~ & {
-  //   color: var(--vex-clr-danger-400);
+  //   color: var(--vex-c-danger-500);
   // }
 }
 

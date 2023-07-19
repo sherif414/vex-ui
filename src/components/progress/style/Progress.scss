@@ -13,41 +13,41 @@
 }
 
 .vex-progress.--color-primary {
-  background-color: var(--vex-clr-primary-100);
+  background-color: var(--vex-c-primary-100);
 
   .vex-progress-bar {
-    background-color: var(--vex-clr-primary-400);
+    background-color: var(--vex-c-primary-500);
   }
 }
 
 .vex-progress.--color-success {
-  background-color: var(--vex-clr-success-100);
+  background-color: var(--vex-c-success-100);
 
   .vex-progress-bar {
-    background-color: var(--vex-clr-success-400);
+    background-color: var(--vex-c-success-500);
   }
 }
 
 .vex-progress.--color-warning {
-  background-color: var(--vex-clr-warning-100);
+  background-color: var(--vex-c-warning-100);
 
   .vex-progress-bar {
-    background-color: var(--vex-clr-warning-400);
+    background-color: var(--vex-c-warning-500);
   }
 }
 
 .vex-progress.--color-danger {
-  background-color: var(--vex-clr-danger-100);
+  background-color: var(--vex-c-danger-100);
 
   .vex-progress-bar {
-    background-color: var(--vex-clr-danger-400);
+    background-color: var(--vex-c-danger-500);
   }
 }
 
 .vex-progress.--color-info {
-  background-color: var(--vex-clr-info-100);
+  background-color: var(--vex-c-accent-100);
 
   .vex-progress-bar {
-    background-color: var(--vex-clr-info-400);
+    background-color: var(--vex-c-accent-500);
   }
 }

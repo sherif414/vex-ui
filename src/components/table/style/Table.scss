@@ -34,11 +34,11 @@
       cursor: pointer;
 
       &:hover {
-        background-color: var(--vex-clr-neutral-100);
+        background-color: var(--vex-c-neutral-100);
       }
 
       &:active {
-        background-color: var(--vex-clr-neutral-200);
+        background-color: var(--vex-c-neutral-200);
       }
     }
   }
@@ -47,7 +47,7 @@
 .vex-table-body {
   &-row {
     &:nth-child(even) {
-      background-color: var(--vex-clr-neutral-100);
+      background-color: var(--vex-c-neutral-100);
     }
 
     &-cell {

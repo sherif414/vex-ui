@@ -14,7 +14,7 @@
   padding-inline: var(--vex-spacing-3);
 
   &:not([inert]):hover {
-    background-color: var(--vex-clr-neutral-100);
+    background-color: var(--vex-c-neutral-100);
   }
 
   &[inert] {
@@ -23,7 +23,7 @@
   }
 
   &.--selected {
-    background-color: var(--vex-clr-neutral-100);
-    color: var(--vex-clr-primary-400);
+    background-color: var(--vex-c-neutral-100);
+    color: var(--vex-c-primary-500);
   }
 }

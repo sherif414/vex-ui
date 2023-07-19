@@ -3,8 +3,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--vex-clr-info-100);
-  color: var(--vex-clr-info-400);
+  background-color: var(--vex-c-accent-100);
+  color: var(--vex-c-accent-500);
   border: 0px solid;
 }
 
@@ -14,7 +14,7 @@
   width: 100%;
   height: 100%;
   border-radius: inherit;
-  background-color: var(--vex-clr-neutral-200);
+  background-color: var(--vex-c-neutral-200);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -37,8 +37,8 @@
   width: 100%;
   height: 100%;
   border-radius: inherit;
-  background-color: var(--vex-clr-danger-100);
-  color: var(--vex-clr-danger-400);
+  background-color: var(--vex-c-danger-100);
+  color: var(--vex-c-danger-500);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -77,19 +77,19 @@
   border-color: white;
 }
 .vex-avatar.--ring-info {
-  border-color: var(--vex-clr-info-400);
+  border-color: var(--vex-c-accent-500);
 }
 .vex-avatar.--ring-primary {
-  border-color: var(--vex-clr-primary-400);
+  border-color: var(--vex-c-primary-500);
 }
 .vex-avatar.--ring-danger {
-  border-color: var(--vex-clr-danger-400);
+  border-color: var(--vex-c-danger-500);
 }
 .vex-avatar.--ring-warning {
-  border-color: var(--vex-clr-warning-400);
+  border-color: var(--vex-c-warning-500);
 }
 .vex-avatar.--ring-success {
-  border-color: var(--vex-clr-success-400);
+  border-color: var(--vex-c-success-500);
 }
 
 //------ border radius ------//
