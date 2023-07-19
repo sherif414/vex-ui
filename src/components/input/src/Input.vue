@@ -127,7 +127,7 @@ defineExpose({
         <IconDangerSign
           width="18"
           height="18"
-          style="color: var(--vex-clr-danger-400); pointer-events: auto"
+          style="color: var(--vex-c-danger-500); pointer-events: auto"
         />
       </Tooltip> -->
       <slot v-else name="suffix" />
