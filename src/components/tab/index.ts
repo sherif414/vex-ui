@@ -1,2 +1,2 @@
-export * from './src'
-import './style/index.scss'
+export { Tabs, TabTrigger } from './Tab'
+import './Tab.scss'
