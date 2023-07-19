@@ -9,6 +9,10 @@ import { cloneVNode, Comment, computed, Fragment, nextTick, ref, Text } from 'vu
 // 📌 component meta
 //----------------------------------------------------------------------------------------------------
 
+defineOptions({
+  inheritAttrs: false
+})
+
 const p = withDefaults(
   defineProps<
     {
