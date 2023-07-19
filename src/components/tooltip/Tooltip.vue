@@ -17,13 +17,18 @@ const p = withDefaults(
       /**
        * specifies the tooltip's background color
        */
-      color?: 'danger' | 'warning' | 'success' | 'primary' | 'accent' | 'black' | 'white'
+      color?: 'danger' | 'warning' | 'success' | 'primary' | 'accent' | 'neutral'
 
       /**
-       * with to show the arrow
-       * @default true
+       * specifies the tooltip's variant
+       * @default 'filled'
        */
-      arrow?: boolean
+      variant?: 'filled' | 'light'
+
+      /**
+       * whether to hide the arrow
+       */
+      hideArrow?: boolean
     } & Pick<
       UseFloatingOptions,
       'hideOnClick' | 'offset' | 'placement' | 'arrowPadding' | 'toggleAction'
@@ -32,9 +37,9 @@ const p = withDefaults(
   {
     placement: 'top',
     offset: 8,
-    arrow: true,
-    color: 'black',
+    color: 'neutral',
     toggleAction: 'hover',
+    variant: 'filled',
   }
 )
 
@@ -84,12 +89,12 @@ const { floatingStyles, arrowStyles } = useFloating(
   TriggerEl,
   TooltipEl,
   p,
-  ArrowEl
+  p.hideArrow ? null : ArrowEl
 )
 
 //----------------------------------------------------------------------------------------------------
 
-const modifierClasses = computed(() => ['vex-tooltip', `--c-${p.color}`])
+const modifierClasses = computed(() => ['vex-tooltip', `--c-${p.color}`, `--variant-${p.variant}`])
 </script>
 
 <template>
