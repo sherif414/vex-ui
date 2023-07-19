@@ -1,0 +1,31 @@
+.vex-tooltip {
+  border-radius: var(--vex-border-radius-sm);
+  color: black;
+
+  &-content {
+    padding: var(--vex-spacing-1) var(--vex-spacing-2);
+    font-size: var(--vex-font-size-sm);
+    white-space: nowrap;
+    width: max-content;
+    background-color: inherit;
+  }
+
+  &-arrow {
+    width: 8px;
+    height: 8px;
+    background-color: inherit;
+    transform: rotate(45deg);
+    border: inherit;
+    z-index: -1;
+  }
+}
+
+//------ color ------//
+
+.vex-tooltip.--c-black {
+  background-color: white;
+  filter: var(--vex-drop-shadow-sm);
+}
+.vex-tooltip.--c-primary {
+  background-color: var(--vex-c-primary-500);
+}
