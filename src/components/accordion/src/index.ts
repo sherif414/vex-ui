@@ -1,16 +1,25 @@
 export { default as Accordion } from './Accordion.vue'
 export { default as AccordionItem } from './AccordionItem.vue'
-
 import type { InjectionKey, Ref } from 'vue'
-import type { Getter } from '@/types'
 
-export type ActiveIndex = number | Set<number> | undefined
+//----------------------------------------------------------------------------------------------------
+// 📌 context
+//----------------------------------------------------------------------------------------------------
+
+export type ExpandedItems = string | string[] | undefined
 
 export interface AccordionContext {
-  activeIndex: Ref<ActiveIndex>
-  isChevron: Getter<boolean>
-  arrowPosition: Getter<'start' | 'end'>
-  getIndex: () => number
+  onUpdateModel: (val: string) => void
+  expandedItems: Ref<ExpandedItems>
 }
 
-export const ACCORDION_CONTEXT = Symbol() as InjectionKey<AccordionContext>
+export interface AccordionItemContext {
+  isExpanded: Ref<boolean>
+  isDisabled: Ref<boolean>
+  contentID: string
+  triggerID: string
+  onToggle: () => void
+}
+
+export const ACCORDION_CTX = Symbol() as InjectionKey<AccordionContext>
+export const ACCORDION_ITEM_CTX = Symbol() as InjectionKey<AccordionItemContext>

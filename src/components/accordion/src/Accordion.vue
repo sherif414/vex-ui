@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, provide, ref, watch } from 'vue'
-import { useListNavigation } from '@/composables'
-import { ACCORDION_CONTEXT, type ActiveIndex } from '.'
+import { computed, provide } from 'vue'
+import { useListNavigation, useListSelection } from '@/composables'
+import { ACCORDION_CTX, type ExpandedItems } from '.'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -10,83 +10,41 @@ import { ACCORDION_CONTEXT, type ActiveIndex } from '.'
 const p = withDefaults(
   defineProps<{
     /**
-     * specifies the accordion variant.
-     * @default 'default'
-     */
-    variant?: 'outline' | 'ladder' | 'default' | 'light'
-
-    /**
-     * specifies the chevron arrow position.
-     * @default 'end'
-     */
-    arrowPosition?: 'start' | 'end'
-
-    /**
-     * whether to hide the chevron arrow.
-     */
-    hideArrow?: boolean
-
-    /**
      * whether to allow multiple accordion-items to be expanded at the same time
      */
     multiple?: boolean
 
     /**
-     * whether to loop back to the other end of the list upon reaching the end,
-     * only relevant when navigating with keyboard.
+     * specifies the current active accordion-items.
      */
-    loop?: boolean
+    modelValue?: ExpandedItems
   }>(),
-  {
-    variant: 'default',
-    arrowPosition: 'end',
-  }
+  {}
 )
+
+const emit = defineEmits<{
+  'update:modelValue': [value?: ExpandedItems]
+}>()
+
+//----------------------------------------------------------------------------------------------------
 
 const CHILDREN_SELECTOR = '.vex-accordion-item-header-button:enabled'
+const { onKeydown } = useListNavigation(CHILDREN_SELECTOR, true)
 
-//----------------------------------------------------------------------------------------------------
-// 📌 keyboard & focus management
-//----------------------------------------------------------------------------------------------------
-
-const { onKeydown } = useListNavigation(CHILDREN_SELECTOR, p.loop)
-
-//----------------------------------------------------------------------------------------------------
-// 📌 context provider
-//----------------------------------------------------------------------------------------------------
-
-let indexCount = 0
-const activeIndex = ref<ActiveIndex>(p.multiple ? new Set() : undefined)
-
-watch(
-  () => p.multiple,
-  (value) => {
-    activeIndex.value = value ? new Set() : undefined
-  }
-)
-
-function getIndex() {
-  return ++indexCount
-}
-
-provide(ACCORDION_CONTEXT, {
-  activeIndex,
-  getIndex,
-  isChevron: () => !p.hideArrow,
-  arrowPosition: () => p.arrowPosition,
+const expandedItems = computed<ExpandedItems>({
+  get: () => p.modelValue,
+  set: (val) => emit('update:modelValue', val),
 })
+const { onUpdateModel } = useListSelection(expandedItems, () => p.multiple)
 
-//----------------------------------------------------------------------------------------------------
-// 📌 classes
-//----------------------------------------------------------------------------------------------------
-
-const modifierClasses = computed(() => {
-  return ['vex-accordion', `--variant-${p.variant}`]
+provide(ACCORDION_CTX, {
+  onUpdateModel,
+  expandedItems,
 })
 </script>
 
 <template>
-  <div :class="modifierClasses" @keydown="onKeydown">
+  <div class="vex-accordion" @keydown="onKeydown">
     <slot />
   </div>
 </template>

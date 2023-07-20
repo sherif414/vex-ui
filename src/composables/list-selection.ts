@@ -1,14 +1,7 @@
-import { watch, provide, toRef, reactive } from 'vue'
-import type { InjectionKey, Ref, MaybeRefOrGetter } from 'vue'
+import { watch, reactive } from 'vue'
+import type { Ref, MaybeRefOrGetter } from 'vue'
 
 export type SelectedItems = string | string[] | undefined
-
-export const SELECTION_INJECTION_KEY = Symbol() as InjectionKey<{
-  selectedItems: Ref<SelectedItems>
-  onSelect: (itemValue: string) => void
-  register: (itemValue: string) => void
-  unRegister: (itemValue: string) => void
-}>
 
 export function useListSelection(
   selectedItems: Ref<SelectedItems>,
@@ -17,7 +10,7 @@ export function useListSelection(
 ) {
   const items = reactive<Set<string>>(new Set())
 
-  function onSelect(value: string): void {
+  function onUpdateModel(value: string): void {
     if (Array.isArray(selectedItems.value)) {
       selectedItems.value = selectedItems.value.includes(value)
         ? selectedItems.value.filter((v) => v !== value)
@@ -37,18 +30,9 @@ export function useListSelection(
     selectedItems.value = val ? [] : undefined
   })
 
-  provide(SELECTION_INJECTION_KEY, {
-    onSelect,
-    selectedItems: selectedItems,
-    register: (itemValue: string) => {
-      items.add(itemValue)
-    },
-    unRegister: (itemValue: string) => {
-      items.delete(itemValue)
-    },
-  })
-
   return {
     items,
+    onUpdateModel,
+    selected: selectedItems,
   }
 }
