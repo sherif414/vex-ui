@@ -1,5 +1,7 @@
 export { default as Accordion } from './Accordion.vue'
 export { default as AccordionItem } from './AccordionItem.vue'
+export { default as AccordionItemContent } from './AccordionItemContent.vue'
+export { default as AccordionItemTrigger } from './AccordionItemTrigger.vue'
 import type { InjectionKey, Ref } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
