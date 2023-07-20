@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { inject, computed, provide } from 'vue'
-import { getRandomString } from '@/composables/helpers'
+import { inject, computed, provide, toRef } from 'vue'
+import { useID } from '@/composables'
 import { ACCORDION_CTX, ACCORDION_ITEM_CTX } from '.'
 
 //----------------------------------------------------------------------------------------------------
@@ -54,9 +54,9 @@ const isExpanded = computed<boolean>(() => {
     : expandedItems.value === p.value
 })
 
-const contentID = `accordion-item-content-${getRandomString(6)}`
-const triggerID = `accordion-item-controls-${getRandomString(6)}`
-const isDisabled = computed(() => p.disabled || p.alwaysExpanded)
+const contentID = useID()
+const triggerID = useID()
+const isDisabled = toRef(() => p.disabled)
 
 provide(ACCORDION_ITEM_CTX, {
   contentID,
