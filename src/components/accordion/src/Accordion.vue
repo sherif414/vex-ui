@@ -28,7 +28,7 @@ const emit = defineEmits<{
 
 //----------------------------------------------------------------------------------------------------
 
-const CHILDREN_SELECTOR = '.vex-accordion-item-header-button:enabled'
+const CHILDREN_SELECTOR = '.vex-accordion-item-trigger-button:enabled'
 const { onKeydown } = useListNavigation(CHILDREN_SELECTOR, true)
 
 const expandedItems = computed<ExpandedItems>({
