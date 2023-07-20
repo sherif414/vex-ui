@@ -4,14 +4,14 @@
   display: flex;
   cursor: pointer;
   align-items: center;
-  justify-content: space-between;
+  justify-content: start;
   gap: var(--vex-spacing-2);
   transition-property: color, background-color;
   transition-timing-function: var(--vex-transition-easing);
   transition-duration: 150ms;
-  border-radius: var(--vex-border-radius-md);
+  border-radius: var(--vex-border-radius-sm);
   padding: 0;
-  padding-inline: var(--vex-spacing-3);
+  padding-inline: var(--vex-spacing-2);
 
   &:not([inert]):hover {
     background-color: var(--vex-c-neutral-100);

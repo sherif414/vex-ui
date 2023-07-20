@@ -7,9 +7,9 @@ import { IconArrowDown } from '@/icons'
 import { getRandomString } from '@/composables/helpers'
 import type { Placement } from '@floating-ui/vue'
 
-//===============================================
+//----------------------------------------------------------------------------------------------------
 // 📌 component meta
-//===============================================
+//----------------------------------------------------------------------------------------------------
 
 const p = withDefaults(
   defineProps<{
@@ -114,9 +114,9 @@ const emit = defineEmits<{
   search: [query: string]
 }>()
 
-//===============================================
+//----------------------------------------------------------------------------------------------------
 // 📌 search
-//===============================================
+//----------------------------------------------------------------------------------------------------
 
 const isLoading = ref(false)
 const inputValue = ref(p.modelValue?.label)
@@ -155,9 +155,9 @@ function search(query: string, limit: number): Option[] {
   return p.options.filter((op) => op.label.includes(query)).slice(0, limit)
 }
 
-//===============================================
+//----------------------------------------------------------------------------------------------------
 // 📌 validation
-//===============================================
+//----------------------------------------------------------------------------------------------------
 
 function handleBlur() {
   if (!p.modelValue) return
@@ -165,9 +165,9 @@ function handleBlur() {
   inputValue.value = p.modelValue.label
 }
 
-//===============================================
+//----------------------------------------------------------------------------------------------------
 // 📌 misc
-//===============================================
+//----------------------------------------------------------------------------------------------------
 
 const dropdownInstance = ref<InstanceType<typeof Dropdown> | null>(null)
 const isSuggestionsEmpty = computed<boolean>(() => !suggestions.value.length)
@@ -194,7 +194,7 @@ watch(
     :size="p.size"
     :disabled="p.disabled"
     :readonly="p.readonly"
-    :error="p.error"
+    :invalid="p.error"
     :error-message="p.errorMessage"
     :hint="p.hint"
     :label="p.label"
@@ -216,9 +216,9 @@ watch(
     <template #dropdown>
       <Dropdown
         ref="dropdownInstance"
-        trigger="click"
+        toggle-action="click"
         @update:model-value="handleEmit"
-        :disabled="p.disabled || p.readonly"
+        :disable="p.disabled || p.readonly"
         :model-value="p.modelValue"
         :options="suggestions"
         :placement="p.placement"

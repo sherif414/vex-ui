@@ -14,7 +14,7 @@
   --vex-c-primary-100: #f4f4f5;
   --vex-c-primary-200: #e4e4e7;
   --vex-c-primary-300: #d4d4d8;
-  --vex-c-primary-400: #a1a1aa;
+  --vex-c-primary-400: #303033;
   --vex-c-primary-500: #18181b;
   --vex-c-primary-600: #18181b;
   --vex-c-primary-700: #18181b;
@@ -83,16 +83,33 @@
 
   /* spacing */
 
+  --vex-spacing-0: 0px;
+  --vex-spacing-px: 1px;
+  --vex-spacing-2px: 2px;
   --vex-spacing-1: 0.25rem;
   --vex-spacing-2: 0.5rem;
   --vex-spacing-3: 0.75rem;
   --vex-spacing-4: 1rem;
-  --vex-spacing-5: 1.5rem;
-  --vex-spacing-6: 2rem;
-  --vex-spacing-7: 3rem;
-  --vex-spacing-8: 4rem;
-  --vex-spacing-9: 6rem;
-  --vex-spacing-10: 8rem;
+  --vex-spacing-5: 1.25rem;
+  --vex-spacing-6: 1.5rem;
+  --vex-spacing-7: 1.75rem;
+  --vex-spacing-8: 2rem;
+  --vex-spacing-9: 2.25rem;
+  --vex-spacing-10: 2.5rem;
+  --vex-spacing-11: 2.75rem;
+  --vex-spacing-12: 3rem;
+  --vex-spacing-13: 3.5rem;
+  --vex-spacing-14: 4rem;
+  --vex-spacing-15: 5rem;
+  --vex-spacing-16: 6rem;
+  --vex-spacing-17: 7rem;
+  --vex-spacing-18: 8rem;
+  --vex-spacing-19: 9rem;
+  --vex-spacing-20: 10rem;
+  --vex-spacing-21: 12rem;
+  --vex-spacing-22: 14rem;
+  --vex-spacing-23: 17rem;
+  --vex-spacing-24: 20rem;
 
   /* border */
 
@@ -159,16 +176,16 @@
   opacity: 0;
 }
 
-:not(body, html, vex-default-scrollbar)::-webkit-scrollbar {
+:not(body, html, .vex-default-scrollbar)::-webkit-scrollbar {
   width: 4px;
   height: 4px;
 }
 
-:not(body, html, vex-default-scrollbar)::-webkit-scrollbar:hover {
+:not(body, html, .vex-default-scrollbar)::-webkit-scrollbar:hover {
   background-color: var(--vex-c-neutral-100);
 }
 
-:not(body, html, vex-default-scrollbar)::-webkit-scrollbar-thumb {
+:not(body, html, .vex-default-scrollbar)::-webkit-scrollbar-thumb {
   width: 4px;
   height: 4px;
   background-color: var(--vex-c-neutral-300);
@@ -179,33 +196,6 @@
   overflow: hidden;
 }
 
-/* // --vex-clr-danger-500: #b91c1c;
-// --vex-clr-danger-400: #da2030;
-// --vex-clr-danger-300: #f87171;
-// --vex-clr-danger-200: #f9cdcd;
-// --vex-clr-danger-100: #fef8f2;
-// --vex-clr-danger-100: #f9cdcd;
-
-// --vex-clr-warning-500: #92400e;
-// --vex-clr-warning-400: #f59e0b;
-// --vex-clr-warning-300: #fcd34d;
-// --vex-clr-warning-200: #fef08a;
-// --vex-clr-warning-100: #fef3c7;
-
-// --vex-clr-success-500: #166534;
-// --vex-clr-success-400: #22c55e;
-// --vex-clr-success-300: #86efac;
-// --vex-clr-success-200: #bbf7d0;
-// --vex-clr-success-100: #dcfce7;
-
-// --vex-c-accent-800: #4c1d95;
-// --vex-c-accent-500: #7c3aed;
-// --vex-clr-info-300: #c4b5fd;
-// --vex-c-accent-200: #ddd6fe;
-// --vex-c-accent-100: #ede9fe;
-
-// --vex-clr-plain-500: var(--vex-c-neutral-700);
-// --vex-clr-plain-400: var(--vex-c-neutral-900);
-// --vex-clr-plain-300: var(--vex-c-neutral-300);
-// --vex-clr-plain-200: var(--vex-c-neutral-200);
-// --vex-clr-plain-100: var(--vex-c-neutral-100); */
+.vex-no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

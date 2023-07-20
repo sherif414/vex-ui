@@ -5,8 +5,8 @@
   display: flex;
   align-items: stretch;
   justify-content: start;
-  padding: 2px;
-  border-radius: var(--vex-border-radius-none);
+  padding: 4px;
+  border-radius: var(--vex-border-radius-sm);
   font-size: var(--vex-font-size-sm);
 }
 
@@ -19,8 +19,10 @@
   gap: var(--vex-spacing-2);
   z-index: 2;
   position: relative;
-  padding: var(--vex-spacing-2);
+  padding: var(--vex-spacing-2) var(--vex-spacing-3);
 
+  line-height: 1;
+  font-weight: 500;
   color: var(--vex-c-neutral-400);
   cursor: pointer;
   transition: color 150ms;
@@ -45,7 +47,7 @@
 //------ variants ------//
 
 .vex-tabs.--variant-switch {
-  background-color: var(--vex-c-neutral-200);
+  background-color: var(--vex-c-neutral-100);
 
   .vex-tabs-pointer {
     background-color: white;
@@ -66,14 +68,14 @@
   flex-direction: row;
 
   .vex-tabs-pointer {
-    bottom: 4px;
+    bottom: 8px;
     width: 10px;
     transform-origin: 0% 50%;
   }
 
   &.--variant-switch {
     .vex-tabs-pointer {
-      height: calc(100% - 4px);
+      height: calc(100% - 8px);
     }
   }
 
@@ -95,7 +97,7 @@
 
   &.--variant-switch {
     .vex-tabs-pointer {
-      width: calc(100% - 4px);
+      width: calc(100% - 8px);
     }
   }
 
