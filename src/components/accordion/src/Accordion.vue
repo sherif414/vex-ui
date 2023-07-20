@@ -35,7 +35,7 @@ const expandedItems = computed<ExpandedItems>({
   get: () => p.modelValue,
   set: (val) => emit('update:modelValue', val),
 })
-const { onUpdateModel } = useListSelection(expandedItems, () => p.multiple)
+const { onUpdateModel } = useListSelection(expandedItems, () => p.multiple, true)
 
 provide(ACCORDION_CTX, {
   onUpdateModel,
