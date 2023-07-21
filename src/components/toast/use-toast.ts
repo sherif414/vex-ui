@@ -1,7 +1,7 @@
 import { render, h, markRaw } from 'vue'
 import type { VNode, Component } from 'vue'
 import ToastRoot from './ToastRoot.vue'
-import { getRandomString } from '@/composables/helpers'
+import { useID } from '@/composables'
 
 export interface ToastifyProps {
   content: string | Component
@@ -26,7 +26,7 @@ export function useToast() {
    * @returns a function that removes the toast
    */
   function toastify(params: ToastifyProps) {
-    const item = markRaw({ ...params, key: getRandomString(6) })
+    const item = markRaw({ ...params, key: useID() })
 
     Root?.component?.exposed?.addToast(item)
 

@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { useFloating, type UseFloatingOptions } from '@/composables'
-import { getRandomString } from '@/composables/helpers'
+import { useFloating, useID, type UseFloatingOptions } from '@/composables'
 import { cloneVNode, computed, Fragment, ref, type VNode, type VNodeTypes } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
@@ -50,7 +49,7 @@ const slots = defineSlots<{
 
 //----------------------------------------------------------------------------------------------------
 
-const TOOLTIP_ID = `tooltip-${getRandomString(6)}`
+const TOOLTIP_ID = useID()
 const TooltipEl = ref<HTMLElement | null>(null)
 const TriggerEl = ref<HTMLElement | null>(null)
 const ArrowEl = ref<HTMLElement | null>(null)

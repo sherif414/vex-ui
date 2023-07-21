@@ -4,8 +4,8 @@ import type { Option } from '@/components/dropdown/types'
 import { computed, ref, watch } from 'vue'
 import { watchDebounced } from '@vueuse/core'
 import { IconArrowDown } from '@/icons'
-import { getRandomString } from '@/composables/helpers'
 import type { Placement } from '@floating-ui/vue'
+import { useID } from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -105,7 +105,7 @@ const p = withDefaults(
     size: 'md',
     debounce: 300,
     maxOptions: 10,
-    id: () => `autocomplete-${getRandomString(6)}`,
+    id: () => useID(),
     placement: 'bottom-start',
   }
 )

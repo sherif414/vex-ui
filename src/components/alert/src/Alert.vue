@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { getRandomString } from '@/composables/helpers'
 import { Button } from '@/components'
 import { IconDangerSign, IconWarn, IconCheckCircle, IconBell, IconXMark } from '@/icons'
 import { computed } from 'vue'
+import { useID } from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -40,8 +40,8 @@ const slots = defineSlots<{
   icon?: (props: {}) => any
 }>()
 
-const HEADER_ID = `alert-header-${getRandomString(6)}`
-const CONTENT_ID = `alert-content-${getRandomString(6)}`
+const HEADER_ID = useID()
+const CONTENT_ID = useID()
 
 //----------------------------------------------------------------------------------------------------
 // 📌 icon

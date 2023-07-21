@@ -3,7 +3,7 @@ import { computed, inject, toRef } from 'vue'
 import { IconCheck } from '@/icons'
 import { CHIP_GROUP_INJECTION_KEY } from '.'
 import { TransitionExpand } from '@/transitions'
-import { getRandomString } from '@/composables/helpers'
+import { useID } from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -75,7 +75,7 @@ function onChange(e: Event): void {
 // 📌 attrs
 //----------------------------------------------------------------------------------------------------
 
-const INPUT_ID = `chip-${getRandomString(6)}`
+const INPUT_ID = useID()
 const inputType = computed<'checkbox' | 'radio'>(() =>
   !isWithinGroup || isMultiple.value ? 'checkbox' : 'radio'
 )

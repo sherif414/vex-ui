@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import { useFloating, type UseFloatingOptions } from '@/composables'
-import { getRandomString } from '@/composables/helpers'
+import { useFloating, useID, type UseFloatingOptions } from '@/composables'
 import { useEventListener } from '@vueuse/core'
 import type { VNode, VNodeTypes } from 'vue'
 import { cloneVNode, Comment, computed, Fragment, nextTick, ref, Text } from 'vue'
@@ -10,7 +9,7 @@ import { cloneVNode, Comment, computed, Fragment, nextTick, ref, Text } from 'vu
 //----------------------------------------------------------------------------------------------------
 
 defineOptions({
-  inheritAttrs: false
+  inheritAttrs: false,
 })
 
 const p = withDefaults(
@@ -48,8 +47,8 @@ const slots = defineSlots<{
 //----------------------------------------------------------------------------------------------------
 
 const DROPDOWN_ROLE = p.role
-const DROPDOWN_ID = 'vex-dropdown-' + getRandomString(6)
-const TRIGGER_ID = 'vex-trigger-' + getRandomString(6)
+const DROPDOWN_ID = useID()
+const TRIGGER_ID = useID()
 
 const _isOpen = ref(false)
 const isFloatingElVisible = computed<boolean>({

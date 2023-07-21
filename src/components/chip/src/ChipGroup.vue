@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { provide, watch } from 'vue'
 import { type selected, CHIP_GROUP_INJECTION_KEY } from '..'
-import { getRandomString } from '@/composables/helpers'
+import { useID } from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -29,7 +29,7 @@ const p = withDefaults(
   }>(),
   {
     multiple: false,
-    name: () => `chip-group-${getRandomString(6)}`,
+    name: () => useID(),
   }
 )
 

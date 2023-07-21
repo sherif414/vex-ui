@@ -1,9 +1,8 @@
 <script lang="ts" setup>
 import { Input, Tag } from '@/components'
-import { useFloating, useListNavigation, useListSelection } from '@/composables'
-import { getRandomString } from '@/composables/helpers'
+import { useFloating, useID, useListNavigation, useListSelection } from '@/composables'
 import { useElementSize, useEventListener } from '@vueuse/core'
-import { nextTick, reactive, ref, computed, toRef, watch } from 'vue'
+import { nextTick, reactive, ref, computed, toRef } from 'vue'
 import { IconArrowDown } from '@/icons'
 
 //----------------------------------------------------------------------------------------------------
@@ -56,8 +55,8 @@ const emit = defineEmits<{
 
 //----------------------------------------------------------------------------------------------------
 
-const SELECT_ID = computed(() => p.id || 'select-' + getRandomString(6))
-const CONTROLS_ID = 'select-controls-' + getRandomString(6)
+const SELECT_ID = computed(() => p.id || useID())
+const CONTROLS_ID = useID()
 const CHILDREN_SELECTOR = '.vex-list-item:not([inert])'
 
 //----------------------------------------------------------------------------------------------------

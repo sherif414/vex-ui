@@ -1,7 +1,7 @@
 import { h, markRaw, render } from 'vue'
 import type { VNode, Component } from 'vue'
 import NotificationRoot from './NotificationRoot.vue'
-import { getRandomString } from '@/composables/helpers'
+import { useID } from '@/composables'
 
 export interface NotifyProps {
   title?: string | Component
@@ -36,7 +36,7 @@ function useNotification() {
    */
   function notify(args: NotifyProps = {}, options: NotifyOptions = {}) {
     const notification: NotificationItem = markRaw({
-      key: getRandomString(6),
+      key: useID(),
       ...args,
       ...options,
     })

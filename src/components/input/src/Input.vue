@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { useAttrs, computed, ref, onMounted, watch } from 'vue'
-import { getRandomString } from '@/composables/helpers'
-import { IconDangerSign } from '@/icons'
-import { Tooltip, Loader } from '@/components'
+import { computed, ref } from 'vue'
+import { Loader } from '@/components'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -123,13 +121,6 @@ defineExpose({
 
     <div v-if="hasSuffix" aria-hidden="true" class="vex-field-suffix">
       <Loader v-if="p.loading" />
-      <!-- <Tooltip v-else-if="isInvalid" color="danger" :content="errorMessage">
-        <IconDangerSign
-          width="18"
-          height="18"
-          style="color: var(--vex-c-danger-500); pointer-events: auto"
-        />
-      </Tooltip> -->
       <slot v-else name="suffix" />
     </div>
 
