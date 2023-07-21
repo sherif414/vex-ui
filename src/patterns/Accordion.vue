@@ -20,7 +20,7 @@ const expanded = ref()
         <IconArrowDown aria-hidden="true" class="vex-accordion-chevron" />
       </AccordionItemTrigger>
 
-      <TransitionExpand :duration="750">
+      <TransitionExpand :duration="500">
         <AccordionItemContent v-show="isExpanded">
           <div>
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Reiciendis iusto fuga possimus
