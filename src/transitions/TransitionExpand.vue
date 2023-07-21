@@ -1,86 +1,84 @@
 <script lang="ts" setup>
+import { animate } from 'motion'
 import { Transition } from 'vue'
 
-const props = withDefaults(
+//----------------------------------------------------------------------------------------------------
+// 📌 component meta
+//----------------------------------------------------------------------------------------------------
+
+const p = withDefaults(
   defineProps<{
-    duration?: string
+    duration?: number
     transitionProp?: 'width' | 'height'
   }>(),
   {
-    duration: '200ms',
+    duration: 300,
     transitionProp: 'height',
   }
 )
 
-const onEnter = (element: HTMLElement) => {
-  const inlineSize = props.transitionProp === 'height' ? 'width' : 'height'
-  const blockSize = props.transitionProp
+//----------------------------------------------------------------------------------------------------
 
-  element.style[inlineSize] = getComputedStyle(element)[inlineSize]
-  element.style.position = 'absolute'
-  element.style.visibility = 'hidden'
-  element.style[blockSize] = 'auto'
+let expandedSize = '0'
+const dynamicSize = p.transitionProp
+const staticSize = p.transitionProp === 'height' ? 'width' : 'height'
 
-  const _blockSize = getComputedStyle(element)[blockSize]
-  element.style[inlineSize] = ''
-  element.style.position = ''
-  element.style.visibility = ''
-  element.style[blockSize] = '0px'
-  // Force repaint to make sure the
-  // animation is triggered correctly.
-  getComputedStyle(element)[blockSize]
-  // Trigger the animation.
-  // We use `requestAnimationFrame` because we need
-  // to make sure the browser has finished
-  // painting after setting the `height`
-  // to `0` in the line above.
-  requestAnimationFrame(() => {
-    element.style[blockSize] = _blockSize
-  })
+async function onEnter(el: HTMLElement, done: () => void) {
+  el.style.transitionDuration = '0s'
+  el.style.animationName = 'none'
+  el.style[staticSize] = getComputedStyle(el)[staticSize]
+  el.style.position = 'absolute'
+  el.style.visibility = 'hidden'
+  el.style[dynamicSize] = 'auto'
+
+  expandedSize = el.getBoundingClientRect()[dynamicSize] + 'px'
+
+  el.style.transitionDuration = ''
+  el.style.animationName = ''
+  el.style[staticSize] = ''
+  el.style.position = ''
+  el.style.visibility = ''
+  el.style.overflow = 'hidden'
+
+  await animate(
+    el,
+    { [dynamicSize]: [0, expandedSize], opacity: [0, 1] },
+    { duration: p.duration / 1000 }
+  ).finished
+  done()
 }
 
-const onAfterEnter = (element: HTMLElement) => {
-  const blockSize = props.transitionProp
-
-  element.style[blockSize] = 'auto'
+function onAfterEnter(el: HTMLElement) {
+  el.style.overflow = ''
+  el.style[dynamicSize] = 'auto'
 }
 
-const onLeave = (element: HTMLElement) => {
-  const blockSize = props.transitionProp
+async function onLeave(el: HTMLElement, done: () => void) {
+  expandedSize = el.getBoundingClientRect()[dynamicSize] + 'px'
+  el.style.overflow = 'hidden'
 
-  const _blockSize = getComputedStyle(element)[blockSize]
-  element.style[blockSize] = _blockSize
-  // Force repaint to make sure the
-  // animation is triggered correctly.
-  getComputedStyle(element)[blockSize]
-  requestAnimationFrame(() => {
-    element.style[blockSize] = '0px'
-  })
+  await animate(
+    el,
+    { [dynamicSize]: [expandedSize, 0], opacity: [1, 0] },
+    { duration: p.duration / 1000 }
+  ).finished
+  done()
+}
+
+function onAfterLeave(el: HTMLElement) {
+  el.style.overflow = ''
+  el.style[dynamicSize] = 'auto'
 }
 </script>
 
 <template>
   <Transition
-    name="vex-expand"
-    @enter="onEnter"
-    @after-enter="onAfterEnter"
-    @leave="onLeave"
+    :css="false"
+    @enter="(el, done) => onEnter(el as HTMLElement, done)"
+    @leave="(el, done) => onLeave(el as HTMLElement, done)"
+    @after-enter="(el) => onAfterEnter(el as HTMLElement)"
+    @after-leave="(el) => onAfterLeave(el as HTMLElement)"
   >
     <slot></slot>
   </Transition>
 </template>
-
-<style>
-.vex-expand-enter-active,
-.vex-expand-leave-active {
-  overflow: hidden;
-  transition-property: all !important;
-  transition-duration: v-bind(duration) !important;
-  transition-timing-function: linear !important;
-}
-
-.vex-expand-enter-from,
-.vex-expand-leave-to {
-  opacity: 0;
-}
-</style>
