@@ -6,7 +6,7 @@ import {
   AccordionItem,
   AccordionItemContent,
   AccordionItemTrigger,
-} from '../components/accordion'
+} from '@/primitives/accordion'
 import { TransitionExpand } from '@/transitions'
 
 const expanded = ref()

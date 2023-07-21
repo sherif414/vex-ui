@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Avatar } from '@/components'
+import { Avatar } from '@/primitives/avatar'
 
 const src = 'avatars/01.png'
 </script>
