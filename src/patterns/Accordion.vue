@@ -14,33 +14,24 @@ const expanded = ref()
 
 <template>
   <Accordion v-model="expanded">
-    <AccordionItem value="item 1" #="{ isExpanded }">
-      <AccordionItemTrigger
-        >this is the trigger
+    <AccordionItem v-for="i in 3" :key="i" :value="`item ${i}`" #="{ isExpanded }">
+      <AccordionItemTrigger>
+        accordion header
         <IconArrowDown aria-hidden="true" class="vex-accordion-chevron" />
       </AccordionItemTrigger>
-      <TransitionExpand>
-        <AccordionItemContent v-if="isExpanded"> this is the content </AccordionItemContent>
-      </TransitionExpand>
-    </AccordionItem>
 
-    <AccordionItem value="item 2" #="{ isExpanded }">
-      <AccordionItemTrigger
-        >this is the trigger
-        <IconArrowDown aria-hidden="true" class="vex-accordion-chevron" />
-      </AccordionItemTrigger>
-      <TransitionExpand>
-        <AccordionItemContent v-if="isExpanded">this is the content</AccordionItemContent>
-      </TransitionExpand>
-    </AccordionItem>
-
-    <AccordionItem value="item 3" #="{ isExpanded }">
-      <AccordionItemTrigger
-        >this is the trigger
-        <IconArrowDown aria-hidden="true" class="vex-accordion-chevron" />
-      </AccordionItemTrigger>
-      <TransitionExpand>
-        <AccordionItemContent v-if="isExpanded">this is the content</AccordionItemContent>
+      <TransitionExpand :duration="750">
+        <AccordionItemContent v-show="isExpanded">
+          <div>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Reiciendis iusto fuga possimus
+            dolor! Officiis, natus! Lorem ipsum dolor, sit amet consectetur adipisicing elit. Qui
+            vitae fugit hic, quidem, recusandae sint officia illo vel aliquid, nemo vero est
+            molestiae expedita. Necessitatibus neque quod voluptatum suscipit eveniet. Lorem ipsum
+            dolor sit amet, consectetur adipisicing elit. Corrupti vero expedita omnis, minus
+            impedit, inventore minima, sint repellendus asperiores quam excepturi eum ratione
+            doloremque natus corporis velit quibusdam nam earum!
+          </div>
+        </AccordionItemContent>
       </TransitionExpand>
     </AccordionItem>
   </Accordion>
@@ -91,8 +82,10 @@ const expanded = ref()
   will-change: height;
   font-size: var(--vex-font-size-sm);
 
-  &-wrapper {
+  & > div {
     padding: var(--vex-spacing-1) var(--vex-spacing-4) var(--vex-spacing-3) var(--vex-spacing-4);
+    max-height: 200px;
+    overflow-y: auto;
   }
 }
 
