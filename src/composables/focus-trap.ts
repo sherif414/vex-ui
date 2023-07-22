@@ -1,7 +1,7 @@
 import type { RefOrGetter } from '@/types'
 import type { FocusTrap } from 'focus-trap'
 import { createFocusTrap, type Options } from 'focus-trap'
-import { type MaybeRefOrGetter, watchEffect, toRef, onScopeDispose, watch } from 'vue'
+import { type MaybeRefOrGetter, toRef, onScopeDispose, watch, watchPostEffect } from 'vue'
 
 const trapStack: FocusTrap[] = []
 
@@ -14,7 +14,7 @@ export function useFocusTrap(
   let trap: FocusTrap | null = null
   const isActive = toRef(active)
 
-  watchEffect(() => {
+  watchPostEffect(() => {
     if (target.value) {
       trap = createFocusTrap(target.value, options)
       isActive.value && trap.activate()
