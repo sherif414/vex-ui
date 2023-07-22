@@ -32,7 +32,7 @@ export function useFocusTrap(
 
   function create(el?: HTMLElement | null) {
     if (!el || trap) return
-    trap = createFocusTrap(el, options)
+    trap = createFocusTrap(el, { ...options, trapStack })
     isActive.value && trap.activate()
     trapStack.push(trap)
   }
