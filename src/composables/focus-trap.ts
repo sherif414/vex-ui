@@ -12,20 +12,21 @@ export function useFocusTrap(
 ) {
   const target = toRef(el)
   let trap: FocusTrap | null = null
+  const isActive = toRef(active)
 
   watchEffect(() => {
     if (target.value) {
       trap = createFocusTrap(target.value, options)
+      isActive.value && trap.activate()
       trapStack.push(trap)
     }
   })
 
   // implicitly switch to manual mode if no `active` arg was passed
-  if (active) {
-    watch(active, (val) => {
-      val ? trap?.activate() : trap?.deactivate()
-    })
-  }
+  watch(isActive, (val) => {
+    if (val) trap?.activate()
+    else trap?.deactivate()
+  })
 
   onScopeDispose(() => {
     if (trap) {
