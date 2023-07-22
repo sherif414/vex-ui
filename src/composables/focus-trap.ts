@@ -25,7 +25,8 @@ export function useFocusTrap(
   function kill() {
     if (trap) {
       trap.deactivate()
-      trapStack.splice(trapStack.indexOf(trap), 1)
+      const index = trapStack.indexOf(trap)
+      if (index !== -1) trapStack.splice(index, 1)
       trap = null
     }
   }
