@@ -14,13 +14,16 @@ export function useFocusTrap(
   let trap: FocusTrap | null = null
   const isActive = toRef(active)
 
-  watchPostEffect(() => {
-    if (target.value) {
-      trap = createFocusTrap(target.value, options)
+  watch(
+    target,
+    (el) => {
+      if (!el) return
+      trap = createFocusTrap(el, options)
       isActive.value && trap.activate()
       trapStack.push(trap)
-    }
-  })
+    },
+    { flush: 'post' }
+  )
 
   // implicitly switch to manual mode if no `active` arg was passed
   watch(isActive, (val) => {
