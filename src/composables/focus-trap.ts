@@ -1,7 +1,7 @@
 import type { RefOrGetter } from '@/types'
 import type { FocusTrap } from 'focus-trap'
 import { createFocusTrap, type Options } from 'focus-trap'
-import { type MaybeRefOrGetter, toRef, onScopeDispose, watch, watchPostEffect } from 'vue'
+import { type MaybeRefOrGetter, toRef, onScopeDispose, watch } from 'vue'
 
 const trapStack: FocusTrap[] = []
 
@@ -14,46 +14,35 @@ export function useFocusTrap(
   let trap: FocusTrap | null = null
   const isActive = toRef(active)
 
-  watch(
-    target,
-    (el) => {
-      if (!el) return
-      trap = createFocusTrap(el, options)
-      isActive.value && trap.activate()
-      trapStack.push(trap)
-    },
-    { flush: 'post' }
-  )
+  watch(target, create, { flush: 'post', immediate: true })
 
-  // implicitly switch to manual mode if no `active` arg was passed
   watch(isActive, (val) => {
-    if (val) trap?.activate()
-    else trap?.deactivate()
+    if (!trap) return
+    if (val) trap.active ? trap.pause() : trap.activate()
+    else trap.pause()
   })
 
-  onScopeDispose(() => {
+  function kill() {
     if (trap) {
       trap.deactivate()
       trapStack.splice(trapStack.indexOf(trap), 1)
       trap = null
     }
-  })
+  }
+
+  function create(el?: HTMLElement | null) {
+    if (!el || trap) return
+    trap = createFocusTrap(el, options)
+    isActive.value && trap.activate()
+    trapStack.push(trap)
+  }
+
+  onScopeDispose(kill)
 
   return {
-    activate() {
-      trap?.activate()
-    },
-    deactivate() {
-      if (trap) {
-        trap?.deactivate()
-        trapStack.splice(trapStack.indexOf(trap), 1)
-      }
-    },
-    pause() {
-      trap?.pause()
-    },
-    resume() {
-      trap?.unpause()
-    },
+    activate: () => create(target.value),
+    deactivate: kill,
+    pause: () => trap?.pause(),
+    resume: () => trap?.unpause(),
   }
 }
