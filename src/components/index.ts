@@ -1,5 +1,5 @@
 export { Alert } from './alert'
-export { Accordion, AccordionItem } from './accordion'
+export { Accordion, AccordionItem, AccordionItemTrigger, AccordionItemContent } from './accordion'
 export { Avatar } from './avatar'
 export { Autocomplete } from './autocomplete'
 export { Badge } from './badge'
