@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { dialogStore } from '@/components/dialog'
 import { useFocusTrap } from '@/composables'
-import { ref, onUnmounted, readonly, computed } from 'vue'
+import { ref, onUnmounted, computed, onMounted, nextTick } from 'vue'
+import { createFocusTrap } from 'focus-trap'
 import { IconXMark } from '@/icons'
-import { timeline } from 'motion'
+import { animate, timeline } from 'motion'
 import { useEventListener } from '@vueuse/core'
+import type { FocusTrap } from 'focus-trap'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -24,7 +26,7 @@ const p = withDefaults(
     /**
      * whether the dialog is open
      */
-    open?: boolean
+    modelValue?: boolean
   }>(),
   {}
 )
@@ -34,23 +36,24 @@ defineSlots<{
 }>()
 
 const emit = defineEmits<{
-  'update:open': [value: boolean]
+  'update:modelValue': [value: boolean]
 }>()
 
 //----------------------------------------------------------------------------------------------------
 // 📌 visibility
 //----------------------------------------------------------------------------------------------------
 
-const dialogEl = ref<HTMLDialogElement | null>(null)
+const DialogEl = ref<HTMLDialogElement | null>(null)
+const OverlayEl = ref<HTMLElement | null>(null)
 
-useEventListener(dialogEl, 'keydown', (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && p.open) {
-    emit('update:open', false)
+useEventListener(DialogEl, 'keydown', (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && p.modelValue) {
+    emit('update:modelValue', false)
   }
 })
 
 //----------------------------------------------------------------------------------------------------
-// 📌 hide body-scrollbar
+// 📌 remove body scroll
 //----------------------------------------------------------------------------------------------------
 
 function hideBodyScrollbar(): void {
@@ -73,37 +76,27 @@ function showBodyScrollbar(): void {
 onUnmounted(showBodyScrollbar)
 
 //----------------------------------------------------------------------------------------------------
-// 📌 focus
+// 📌 animation & focus trap
 //----------------------------------------------------------------------------------------------------
 
-const trap = useFocusTrap(dialogEl, null, {
-  escapeDeactivates: false,
-})
-
-//----------------------------------------------------------------------------------------------------
-// 📌 animation
-//----------------------------------------------------------------------------------------------------
-
-const overlayEl = ref<HTMLElement | null>(null)
+let trap: FocusTrap | null = null
 
 async function onEnter(_: Element, done: () => void) {
   await timeline([
-    [overlayEl.value!, { opacity: [0, 1] }, { duration: 0.3 }],
-    [dialogEl.value!, { scale: [0.95, 1] }, { duration: 0.3, at: 0 }],
+    [OverlayEl.value!, { opacity: [0, 1] }, { duration: 0.3 }],
+    [DialogEl.value!, { scale: [0.95, 1] }, { duration: 0.3, at: 0 }],
   ]).finished
 
   done()
+  trap = createFocusTrap(DialogEl.value!)
   trap.activate()
 }
 
-async function onLeave(_: Element, done: () => void) {
-  await timeline([
-    [overlayEl.value!, { opacity: [1, 0] }, { duration: 0.3 }],
-    [dialogEl.value!, { scale: [1, 0.95] }, { duration: 0.3, at: 0 }],
-  ]).finished
+async function onLeave(overlay: Element, done: () => void) {
+  await animate(overlay, { opacity: [1, 0] }, { duration: 0.3 }).finished
 
   done()
-  trap.deactivate()
+  trap?.deactivate()
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -116,7 +109,7 @@ const modifierClasses = computed(() => [
 ])
 
 defineExpose({
-  dialogEl,
+  DialogEl,
 })
 </script>
 
@@ -128,19 +121,22 @@ defineExpose({
       @enter="onEnter"
       @leave="onLeave"
       :css="false"
-      name="vex-t-dialog"
     >
-      <div v-show="p.open" ref="overlayEl" class="vex-overlay">
+      <div v-if="p.modelValue" ref="OverlayEl" class="vex-overlay">
         <div
-          tabindex="-1"
-          ref="dialogEl"
           v-bind="$attrs"
           :class="modifierClasses"
+          ref="DialogEl"
+          tabindex="-1"
           role="dialog"
           aria-modal="true"
         >
           <slot />
-          <button aria-label="close" class="vex-dialog-close" @click="emit('update:open', false)">
+          <button
+            aria-label="close"
+            class="vex-dialog-close"
+            @click="emit('update:modelValue', false)"
+          >
             <IconXMark aria-hidden="true" />
           </button>
         </div>
