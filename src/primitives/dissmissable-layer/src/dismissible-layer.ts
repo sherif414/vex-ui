@@ -1,4 +1,4 @@
-import { useFocusTrap } from '@/composables'
+import { useFocusTrap, useRemoveBodyScroll } from '@/composables'
 import { onClickOutside, useEventListener } from '@vueuse/core'
 import type { Options } from 'focus-trap'
 import type { Ref } from 'vue'
@@ -6,15 +6,20 @@ import { computed, onBeforeUnmount, shallowReactive, watch } from 'vue'
 
 export type Layer = Ref<HTMLElement | null | undefined>
 export const layers = shallowReactive(new Set<Layer>())
+const bodyScroll = useRemoveBodyScroll()
 
 watch(
   layers,
   () => {
     if (layers.size === 0) {
       document.body.style.pointerEvents = ''
+      bodyScroll.unRemove()
+      return
     }
     if (layers.size === 1) {
       document.body.style.pointerEvents = 'none'
+      bodyScroll.remove()
+      return
     }
   },
   { flush: 'sync' }
