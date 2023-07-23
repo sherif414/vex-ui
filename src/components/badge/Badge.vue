@@ -20,7 +20,7 @@ const p = withDefaults(
      * specifies the badge color
      * @default 'info'
      */
-    color?: 'info' | 'warning' | 'success' | 'danger'
+    color?: 'accent' | 'warning' | 'success' | 'danger' | 'primary'
 
     /**
      * specifies the badge size
@@ -53,7 +53,7 @@ const p = withDefaults(
     placement?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
   }>(),
   {
-    color: 'info',
+    color: 'accent',
     offset: '-2px',
     placement: 'top-right',
     size: 'md',
@@ -92,12 +92,7 @@ const positionStyles = computed(() => {
 
 <template>
   <div style="position: relative">
-    <div
-      v-bind="$attrs"
-      v-show="isVisible"
-      :class="modifierClasses"
-      :style="positionStyles"
-    >
+    <div v-bind="$attrs" v-show="isVisible" :class="modifierClasses" :style="positionStyles">
       <span v-if="!p.dot">
         {{ p.value }}
       </span>

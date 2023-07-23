@@ -1,6 +1,6 @@
 .vex-badge {
   z-index: 10;
-  border-radius: var(--vex-border-radius-rounded);
+  border-radius: var(--vex-border-radius-full);
   position: absolute;
   pointer-events: none;
   transform: translate(-50%, -50%);
@@ -45,7 +45,11 @@
 //------ color ------//
 
 .vex-badge {
-  &.--color-info {
+  &.--color-primary {
+    background-color: var(--vex-c-primary-500);
+    color: white;
+  }
+  &.--color-accent {
     background-color: var(--vex-c-accent-500);
     color: white;
   }
