@@ -61,12 +61,12 @@
   color: var(--vex-c-success-800);
 }
 
-.vex-alert.--variant-info {
+.vex-alert.--variant-accent {
   background-color: var(--vex-c-accent-100);
   color: var(--vex-c-accent-800);
 }
 
-.vex-alert.--variant-plain {
-  background-color: var(--vex-clr-plain-100);
-  color: var(--vex-clr-plain-500);
+.vex-alert.--variant-primary {
+  background-color: var(--vex-c-primary-100);
+  color: var(--vex-c-primary-500);
 }

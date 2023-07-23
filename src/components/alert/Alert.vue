@@ -18,7 +18,7 @@ const p = withDefaults(
     /**
      * specifies the alert variant
      */
-    variant?: 'success' | 'warning' | 'danger' | 'info' | 'plain'
+    variant?: 'success' | 'warning' | 'danger' | 'accent' | 'primary'
 
     /**
      * whether to show the close button
@@ -26,7 +26,7 @@ const p = withDefaults(
     dismissible?: boolean
   }>(),
   {
-    variant: 'info',
+    variant: 'primary',
   }
 )
 
@@ -51,8 +51,8 @@ const IconComponent = computed(() => {
   return {
     danger: IconDangerSign,
     success: IconCheckCircle,
-    info: IconBell,
-    plain: IconBell,
+    accent: IconBell,
+    primary: IconBell,
     warning: IconWarn,
   }[p.variant]
 })
@@ -102,7 +102,7 @@ const modifierClasses = computed(() => ['vex-alert', `--variant-${p.variant}`])
       aria-label="close"
       @click="emit('close')"
     >
-      <IconXMark width="16" height="16" />
+      <IconXMark aria-hidden="true" width="14" height="14" />
     </button>
   </div>
 </template>
