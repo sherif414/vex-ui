@@ -7,5 +7,5 @@ export * from './dismissible-layer'
 export * from './remove-body-scroll'
 export * from './floating'
 
-// remove me
+// TODO: remove me
 export const SELECTION_INJECTION_KEY = Symbol()

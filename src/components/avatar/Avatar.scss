@@ -1,29 +1,3 @@
-<script setup lang="ts">
-import { Avatar } from '@/primitives/avatar'
-
-const src = 'avatars/01.png'
-</script>
-
-<template>
-  <Avatar :src="src" #="{ loadStatus }" class="vex-avatar --size-md --ring-danger --rounded-full">
-    <!-- error -->
-
-    <span v-if="loadStatus === 'error'" class="vex-avatar-error">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path
-          fill="currentColor"
-          d="M5 21q-.825 0-1.413-.588T3 19v-6.6l3 3l4-4l4 4l4-4l3 3V19q0 .825-.588 1.413T19 21H5ZM5 3h14q.825 0 1.413.588T21 5v6.575l-3-3l-4 4l-4-4l-4 4l-3-3V5q0-.825.588-1.413T5 3Z"
-        />
-      </svg>
-    </span>
-
-    <!-- fallback -->
-
-    <span v-else class="vex-avatar-fallback"> AJ </span>
-  </Avatar>
-</template>
-
-<style lang="scss">
 .vex-avatar {
   flex: none;
   display: inline-flex;
@@ -132,4 +106,3 @@ const src = 'avatars/01.png'
 .vex-avatar.--rounded-full {
   border-radius: var(--vex-border-radius-full);
 }
-</style>

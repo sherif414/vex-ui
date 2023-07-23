@@ -1,48 +1,41 @@
-import type { RefOrGetter } from '@/types'
-import type { FocusTrap } from 'focus-trap'
-import { createFocusTrap, type Options } from 'focus-trap'
-import { type MaybeRefOrGetter, toRef, onScopeDispose, watch } from 'vue'
+import { createFocusTrap, type Options, type FocusTrap } from 'focus-trap'
+import { onUnmounted, toRef, watch, type MaybeRefOrGetter } from 'vue'
 
 const trapStack: FocusTrap[] = []
 
 export function useFocusTrap(
-  el: MaybeRefOrGetter<HTMLElement | null | undefined>,
-  active?: RefOrGetter<boolean> | null,
+  target: MaybeRefOrGetter<HTMLElement | null | undefined>,
   options: Options = {}
 ) {
-  const target = toRef(el)
   let trap: FocusTrap | null = null
-  const isActive = toRef(active)
+  const TargetEl = toRef(target)
 
-  watch(target, create, { flush: 'post', immediate: true })
+  watch(
+    TargetEl,
+    (el, prevEl) => {
+      if (!el) return
+      if (trap && el !== prevEl) {
+        trap.updateContainerElements(el)
+        return
+      }
 
-  watch(isActive, (val) => {
-    if (!trap) return
-    if (val) trap.active ? trap.pause() : trap.activate()
-    else trap.pause()
-  })
+      trap = createFocusTrap(el, { ...options, trapStack })
+      trapStack.push(trap)
+    },
+    { flush: 'post' }
+  )
 
-  function kill() {
+  onUnmounted(() => {
     if (trap) {
       trap.deactivate()
       const index = trapStack.indexOf(trap)
       if (index !== -1) trapStack.splice(index, 1)
       trap = null
     }
-  }
-
-  function create(el?: HTMLElement | null) {
-    if (!el || trap) return
-    trap = createFocusTrap(el, { ...options, trapStack })
-    isActive.value && trap.activate()
-    trapStack.push(trap)
-  }
-
-  onScopeDispose(kill)
+  })
 
   return {
-    activate: () => create(target.value),
-    deactivate: kill,
+    activate: () => trap?.activate(),
     pause: () => trap?.pause(),
     resume: () => trap?.unpause(),
   }

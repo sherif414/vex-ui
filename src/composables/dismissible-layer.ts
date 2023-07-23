@@ -1,7 +1,6 @@
-import { useFocusTrap, useRemoveBodyScroll } from '@/composables'
+import { useRemoveBodyScroll } from '@/composables'
 import { onClickOutside, useEventListener } from '@vueuse/core'
-import type { Options } from 'focus-trap'
-import type { Ref } from 'vue'
+import { onMounted, type Ref } from 'vue'
 import { computed, onBeforeUnmount, shallowReactive, watch } from 'vue'
 
 export type Layer = Ref<HTMLElement | null | undefined>
@@ -31,18 +30,15 @@ interface UseLayerListeners {
   onEscapeKey?: (e: KeyboardEvent) => void
 }
 
-export function useLayer(
-  LayerEl: Layer,
-  listeners: UseLayerListeners = {},
-  focusTrapOptions: Options = {}
-) {
-  layers.add(LayerEl)
+export function useLayer(LayerEl: Layer, listeners: UseLayerListeners = {}) {
+  onMounted(() => {
+    layers.add(LayerEl)
+  })
   onBeforeUnmount(() => {
     layers.delete(LayerEl)
   })
 
   const isTopLayer = computed<boolean>(() => [...layers][layers.size - 1] === LayerEl)
-  useFocusTrap(LayerEl, isTopLayer, focusTrapOptions)
 
   //----------------------------------------------------------------------------------------------------
 
@@ -60,6 +56,6 @@ export function useLayer(
   })
 
   return {
-    pointerEvents: computed(() => (isTopLayer.value ? 'auto' : 'none')),
+    isTopLayer,
   }
 }
