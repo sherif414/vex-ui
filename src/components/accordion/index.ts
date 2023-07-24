@@ -12,7 +12,7 @@ import type { InjectionKey, Ref } from 'vue'
 export type ExpandedItems = string | string[] | undefined
 
 export interface AccordionContext {
-  onUpdateModel: (val: string) => void
+  setExpanded: (val: string) => void
   expandedItems: Ref<ExpandedItems>
   getIndex: () => string
 }

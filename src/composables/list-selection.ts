@@ -10,7 +10,7 @@ export function useListSelection(
 ) {
   const items = reactive<Set<string>>(new Set())
 
-  function onUpdateModel(value: string): void {
+  function setSelected(value: string): void {
     if (Array.isArray(selectedItems.value)) {
       selectedItems.value = selectedItems.value.includes(value)
         ? selectedItems.value.filter((v) => v !== value)
@@ -32,7 +32,7 @@ export function useListSelection(
 
   return {
     items,
-    onUpdateModel,
+    setSelected,
     selected: selectedItems,
   }
 }

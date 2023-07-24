@@ -40,11 +40,11 @@ const CHILDREN_SELECTOR = '.vex-accordion-item-trigger-button:enabled'
 const { onKeydown } = useListNavigation(CHILDREN_SELECTOR, true)
 
 const expandedItems = ref<ExpandedItems>()
-const { onUpdateModel } = useListSelection(expandedItems, () => p.multiple, true)
+const { setSelected: setExpanded } = useListSelection(expandedItems, () => p.multiple, true)
 
 let count = 0
 provide(ACCORDION_CTX, {
-  onUpdateModel,
+  setExpanded: setExpanded,
   expandedItems,
   getIndex: () => `item:${count++}`,
 })

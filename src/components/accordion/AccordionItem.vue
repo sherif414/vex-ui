@@ -52,7 +52,7 @@ if (!ctx) {
   throw new Error('[vex] <AccordionItem> is missing an <Accordion> parent component.')
 }
 
-const { onUpdateModel, expandedItems, getIndex } = ctx
+const { setExpanded, expandedItems, getIndex } = ctx
 
 //----------------------------------------------------------------------------------------------------
 // 📌 provide
@@ -82,7 +82,7 @@ const modifierClasses = computed(() => {
       <button
         type="button"
         class="vex-accordion-item-trigger-button"
-        @click="onUpdateModel(index)"
+        @click="setExpanded(index)"
         :aria-expanded="isExpanded"
         :aria-disabled="isDisabled"
         :disabled="isDisabled"
