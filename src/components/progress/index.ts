@@ -1,2 +1,2 @@
-export * from './src'
-import './style/index.scss'
+export { default as Progress } from './Progress.vue'
+import './Progress.scss'
