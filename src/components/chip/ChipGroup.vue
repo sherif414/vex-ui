@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { provide, watch } from 'vue'
-import { type selected, CHIP_GROUP_INJECTION_KEY } from '..'
+import { type selected, CHIP_GROUP_CTX } from '.'
 import { useID } from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
@@ -45,7 +45,7 @@ const slots = defineSlots<{
 // 📌 context provider
 //----------------------------------------------------------------------------------------------------
 
-provide(CHIP_GROUP_INJECTION_KEY, {
+provide(CHIP_GROUP_CTX, {
   groupName: () => p.name,
   multiple: () => p.multiple,
   onEmit,

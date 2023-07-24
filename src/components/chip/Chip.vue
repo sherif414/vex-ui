@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, inject, toRef } from 'vue'
 import { IconCheck } from '@/icons'
-import { CHIP_GROUP_INJECTION_KEY } from '.'
+import { CHIP_GROUP_CTX } from '.'
 import { TransitionExpand } from '@/transitions'
 import { useID } from '@/composables'
 
@@ -42,7 +42,7 @@ const slots = defineSlots<{
 // 📌 context injector
 //----------------------------------------------------------------------------------------------------
 
-const ctx = inject(CHIP_GROUP_INJECTION_KEY, null)
+const ctx = inject(CHIP_GROUP_CTX, null)
 const isWithinGroup = !!ctx
 
 if (isWithinGroup && !p.value) {
