@@ -22,25 +22,25 @@ const p = withDefaults(
 // 📌 aria-current
 //----------------------------------------------------------------------------------------------------
 
-const rootEl = ref<HTMLElement | null>(null)
+const BreadcrumbEl = ref<HTMLElement | null>(null)
 
 if (p.autoAriaCurrent) {
   onBeforeUpdate(() => {
-    rootEl.value?.querySelector('a:last-of-type')?.removeAttribute('aria-current')
+    BreadcrumbEl.value?.querySelector('a:last-of-type')?.removeAttribute('aria-current')
   })
 
   onUpdated(() => {
-    rootEl.value?.querySelector('a:last-of-type')?.setAttribute('aria-current', 'page')
+    BreadcrumbEl.value?.querySelector('a:last-of-type')?.setAttribute('aria-current', 'page')
   })
 
   onMounted(() => {
-    rootEl.value?.querySelector('a:last-of-type')?.setAttribute('aria-current', 'page')
+    BreadcrumbEl.value?.querySelector('a:last-of-type')?.setAttribute('aria-current', 'page')
   })
 }
 </script>
 
 <template>
-  <div ref="rootEl" role="navigation" aria-label="breadcrumb" class="vex-breadcrumb">
+  <div ref="BreadcrumbEl" role="navigation" aria-label="breadcrumb" class="vex-breadcrumb">
     <slot></slot>
   </div>
 </template>
