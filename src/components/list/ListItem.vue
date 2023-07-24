@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, inject, onBeforeUnmount } from 'vue'
-import { SELECTION_INJECTION_KEY } from '@/composables'
+import { LIST_CTX } from '.'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -29,20 +29,17 @@ defineSlots<{
 
 //----------------------------------------------------------------------------------------------------
 
-const context = inject(SELECTION_INJECTION_KEY, null)
+const ctx = inject(LIST_CTX, null)
 
-if (!context) {
+if (!ctx) {
   throw new Error(`[vex] <ListItem> is missing a <List> parent component.`)
 }
-context.register(p.value)
-onBeforeUnmount(() => context.unRegister(p.value))
+const { setSelected, selected } = ctx
 
 //----------------------------------------------------------------------------------------------------
 
 const isSelected = computed<boolean>(() =>
-  Array.isArray(context.selectedItems.value)
-    ? context.selectedItems.value.includes(p.value)
-    : context.selectedItems.value === p.value
+  Array.isArray(selected.value) ? selected.value.includes(p.value) : selected.value === p.value
 )
 
 function onKeydown(e: KeyboardEvent) {
@@ -50,7 +47,7 @@ function onKeydown(e: KeyboardEvent) {
   if (e.ctrlKey || e.altKey || e.shiftKey || e.metaKey) return
 
   e.preventDefault()
-  context?.onSelect(p.value)
+  setSelected(p.value)
 }
 
 const modifierClasses = computed(() => ['vex-list-item', { '--selected': isSelected.value }])
@@ -59,7 +56,7 @@ const modifierClasses = computed(() => ['vex-list-item', { '--selected': isSelec
 <template>
   <li
     tabindex="0"
-    @click="context?.onSelect(p.value)"
+    @click="setSelected(p.value)"
     @keydown="onKeydown"
     :inert="p.disabled"
     :aria-selected="isSelected"

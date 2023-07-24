@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useListNavigation, useListSelection } from '@/composables'
-import { computed } from 'vue'
+import { computed, provide } from 'vue'
+import { LIST_CTX } from '.'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -38,7 +39,11 @@ const selected = computed<typeof p.modelValue>({
 if (p.multiple && !Array.isArray(selected.value)) selected.value = []
 if (!p.multiple && Array.isArray(selected.value)) selected.value = undefined
 
-useListSelection(selected, () => p.multiple)
+const { setSelected } = useListSelection(selected, () => p.multiple)
+provide(LIST_CTX, {
+  setSelected,
+  selected,
+})
 
 //----------------------------------------------------------------------------------------------------
 // 📌 focus & keyboard interactions
