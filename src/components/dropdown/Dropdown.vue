@@ -67,7 +67,7 @@ const isFloatingElVisible = computed<boolean>({
 const TriggerEl = ref<HTMLElement | null>(null)
 const INVALID_VNODE_TYPES: VNodeTypes[] = [Fragment, Comment, Text, 'template']
 
-function TriggerVNode(): VNode {
+const TriggerVNode = (): VNode => {
   const vNodes = slots.trigger?.({})
   if (!vNodes || vNodes?.length !== 1 || INVALID_VNODE_TYPES.includes(vNodes[0].type)) {
     throw new Error(
