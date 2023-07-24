@@ -1,2 +1,2 @@
-export * from './src'
-import './style/index.scss'
+export { default as Autocomplete } from './Autocomplete.vue'
+import './Autocomplete.scss'
