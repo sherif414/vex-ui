@@ -2,8 +2,9 @@
 import { Input, Tag } from '@/components'
 import { useFloating, useID, useListNavigation, useListSelection } from '@/composables'
 import { useElementSize, useEventListener } from '@vueuse/core'
-import { nextTick, reactive, ref, computed, toRef } from 'vue'
+import { nextTick, reactive, ref, computed, toRef, provide } from 'vue'
 import { IconArrowDown } from '@/icons'
+import { SELECT_CTX } from '.'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -57,7 +58,7 @@ const emit = defineEmits<{
 
 const SELECT_ID = computed(() => p.id || useID())
 const CONTROLS_ID = useID()
-const CHILDREN_SELECTOR = '.vex-list-item:not([inert])'
+const CHILDREN_SELECTOR = '.vex-select-item:not([inert])'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 floating
@@ -103,7 +104,7 @@ useEventListener(FloatingEl, 'keydown', (e: KeyboardEvent) => {
 
 function onFloatingElFocus() {
   const selectedEl = FloatingEl.value?.querySelector<HTMLElement>(
-    '.vex-list-item.vex-selected:not([inert])'
+    '.vex-select-item.--selected:not([inert])'
   )
   if (selectedEl) selectedEl.focus()
   else FloatingEl.value?.querySelector<HTMLElement>(CHILDREN_SELECTOR)?.focus()
@@ -122,7 +123,12 @@ const selected = computed<typeof p.modelValue>({
 if (p.multiple && !Array.isArray(selected.value)) selected.value = []
 if (!p.multiple && Array.isArray(selected.value)) selected.value = undefined
 
-useListSelection(selected, () => p.multiple)
+const { setSelected: onSelect } = useListSelection(selected, () => p.multiple)
+
+provide(SELECT_CTX, {
+  onSelect,
+  selectedItems: selected,
+})
 
 //----------------------------------------------------------------------------------------------------
 
@@ -192,7 +198,7 @@ defineExpose({
   <Teleport to="body">
     <Transition name="vex-fade">
       <ul
-        v-show="isFloatingElVisible"
+        v-if="isFloatingElVisible"
         ref="FloatingEl"
         class="vex-select-listbox"
         tabindex="-1"

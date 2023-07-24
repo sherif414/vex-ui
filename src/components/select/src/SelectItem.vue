@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, inject, onBeforeUnmount } from 'vue'
-import { SELECTION_INJECTION_KEY } from '@/composables'
+import { SELECT_CTX } from '.'
 import { IconCheckCircle, IconCheck } from '@/icons'
 
 //----------------------------------------------------------------------------------------------------
@@ -26,20 +26,19 @@ const p = withDefaults(
 
 //----------------------------------------------------------------------------------------------------
 
-const context = inject(SELECTION_INJECTION_KEY, null)
+const ctx = inject(SELECT_CTX, null)
 
-if (!context) {
+if (!ctx) {
   throw new Error(`[vex] <SelectItem> is missing a <Select> parent component.`)
 }
-context.register(p.value)
-onBeforeUnmount(() => context.unRegister(p.value))
 
+const { onSelect, selectedItems } = ctx
 //----------------------------------------------------------------------------------------------------
 
 const isSelected = computed<boolean>(() =>
-  Array.isArray(context.selectedItems.value)
-    ? context.selectedItems.value.includes(p.value)
-    : context.selectedItems.value === p.value
+  Array.isArray(selectedItems.value)
+    ? selectedItems.value.includes(p.value)
+    : selectedItems.value === p.value
 )
 
 function onKeydown(e: KeyboardEvent) {
@@ -47,7 +46,7 @@ function onKeydown(e: KeyboardEvent) {
 
   if (e.key === ' ' || e.key === 'Enter') {
     e.preventDefault()
-    context?.onSelect(p.value)
+    onSelect(p.value)
   }
 }
 
@@ -58,7 +57,7 @@ const modifierClasses = computed(() => ['vex-select-item', { '--selected': isSel
   <div
     tabindex="-1"
     role="option"
-    @click="context?.onSelect(p.value)"
+    @click="onSelect(p.value)"
     @keydown="onKeydown"
     :inert="p.disabled"
     :aria-selected="isSelected"
