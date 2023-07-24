@@ -2,8 +2,7 @@
  * Handles keyboard navigation for a list of elements.
  *
  * @param  childrenSelector - css selector for the list's elements.
- * @param  loop - Whether to loop back to the beginning/end of the list when reaching the end/beginning.
- * @param  [activateOnFocus=false] - Whether to activate the element when focused.
+ * @param  loop - Whether to loop back to the other side of the list when reaching an end.
  */
 export function useListNavigation(childrenSelector: string, loop: boolean = false) {
   /**
@@ -17,7 +16,6 @@ export function useListNavigation(childrenSelector: string, loop: boolean = fals
     if (e.altKey || e.ctrlKey || e.shiftKey || e.metaKey) return
 
     const parent = e.currentTarget as HTMLElement
-    // TODO: look for a way to cache children
     const children = Array.from(parent.querySelectorAll<HTMLElement>(childrenSelector))
     if (!children.length) return
     e.preventDefault()
