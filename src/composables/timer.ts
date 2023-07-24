@@ -11,8 +11,7 @@ import type { Ref } from 'vue'
 export function useTimer(duration: number, cb: () => void): TimerControls {
   let startTime = 0
   let remainingTime = duration
-  let timeoutId: number
-
+  let timeoutId: ReturnType<typeof setTimeout>
   const isRunning = ref(false)
 
   function start() {
