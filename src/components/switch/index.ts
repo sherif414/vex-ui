@@ -1,2 +1,2 @@
-export * from './src'
-import './style/index.scss'
+export { default as Switch } from './Switch.vue'
+import './Switch.scss'
