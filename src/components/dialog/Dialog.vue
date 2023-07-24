@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { dialogStore } from '@/components/dialog'
-import { useFocusTrap } from '@/composables'
-import { ref, onUnmounted, computed, onMounted, nextTick } from 'vue'
-import { createFocusTrap } from 'focus-trap'
+import { dialogStore } from '.'
 import { IconXMark } from '@/icons'
-import { animate, timeline } from 'motion'
 import { useEventListener } from '@vueuse/core'
 import type { FocusTrap } from 'focus-trap'
+import { createFocusTrap } from 'focus-trap'
+import { animate, timeline } from 'motion'
+import { computed, onUnmounted, ref } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
