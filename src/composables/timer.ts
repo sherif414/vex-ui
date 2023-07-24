@@ -1,5 +1,5 @@
 import { onUnmounted, readonly, ref } from 'vue'
-import type { Timer } from './types'
+import type { Ref } from 'vue'
 
 /**
  * Custom hook to create a timer with the given duration and callback.
@@ -8,10 +8,10 @@ import type { Timer } from './types'
  * @param cb - The callback function to be executed when the timer ends.
  * @returns An object containing the timer control methods.
  */
-export function useTimer(duration: number, cb: () => void): Timer {
+export function useTimer(duration: number, cb: () => void): TimerControls {
   let startTime = 0
   let remainingTime = duration
-  let timeoutId: ReturnType<typeof setTimeout>
+  let timeoutId: number
 
   const isRunning = ref(false)
 
@@ -53,4 +53,37 @@ export function useTimer(duration: number, cb: () => void): Timer {
     resume,
     isRunning: readonly(isRunning),
   }
+}
+
+/**
+ * provides methods to control a timer.
+ * @interface
+ */
+interface TimerControls {
+  /**
+   * Start the timer.
+   */
+  start: () => void
+
+  /**
+   * Stop the timer and clear it.
+   */
+  stop: () => void
+
+  /**
+   * Pause the timer and update the remaining time.
+   */
+  pause: () => void
+
+  /**
+   * Resume the timer if there is remaining time.
+   */
+  resume: () => void
+
+  /**
+   * Whether the timer is currently running.
+   *
+   * @readonly
+   */
+  readonly isRunning: Readonly<Ref<boolean>>
 }
