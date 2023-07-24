@@ -1,2 +1,2 @@
-export * from './src'
-import './style/index.scss'
+export { default as FileUpload } from './FileUpload.vue'
+import './FileUpload.scss'
