@@ -19,20 +19,11 @@ const p = withDefaults(
      * @default 'default'
      */
     variant?: 'outline' | 'ladder' | 'default' | 'light'
-
-    /**
-     * specifies the current active accordion-items.
-     */
-    modelValue?: ExpandedItems
   }>(),
   {
     variant: 'default',
   }
 )
-
-const emit = defineEmits<{
-  'update:modelValue': [value?: ExpandedItems]
-}>()
 
 //----------------------------------------------------------------------------------------------------
 
