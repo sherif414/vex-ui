@@ -2,24 +2,28 @@
   border-radius: var(--vex-border-radius-sm);
   color: var(--vex-c-neutral-900);
   filter: var(--vex-drop-shadow-md);
+}
 
-  &-content {
-    padding: var(--vex-spacing-1) var(--vex-spacing-2);
-    border-radius: inherit;
-    font-size: var(--vex-font-size-sm);
-    white-space: nowrap;
-    width: max-content;
-    background-color: inherit;
-  }
+//------ content ------//
 
-  &-arrow {
-    width: 8px;
-    height: 8px;
-    background-color: inherit;
-    transform: rotate(45deg);
-    border: inherit;
-    z-index: -1;
-  }
+.vex-tooltip-content {
+  padding: var(--vex-spacing-1) var(--vex-spacing-2);
+  border-radius: inherit;
+  font-size: var(--vex-font-size-sm);
+  white-space: nowrap;
+  width: max-content;
+  background-color: inherit;
+}
+
+//------ arrow ------//
+
+.vex-tooltip-arrow {
+  width: 8px;
+  height: 8px;
+  background-color: inherit;
+  transform: rotate(45deg);
+  border: inherit;
+  z-index: -1;
 }
 
 //------ variant - filled ------//
