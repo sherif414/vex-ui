@@ -1,2 +1,1 @@
-export * from './src'
-import './style/index.scss'
+export { default as Flex } from './Flex'
