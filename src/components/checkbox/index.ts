@@ -1,2 +1,2 @@
-export * from './src'
-import './style/index.scss'
+export { default as Button } from './Checkbox.vue'
+import './Checkbox.scss'
