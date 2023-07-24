@@ -1,11 +1,12 @@
+import type { RefOrGetter } from '@/types'
 import { watch, reactive } from 'vue'
-import type { Ref, MaybeRefOrGetter } from 'vue'
+import type { Ref } from 'vue'
 
 export type SelectedItems = string | string[] | undefined
 
 export function useListSelection(
   selectedItems: Ref<SelectedItems>,
-  multiple: MaybeRefOrGetter,
+  multiple: RefOrGetter<boolean>,
   DeSelectOnReSelect?: boolean
 ) {
   const items = reactive<Set<string>>(new Set())
