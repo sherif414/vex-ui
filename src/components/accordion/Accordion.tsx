@@ -1,5 +1,4 @@
 import { useID, useListNavigation, useListSelection } from '@/composables'
-import { IconArrowDown } from '@/icons'
 import { IAdd } from 'iconsax-vue/linear'
 import { TransitionExpand } from '@/transitions'
 import {
