@@ -20,9 +20,8 @@ const AccordionProps = {
    * whether to allow multiple accordion-items to be expanded at the same time
    */
   multiple: Boolean,
-
   /**
-   * specifies the accordion variant, which changes how the accordion looks
+   * specifies the accordion variant.
    * @default 'default'
    */
   variant: {
@@ -53,9 +52,9 @@ const AccordionImpl = (p: AccordionProps, { slots }: SetupContext) => {
 
   let count = 0
   provide(ACCORDION_CTX, {
-    setExpanded: setExpanded,
+    setExpanded,
     expandedItems,
-    getIndex: () => `item:${count++}`,
+    getIndex: () => `accordion-item:${count++}`,
   })
 
   return () => (
@@ -174,7 +173,7 @@ export type AccordionTrigger = InstanceType<typeof AccordionTrigger>
 // 📌 Accordion Content
 //----------------------------------------------------------------------------------------------------
 
-const AccordionContentImpl = (p: {}, { slots }: SetupContext) => {
+function AccordionContentImpl(_: {}, { slots }: SetupContext) {
   const ctx = inject(ACCORDION_ITEM_CTX, null)
   if (!ctx) {
     throw new Error('[vex] <AccordionContent> is missing an <AccordionItem> parent component.')
