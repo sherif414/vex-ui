@@ -1,20 +1,2 @@
-import { default as Accordion } from './Accordion.vue'
-import { default as AccordionItem } from './AccordionItem.vue'
+export { Accordion, AccordionItem, AccordionContent, AccordionTrigger } from './Accordion'
 import './Accordion.scss'
-export { Accordion, AccordionItem }
-
-import type { InjectionKey, Ref } from 'vue'
-
-//----------------------------------------------------------------------------------------------------
-// 📌 context
-//----------------------------------------------------------------------------------------------------
-
-export type ExpandedItems = string | string[] | undefined
-
-export interface AccordionContext {
-  setExpanded: (val: string) => void
-  expandedItems: Ref<ExpandedItems>
-  getIndex: () => string
-}
-
-export const ACCORDION_CTX = Symbol() as InjectionKey<AccordionContext>
