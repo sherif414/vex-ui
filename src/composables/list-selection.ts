@@ -1,39 +1,53 @@
 import type { RefOrGetter } from '@/types'
-import { watch, reactive } from 'vue'
+import { toRef, watch } from 'vue'
 import type { Ref } from 'vue'
 
-export type SelectedItems = string | string[] | undefined
+interface UseListSelectionReturn<T> {
+  setSelected: (value: T) => void
+  selected: Ref<T | T[] | undefined>
+}
 
-export function useListSelection(
-  selectedItems: Ref<SelectedItems>,
-  multiple: RefOrGetter<boolean>,
+interface UseListSelectionOptions {
   DeSelectOnReSelect?: boolean
-) {
-  const items = reactive<Set<string>>(new Set())
+}
 
-  function setSelected(value: string): void {
-    if (Array.isArray(selectedItems.value)) {
-      selectedItems.value = selectedItems.value.includes(value)
-        ? selectedItems.value.filter((v) => v !== value)
-        : [...selectedItems.value, value]
+/**
+ * handles selection for a list of items.
+ *
+ * @param selected a ref that holds the selected items.
+ * @param multiSelect whether to allow multi-select.
+ * @param options options object.
+ */
+export const useListSelection = <T>(
+  selected: Ref<T | T[] | undefined>,
+  multiSelect: RefOrGetter<boolean>,
+  options: UseListSelectionOptions = {}
+): UseListSelectionReturn<T> => {
+  //
+  const isMultiSelect = toRef(multiSelect)
+
+  watch(isMultiSelect, (val) => {
+    selected.value = val ? [] : undefined
+  })
+
+  function setSelected(value: T): void {
+    if (Array.isArray(selected.value)) {
+      selected.value = selected.value.includes(value)
+        ? selected.value.filter((v) => v !== value)
+        : [...selected.value, value]
     }
     //
-    else if (selectedItems.value !== value) {
-      selectedItems.value = value
+    else if (selected.value !== value) {
+      selected.value = value
     }
     //
-    else if (DeSelectOnReSelect) {
-      selectedItems.value = undefined
+    else if (options.DeSelectOnReSelect) {
+      selected.value = undefined
     }
   }
 
-  watch(multiple, (val) => {
-    selectedItems.value = val ? [] : undefined
-  })
-
   return {
-    items,
     setSelected,
-    selected: selectedItems,
+    selected,
   }
 }
