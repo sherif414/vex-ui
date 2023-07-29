@@ -1,38 +1,37 @@
 <script setup lang="ts">
-import { Input, Dropdown, Loader } from '@/components'
-import type { Option } from '@/components/dropdown/types'
-import { computed, ref, watch } from 'vue'
-import { watchDebounced } from '@vueuse/core'
-import { IconArrowDown } from '@/icons'
-import type { Placement } from '@floating-ui/vue'
-import { useID } from '@/composables'
+import { Input, Dropdown, Loader, Floating } from '@/components'
+import { computed, nextTick, ref, watch } from 'vue'
+import { useEventListener, watchDebounced } from '@vueuse/core'
+import { IconChevronUpDown } from '@/icons'
+import {
+  useComputed,
+  useFloating,
+  useID,
+  useListNavigation,
+  useListSelection,
+  useRef,
+} from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
 //----------------------------------------------------------------------------------------------------
-
 const p = withDefaults(
   defineProps<{
     /**
-     * specifies label text
+     * display a smaller field
      */
-    label?: string
+    compact?: boolean
 
     /**
      * specifies the selected option
      */
-    modelValue?: Option
+    modelValue?: string
 
     /**
      * specifies the list of all the available options, this will only be used with offline mode,
      * when using online mode use the `getOptions` prop instead.
      */
-    options?: Option[]
-
-    /**
-     * TODO: not implemented
-     */
-    // multiple?: boolean
+    options?: string[]
 
     /**
      * whether the field is disabled
@@ -40,41 +39,17 @@ const p = withDefaults(
     disabled?: boolean
 
     /**
-     * whether the field is readonly
+     * specifies a custom filtering function.
+     *
+     * @param query the search query.
+     * @param max maximum displayed options count.
      */
-    readonly?: boolean
-
-    /**
-     * whether there is an error
-     */
-    error?: boolean
-
-    /**
-     * specifies the error message text
-     */
-    errorMessage?: string
-
-    /**
-     * specifies tex hint text
-     */
-    hint?: string
-
-    /**
-     * specifies the field size
-     * @default 'md'
-     */
-    size?: 'sm' | 'md' | 'lg'
-
-    /**
-     * specifies the field's `id` and the inner `<label>` element's `for` attribute
-     * @default auto generated random string
-     */
-    id?: string
+    filter?: (query: string, max: number) => string[]
 
     /**
      * used for custom search logic or online mode.
      */
-    getOptions?: (query: string) => Promise<Option[]>
+    getOptions?: (query: string) => Promise<string[]>
 
     /**
      * use this prop to cleanup pending async work.
@@ -87,149 +62,250 @@ const p = withDefaults(
      * maximum number of options to display.
      * @default 10
      */
-    maxOptions?: number
+    maxDisplayedOptions?: number
 
     /**
      * the search debounce time in milliseconds.
      * @default 300
      */
     debounce?: number
-
-    /**
-     * the direction the dropdown is placed relative to its input.
-     * @default 'bottom-start'
-     */
-    placement?: Placement
   }>(),
   {
-    size: 'md',
     debounce: 300,
-    maxOptions: 10,
-    id: () => useID(),
-    placement: 'bottom-start',
+    maxDisplayedOptions: 10,
   }
 )
+
 const emit = defineEmits<{
-  'update:modelValue': [value: Option | Option[]]
-  search: [query: string]
+  'update:modelValue': [value?: string]
 }>()
 
 //----------------------------------------------------------------------------------------------------
-// 📌 search
+
+const TriggerEl = ref<HTMLInputElement | null>(null)
+const ListboxEl = ref<HTMLElement | null>(null)
+const ListboxItemsElements = ref<HTMLElement[]>([])
+const FormEl = computed(() => TriggerEl.value?.form)
+
+const TRIGGER_ID = useID()
+const LISTBOX_ID = useID()
+
+const isListboxVisible = ref(false)
+const suggestions = ref<string[]>(p.options?.slice(0, p.maxDisplayedOptions) || [])
+
+//----------------------------------------------------------------------------------------------------
+// 📌 selection
+//----------------------------------------------------------------------------------------------------
+
+const selected = useComputed({
+  get: () => p.modelValue,
+  set: (val) => {
+    if (val !== p.modelValue) {
+      emit('update:modelValue', val)
+    }
+  },
+})
+
+//----------------------------------------------------------------------------------------------------
+// 📌 keyboard interactions
+//----------------------------------------------------------------------------------------------------
+
+useEventListener(TriggerEl, 'keydown', (e: KeyboardEvent) => {
+  if (!isListboxVisible.value) {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault()
+      isListboxVisible.value = true
+    }
+    return
+  }
+
+  if (e.key === 'ArrowDown') {
+    setHighlighted(highlighted.value + 1)
+    //
+  } else if (e.key === 'ArrowUp') {
+    setHighlighted(highlighted.value - 1)
+    //
+  } else if (e.key === 'End') {
+    setHighlighted(Infinity)
+    //
+  } else if (e.key === 'Home') {
+    setHighlighted(0)
+    //
+  } else if (e.key === 'Enter') {
+    ListboxItemsElements.value?.[highlighted.value]?.click()
+    isListboxVisible.value = false
+    //
+  } else if (e.key === 'Escape') {
+    isListboxVisible.value = false
+    e.stopPropagation()
+    //
+  } else return
+
+  e.preventDefault()
+})
+
+//----------------------------------------------------------------------------------------------------
+// 📌 highlighting
+//----------------------------------------------------------------------------------------------------
+
+let highlighted = ref(-1)
+
+function setHighlighted(index: number): void {
+  const itemsLength = ListboxItemsElements.value.length
+  if (!itemsLength) return
+
+  if (index >= itemsLength) {
+    highlighted.value = 0
+    //
+  } else if (index < 0) {
+    highlighted.value = itemsLength - 1
+    //
+  } else highlighted.value = index
+}
+
+watch(highlighted, (highlighted) => {
+  if (highlighted < 0) return
+  ListboxItemsElements.value[highlighted]?.scrollIntoView({ block: 'center' })
+  TriggerEl.value?.setAttribute('aria-activedescendant', `${LISTBOX_ID}-${highlighted}`)
+})
+
+watch(isListboxVisible, (visible) => {
+  if (visible) return
+  highlighted.value = -1
+  TriggerEl.value?.removeAttribute('aria-activedescendant')
+})
+
+watch(suggestions, (suggestions) => {
+  if (!suggestions.length) return
+  highlighted.value = -1
+  TriggerEl.value?.removeAttribute('aria-activedescendant')
+  ListboxEl.value?.scrollTo({ top: 4 })
+})
+
+//----------------------------------------------------------------------------------------------------
+// 📌 filter
 //----------------------------------------------------------------------------------------------------
 
 const isLoading = ref(false)
-const inputValue = ref(p.modelValue?.label)
-const suggestions = ref<Option[]>(p.options?.slice(0, p.maxOptions) || [])
-let shouldSearch = true
+const inputValue = useRef(p.modelValue)
 
 watchDebounced(
   inputValue,
   async (query, _, onCleanup) => {
-    if (!shouldSearch) {
-      shouldSearch = true
-      return
-    }
-    // TODO: maybe we can do some sort of reset when query is ''
     if (!query) return
 
     suggestions.value = []
-    emit('search', query)
-    dropdownInstance.value.isDropdownVisible ||= true
+    isListboxVisible.value = true
 
     if (p.getOptions) {
-      isLoading.value ||= true
+      isLoading.value = true
 
-      if (p.getOptionsCleanup) onCleanup(p.getOptionsCleanup)
+      p.getOptionsCleanup && onCleanup(p.getOptionsCleanup)
       suggestions.value = await p.getOptions(query)
 
       isLoading.value = false
     }
 
-    suggestions.value = search(query, p.maxOptions)
+    suggestions.value = p.filter
+      ? p.filter(query, p.maxDisplayedOptions)
+      : filter(query, p.maxDisplayedOptions)
   },
   { debounce: p.debounce }
 )
 
-function search(query: string, limit: number): Option[] {
-  return p.options.filter((op) => op.label.includes(query)).slice(0, limit)
+function filter(query: string, limit: number): string[] {
+  return p.options?.filter((op) => op.includes(query)).slice(0, limit) ?? []
 }
 
-//----------------------------------------------------------------------------------------------------
-// 📌 validation
-//----------------------------------------------------------------------------------------------------
-
-function handleBlur() {
+// reset to the last selected value if the user
+// moved focus from the input while typing
+function onInputBlur() {
   if (!p.modelValue) return
-  shouldSearch = false
-  inputValue.value = p.modelValue.label
+  inputValue.lay(p.modelValue)
 }
 
+watch(selected, (selected) => {
+  inputValue.lay(selected)
+})
+
 //----------------------------------------------------------------------------------------------------
-// 📌 misc
+// 📌 form
 //----------------------------------------------------------------------------------------------------
 
-const dropdownInstance = ref<InstanceType<typeof Dropdown> | null>(null)
-const isSuggestionsEmpty = computed<boolean>(() => !suggestions.value.length)
+watch(FormEl, (form, _, onCleanup) => {
+  if (!form) return
 
-function handleEmit(option: Option | Option[]) {
-  emit('update:modelValue', option)
-}
+  const reset = () => emit('update:modelValue', undefined)
+  form.addEventListener('reset', reset)
+  onCleanup(() => form?.removeEventListener('reset', reset))
+})
 
-watch(
-  () => p.modelValue,
-  (val) => {
-    shouldSearch = false
-    inputValue.value = val.label
-  }
-)
+//----------------------------------------------------------------------------------------------------
+
+const { floatingStyles: listboxStyles } = useFloating(isListboxVisible, TriggerEl, ListboxEl, {
+  placement: 'bottom-start',
+  toggleAction: 'click',
+  offset: 4,
+  autoMinWidth: true,
+  hideOnClick: true,
+})
 </script>
 
 <template>
   <Input
-    ref="inputInstance"
     v-model="inputValue"
     v-bind="$attrs"
-    @blur="handleBlur"
-    :size="p.size"
-    :disabled="p.disabled"
-    :readonly="p.readonly"
-    :invalid="p.error"
-    :error-message="p.errorMessage"
-    :hint="p.hint"
-    :label="p.label"
-    :id="p.id"
+    @blur="onInputBlur"
+    :ref="(vm)=> TriggerEl = (vm as InstanceType<typeof Input>)?.InputEl ?? null"
+    :aria-expanded="isListboxVisible"
+    :aria-controls="LISTBOX_ID"
+    :id="TRIGGER_ID"
+    :compact="p.compact"
+    aria-haspopup="listbox"
+    aria-autocomplete="list"
   >
     <template v-if="$slots.icon" #icon>
       <slot name="icon" />
     </template>
 
     <template #suffix>
-      <IconArrowDown
-        :class="[
-          'vex-autocomplete-arrow',
-          { 'vex-autocomplete-arrow-active': dropdownInstance?.isDropdownVisible },
-        ]"
-      />
-    </template>
-
-    <template #dropdown>
-      <Dropdown
-        ref="dropdownInstance"
-        toggle-action="click"
-        @update:model-value="handleEmit"
-        :disable="p.disabled || p.readonly"
-        :model-value="p.modelValue"
-        :options="suggestions"
-        :placement="p.placement"
-      >
-        <!-- TODO: maybe we can delegate this to dropdown component -->
-        <div v-if="isSuggestionsEmpty" class="vex-autocomplete-placeholder">
-          <!-- TODO: better visuals -->
-          <Loader v-if="isLoading" />
-          <span v-else>no data</span>
-        </div>
-      </Dropdown>
+      <IconChevronUpDown class="vex-autocomplete-arrow" />
     </template>
   </Input>
+
+  <!-- listbox -->
+
+  <Teleport to="body">
+    <ul
+      v-if="isListboxVisible"
+      :style="listboxStyles"
+      :aria-describedby="TRIGGER_ID"
+      :id="LISTBOX_ID"
+      ref="ListboxEl"
+      tabindex="-1"
+      class="vex-autocomplete-listbox"
+    >
+      <div v-if="!suggestions.length" class="vex-autocomplete-placeholder">
+        <Loader v-if="isLoading" />
+        <span v-else>no data</span>
+      </div>
+
+      <template v-else>
+        <li
+          v-for="(item, idx) in suggestions"
+          :key="item"
+          :id="`${LISTBOX_ID}-${idx}`"
+          :data-highlighted="highlighted === idx"
+          :data-selected="selected === item"
+          @click="selected = item"
+          ref="ListboxItemsElements"
+          class="vex-autocomplete-listbox-item"
+        >
+          <slot :item="item">
+            {{ item }}
+          </slot>
+        </li>
+      </template>
+    </ul>
+  </Teleport>
 </template>
