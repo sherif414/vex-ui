@@ -99,6 +99,7 @@ export function useFloating(
   // 📌 visibility
   //----------------------------------------------------------------------------------------------------
 
+  // TODO: move this functionality out
   useEventListener(FloatingEl, 'click', () => {
     if (opt.hideOnClick) {
       isFloatingElVisible.value = false
