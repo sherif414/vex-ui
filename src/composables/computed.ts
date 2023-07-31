@@ -1,5 +1,6 @@
 // ported from @vueuse/core - computedWithControl
 
+import type { Fn } from '@/types'
 import type {
   ComputedGetter,
   ComputedRef,
@@ -10,19 +11,16 @@ import type {
 } from 'vue'
 import { computed, customRef, ref, watch } from 'vue'
 
-type Fn = () => void
-
-export interface UseComputedRef<T> extends ComputedRef<T> {}
-export interface WritableUseComputedRef<T> extends WritableComputedRef<T> {}
-
 export function useComputed<T, S>(
   fn: ComputedGetter<T>,
-  source?: WatchSource<S> | WatchSource<S>[]
+  source?: WatchSource<S> | WatchSource<S>[],
+  options?: WatchOptions
 ): ComputedRef<T>
 
 export function useComputed<T, S>(
   fn: WritableComputedOptions<T>,
-  source?: WatchSource<S> | WatchSource<S>[]
+  source?: WatchSource<S> | WatchSource<S>[],
+  options?: WatchOptions
 ): WritableComputedRef<T>
 
 /**
