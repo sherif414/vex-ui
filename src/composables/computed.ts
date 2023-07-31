@@ -11,15 +11,15 @@ import type {
 } from 'vue'
 import { computed, customRef, ref, watch } from 'vue'
 
-export function useComputed<T, S>(
+export function useComputed<T>(
   fn: ComputedGetter<T>,
-  source?: WatchSource<S> | WatchSource<S>[],
+  source?: WatchSource | WatchSource[],
   options?: WatchOptions
 ): ComputedRef<T>
 
-export function useComputed<T, S>(
+export function useComputed<T>(
   fn: WritableComputedOptions<T>,
-  source?: WatchSource<S> | WatchSource<S>[],
+  source?: WatchSource | WatchSource[],
   options?: WatchOptions
 ): WritableComputedRef<T>
 
@@ -30,9 +30,9 @@ export function useComputed<T, S>(
  * @param source
  * @param options
  */
-export function useComputed<T, S>(
+export function useComputed<T>(
   fn: ComputedGetter<T> | WritableComputedOptions<T>,
-  source?: WatchSource<S> | WatchSource<S>[],
+  source?: WatchSource | WatchSource[],
   options: WatchOptions = {
     flush: 'sync',
   }
