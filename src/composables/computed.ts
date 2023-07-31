@@ -55,8 +55,8 @@ export function useComputed<T, S>(
 
   watch(source, update, options)
 
-  const get = typeof fn !== 'function' ? fn.get : fn
-  const set = typeof fn !== 'function' ? fn.set : undefined
+  const getter = typeof fn !== 'function' ? fn.get : fn
+  const setter = typeof fn !== 'function' ? fn.set : undefined
 
   return customRef<T>((_track, _trigger) => {
     track = _track
@@ -65,14 +65,14 @@ export function useComputed<T, S>(
     return {
       get() {
         if (dirty.value) {
-          v = get()
+          v = getter()
           dirty.value = false
         }
         track()
         return v
       },
       set(v) {
-        set?.(v)
+        setter?.(v)
       },
     }
   }) as ComputedRef<T>
