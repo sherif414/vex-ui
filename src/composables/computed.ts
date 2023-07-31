@@ -3,6 +3,7 @@
 import type {
   ComputedGetter,
   ComputedRef,
+  WatchOptions,
   WatchSource,
   WritableComputedOptions,
   WritableComputedRef,
@@ -29,10 +30,14 @@ export function useComputed<T, S>(
  *
  * @param fn
  * @param source
+ * @param options
  */
 export function useComputed<T, S>(
   fn: ComputedGetter<T> | WritableComputedOptions<T>,
-  source?: WatchSource<S> | WatchSource<S>[]
+  source?: WatchSource<S> | WatchSource<S>[],
+  options: WatchOptions = {
+    flush: 'sync',
+  }
 ) {
   if (!source) {
     return computed(fn as any)
@@ -48,7 +53,7 @@ export function useComputed<T, S>(
     trigger()
   }
 
-  watch(source, update, { flush: 'sync' })
+  watch(source, update, options)
 
   const get = typeof fn !== 'function' ? fn.get : fn
   const set = typeof fn !== 'function' ? fn.set : undefined
