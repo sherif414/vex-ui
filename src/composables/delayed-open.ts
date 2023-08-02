@@ -5,33 +5,33 @@ import { toValue } from 'vue'
 interface UseDelayedOpenOptions {
   open(): void
   close(): void
-  openDelay: MaybeRefOrGetter<number>
-  closeDelay: MaybeRefOrGetter<number>
+  defaultOpenDelay?: MaybeRefOrGetter<number>
+  defaultCloseDelay?: MaybeRefOrGetter<number>
 }
 
-export function useDelayedOpen(opt: UseDelayedOpenOptions) {
+export function useDelayedOpen(options: UseDelayedOpenOptions) {
   let openTimeoutID: ReturnType<typeof setTimeout> = -1
   let closeTimeoutID: ReturnType<typeof setTimeout> = -1
 
-  const open = () => {
+  const open = (delay?: number) => {
+    const _delay = delay ?? toValue(options.defaultOpenDelay) ?? 0
     clearTimeouts()
-    const delay = toValue(opt.openDelay)
 
-    if (delay === 0) {
-      opt.open()
+    if (_delay === 0) {
+      options.open()
     } else {
-      openTimeoutID = window.setTimeout(opt.open, delay)
+      openTimeoutID = window.setTimeout(options.open, _delay)
     }
   }
 
-  const close = () => {
+  const close = (delay?: number) => {
+    const _delay = delay ?? toValue(options.defaultCloseDelay) ?? 0
     clearTimeouts()
-    const delay = toValue(opt.closeDelay)
 
-    if (delay === 0) {
-      opt.close()
+    if (_delay === 0) {
+      options.close()
     } else {
-      closeTimeoutID = window.setTimeout(opt.close, delay)
+      closeTimeoutID = window.setTimeout(options.close, _delay)
     }
   }
 
