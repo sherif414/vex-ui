@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { useFloating, useID, type UseFloatingOptions } from '@/composables'
-import { cloneVNode, computed, Fragment, ref, type VNode, type VNodeTypes } from 'vue'
+import { arrowMiddleware, useArrow, useFloating, useID } from '@/composables'
+import type { Placement, Strategy } from '@floating-ui/vue'
+import { useEventListener } from '@vueuse/core'
+import type { ComponentPublicInstance, VNode, VNodeTypes } from 'vue'
+import { Fragment, cloneVNode, computed, ref } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 Component meta
@@ -11,33 +14,52 @@ defineOptions({
 })
 
 const p = withDefaults(
-  defineProps<
-    {
-      /**
-       * specifies the tooltip's background color
-       */
-      color?: 'danger' | 'warning' | 'success' | 'primary' | 'accent' | 'neutral'
+  defineProps<{
+    /**
+     * specifies the tooltip's background color.
+     * @defaultValue 'neutral'
+     */
+    color?: 'danger' | 'warning' | 'success' | 'primary' | 'accent' | 'neutral'
 
-      /**
-       * specifies the tooltip's variant
-       * @default 'filled'
-       */
-      variant?: 'filled' | 'light'
+    /**
+     * specifies the tooltip's variant.
+     * @defaultValue 'filled'
+     */
+    variant?: 'filled' | 'light'
 
-      /**
-       * whether to hide the arrow
-       */
-      hideArrow?: boolean
-    } & Pick<
-      UseFloatingOptions,
-      'hideOnClick' | 'offset' | 'placement' | 'arrowPadding' | 'toggleAction'
-    >
-  >(),
+    /**
+     * whether to hide the arrow.
+     */
+    hideArrow?: boolean
+
+    /**
+     * adds a delay before the tooltip opens.
+     * @defaultValue 200
+     */
+    openDelay?: number
+
+    /**
+     * whether to make the min-width of the tooltip the same as the trigger width.
+     */
+    autoMinWidth?: boolean
+
+    /**
+     * tooltip's placement direction.
+     * @defaultValue 'top'
+     */
+    placement?: Placement
+
+    /**
+     * tooltip's display strategy.
+     * @defaultValue 'absolute'
+     */
+    strategy?: Strategy
+  }>(),
   {
+    openDelay: 0,
     placement: 'top',
-    offset: 8,
+    strategy: 'absolute',
     color: 'neutral',
-    toggleAction: 'hover',
     variant: 'filled',
   }
 )
@@ -70,30 +92,79 @@ const TriggerVNode = (): VNode => {
   return cloneVNode(
     vNodes[0],
     {
-      ref: TriggerEl,
+      ref: (vm) => (TriggerEl.value = getElementFromRef(vm)),
       'aria-describedby': TOOLTIP_ID,
     },
     true
   )
 }
 
+function getElementFromRef(vm: ComponentPublicInstance | Element | null): HTMLElement | null {
+  if (vm == null) return null
+  if (vm instanceof Element) return vm as HTMLElement
+  if (vm.$el instanceof Element) return vm.$el as HTMLElement
+
+  throw new Error(`[vex] <Tooltip> trigger slot received a non Element root child`)
+}
+
 //----------------------------------------------------------------------------------------------------
 // 📌 Floating
 //----------------------------------------------------------------------------------------------------
 
-const isFloatingElVisible = ref(false)
+const isTooltipVisible = ref(false)
 
-const { floatingStyles, arrowStyles } = useFloating(
-  isFloatingElVisible,
+const { floatingStyles, middlewareData, placement } = useFloating(
   TriggerEl,
   TooltipEl,
-  p,
-  p.hideArrow ? null : ArrowEl
+  isTooltipVisible,
+  {
+    autoMinWidth: () => p.autoMinWidth,
+    placement: () => p.placement,
+    middleware: [arrowMiddleware(ArrowEl)],
+    offset: 8,
+  }
 )
+
+const arrowStyles = useArrow(middlewareData, placement)
+
+//----------------------------------------------------------------------------------------------------
+// 📌 visibility
+//----------------------------------------------------------------------------------------------------
+
+let openTimeoutId: ReturnType<typeof setTimeout> = -1
+
+function open() {
+  clearTimeout(openTimeoutId)
+
+  if (p.openDelay <= 0) {
+    isTooltipVisible.value = true
+    return
+  }
+
+  openTimeoutId = setTimeout(() => {
+    isTooltipVisible.value = true
+  }, p.openDelay)
+}
+
+function close() {
+  clearTimeout(openTimeoutId)
+  isTooltipVisible.value = false
+}
+
+useEventListener(TriggerEl, 'pointerenter', open)
+useEventListener(TriggerEl, 'pointerleave', close)
+
+useEventListener(TriggerEl, 'focus', open)
+useEventListener(TriggerEl, 'blur', close)
 
 //----------------------------------------------------------------------------------------------------
 
 const modifierClasses = computed(() => ['vex-tooltip', `--c-${p.color}`, `--variant-${p.variant}`])
+
+defineExpose({
+  open,
+  close,
+})
 </script>
 
 <template>
@@ -102,11 +173,13 @@ const modifierClasses = computed(() => ['vex-tooltip', `--c-${p.color}`, `--vari
   <Teleport to="body">
     <Transition name="vex-fade">
       <div
-        v-show="isFloatingElVisible"
+        v-show.lazy="isTooltipVisible"
         v-bind="$attrs"
         :style="floatingStyles"
         :class="modifierClasses"
+        :id="TOOLTIP_ID"
         ref="TooltipEl"
+        role="tooltip"
       >
         <div class="vex-tooltip-content">
           <slot />
