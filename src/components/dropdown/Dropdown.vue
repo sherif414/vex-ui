@@ -1,8 +1,9 @@
 <script lang="ts" setup>
-import { useFloating, useID, type UseFloatingOptions } from '@/composables'
+import { useFloating, useID, useDelayedOpen } from '@/composables'
+import type { Placement, Strategy } from '@floating-ui/vue'
 import { useEventListener } from '@vueuse/core'
-import type { VNode, VNodeTypes } from 'vue'
-import { cloneVNode, Comment, computed, Fragment, nextTick, ref, Text } from 'vue'
+import type { ComponentPublicInstance, VNode, VNodeTypes } from 'vue'
+import { cloneVNode, Comment, computed, Fragment, nextTick, ref, Text, toRef, watch } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -13,29 +14,62 @@ defineOptions({
 })
 
 const p = withDefaults(
-  defineProps<
-    {
-      /**
-       * floatingEl aria role.
-       */
-      role?: 'menu' | 'listbox'
+  defineProps<{
+    /**
+     * The dropdown aria role.
+     * @default 'menu'
+     */
+    role?: 'menu' | 'listbox'
 
-      /**
-       * whether to disable visibility
-       */
-      disabled?: boolean
-    } & Pick<
-      UseFloatingOptions,
-      'placement' | 'hideOnClick' | 'autoMinWidth' | 'toggleAction' | 'offset'
-    >
-  >(),
+    /**
+     * Whether to disable visibility.
+     */
+    disabled?: boolean
+
+    /**
+     * Sets the min-width of the Dropdown to the width of the Trigger element.
+     */
+    autoMinWidth?: boolean
+
+    /**
+     * Controls the dropdown's placement direction.
+     * @defaultValue 'bottom-start'
+     */
+    placement?: Placement
+
+    /**
+     * Controls the dropdown's display strategy.
+     */
+    strategy?: Strategy
+
+    /**
+     * The distance between the dropdown and the trigger.
+     * @defaultValue 4
+     */
+    offset?: number
+
+    /**
+     * The time before the dropdown opens/closes
+     * @defaultValue 150
+     */
+
+    openDelay?: number
+    /**
+     * The time before the dropdown opens/closes
+     * @defaultValue 150
+     */
+    closeDelay?: number
+
+    triggerOn?: 'hover' | 'click'
+  }>(),
   {
-    toggleAction: 'click',
     placement: 'bottom-start',
-    hideOnClick: true,
     autoMinWidth: true,
     offset: 4,
     role: 'menu',
+    openDelay: 150,
+    closeDelay: 150,
+    triggerOn: 'click',
   }
 )
 
@@ -46,17 +80,15 @@ const slots = defineSlots<{
 
 //----------------------------------------------------------------------------------------------------
 
-const DROPDOWN_ROLE = p.role
+const role = toRef(() => p.role)
 const DROPDOWN_ID = useID()
 const TRIGGER_ID = useID()
 
-const _isOpen = ref(false)
-const isFloatingElVisible = computed<boolean>({
-  get() {
-    return _isOpen.value && !p.disabled
-  },
-  set(val) {
-    if (val !== _isOpen.value) _isOpen.value = val
+const __isOpen = ref(false)
+const isDropdownOpen = computed<boolean>({
+  get: () => __isOpen.value && !p.disabled,
+  set: (val) => {
+    if (val !== __isOpen.value) __isOpen.value = val
   },
 })
 
@@ -77,49 +109,76 @@ const TriggerVNode = (): VNode => {
   return cloneVNode(
     vNodes[0],
     {
-      ref: TriggerEl,
+      ref: (vm) => (TriggerEl.value = getElementFromRef(vm)),
       id: TRIGGER_ID,
       'aria-controls': DROPDOWN_ID,
-      'aria-haspopup': DROPDOWN_ROLE,
-      'aria-expanded': `${isFloatingElVisible.value}`,
     },
     true
   )
 }
 
+function getElementFromRef(vm: ComponentPublicInstance | Element | null): HTMLElement | null {
+  if (vm == null) return null
+  if (vm instanceof Element) return vm as HTMLElement
+  if (vm.$el instanceof Element) return vm.$el as HTMLElement
+
+  throw new Error(`[vex] <Dropdown> trigger slot received a non Element root child`)
+}
+
+watch([isDropdownOpen, role, TriggerEl], ([visible, role, el]) => {
+  if (!el) return
+  el.setAttribute('aria-haspopup', `${role}`)
+  el.setAttribute('aria-expanded', `${visible}`)
+})
+
 //----------------------------------------------------------------------------------------------------
-// 📌 focus management
+// 📌 open / close
 //----------------------------------------------------------------------------------------------------
 
-const FloatingEl = ref<HTMLElement | null>(null)
+const { close: closeDropdown, open: openDropdown } = useDelayedOpen({
+  open: () => (isDropdownOpen.value = true),
+  close: () => (isDropdownOpen.value = false),
+  defaultOpenDelay: () => p.openDelay,
+  defaultCloseDelay: () => p.closeDelay,
+})
+
+const DropdownEl = ref<HTMLElement | null>(null)
 
 useEventListener(TriggerEl, 'keydown', (e: KeyboardEvent) => {
   if (e.shiftKey || e.altKey || e.ctrlKey) return
 
-  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+  if ((e.key === 'ArrowDown' || e.key === 'ArrowUp', e.key === 'Enter' || e.key === ' ')) {
     e.preventDefault()
-    isFloatingElVisible.value = true
-    focusFirstChild()
+    isDropdownOpen.value || openDropdown()
+    nextTick(() => DropdownEl.value?.focus({ preventScroll: true }))
   }
 
-  if (e.key === 'Enter' || e.key === ' ') {
+  if (e.key === 'Escape') {
     e.preventDefault()
-    isFloatingElVisible.value = true
-    focusFirstChild()
+    isDropdownOpen.value && closeDropdown()
+    nextTick(() => TriggerEl.value?.focus({ preventScroll: true }))
   }
 })
 
-function focusFirstChild(): void {
-  nextTick(() => (FloatingEl.value as HTMLElement)?.focus())
+if (p.triggerOn === 'hover') {
+  useEventListener(TriggerEl, 'pointerenter', () => openDropdown())
+  useEventListener(TriggerEl, 'pointerleave', () => closeDropdown())
+
+  useEventListener(DropdownEl, 'pointerenter', () => openDropdown())
+  useEventListener(DropdownEl, 'pointerleave', () => closeDropdown())
 }
 
 //----------------------------------------------------------------------------------------------------
 
-const { floatingStyles } = useFloating(isFloatingElVisible, TriggerEl, FloatingEl, p)
+const { floatingStyles } = useFloating(TriggerEl, DropdownEl, isDropdownOpen, {
+  autoMinWidth: () => p.autoMinWidth,
+  placement: () => p.placement,
+  strategy: () => p.strategy,
+})
 
 defineExpose({
-  isDropdownVisible: isFloatingElVisible,
-  FloatingEl: FloatingEl,
+  isDropdownOpen,
+  DropdownEl,
 })
 </script>
 
@@ -129,14 +188,14 @@ defineExpose({
   <Transition name="vex-fade">
     <Teleport to="body">
       <div
-        ref="FloatingEl"
+        ref="DropdownEl"
         v-bind="$attrs"
-        v-show.lazy="isFloatingElVisible"
+        v-show.lazy="isDropdownOpen"
         tabindex="-1"
         class="vex-dropdown"
         :id="DROPDOWN_ID"
         :aria-labelledby="TRIGGER_ID"
-        :role="p.role"
+        :role="role"
         :style="floatingStyles"
       >
         <slot />
