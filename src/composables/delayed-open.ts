@@ -2,36 +2,36 @@ import type { MaybeRefOrGetter } from '@/types'
 import { tryOnScopeDispose } from '@vueuse/core'
 import { toValue } from 'vue'
 
-interface UseDelayedOpenOptions {
+interface UseDelayedOpenArgs {
   open(): void
   close(): void
   defaultOpenDelay?: MaybeRefOrGetter<number>
   defaultCloseDelay?: MaybeRefOrGetter<number>
 }
 
-export function useDelayedOpen(options: UseDelayedOpenOptions) {
+export function useDelayedOpen(args: UseDelayedOpenArgs) {
   let openTimeoutID: ReturnType<typeof setTimeout> = -1
   let closeTimeoutID: ReturnType<typeof setTimeout> = -1
 
   const open = (delay?: number) => {
-    const _delay = delay ?? toValue(options.defaultOpenDelay) ?? 0
+    const _delay = delay ?? toValue(args.defaultOpenDelay) ?? 0
     clearTimeouts()
 
     if (_delay === 0) {
-      options.open()
+      args.open()
     } else {
-      openTimeoutID = window.setTimeout(options.open, _delay)
+      openTimeoutID = window.setTimeout(args.open, _delay)
     }
   }
 
   const close = (delay?: number) => {
-    const _delay = delay ?? toValue(options.defaultCloseDelay) ?? 0
+    const _delay = delay ?? toValue(args.defaultCloseDelay) ?? 0
     clearTimeouts()
 
     if (_delay === 0) {
-      options.close()
+      args.close()
     } else {
-      closeTimeoutID = window.setTimeout(options.close, _delay)
+      closeTimeoutID = window.setTimeout(args.close, _delay)
     }
   }
 
