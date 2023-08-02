@@ -1,156 +1,95 @@
-import {
-  arrow as arrowMiddleware,
-  autoUpdate,
-  flip,
-  offset,
-  shift,
-  size,
-  useFloating as useFloatingUi,
-  type UseFloatingReturn,
+import type { MaybeRefOrGetter } from '@/types'
+import type {
+  Middleware,
+  MiddlewareData,
+  MiddlewareState,
+  Padding,
+  Placement,
+  Strategy,
 } from '@floating-ui/vue'
-import type { Middleware, Placement } from '@floating-ui/vue'
-import { onClickOutside, useEventListener } from '@vueuse/core'
-import { computed, onScopeDispose, toRef } from 'vue'
-import type { ComputedRef, MaybeRefOrGetter, Ref, StyleValue } from 'vue'
+import { arrow, autoUpdate, computePosition, flip, offset, shift, size } from '@floating-ui/vue'
+import { tryOnScopeDispose } from '@vueuse/core'
+import { ref, shallowReadonly, shallowRef, toRef, toValue, watch, type StyleValue } from 'vue'
+import { useComputed } from '.'
+
+export interface FloatingStyles {
+  position: Strategy
+  top: string
+  left: string
+  transform?: string
+  'will-change'?: 'transform'
+}
 
 export interface UseFloatingOptions {
   /**
-   * the space between triggerEl and floatingEl.
+   * Where to place the floating element relative to its reference element.
+   * @default 'bottom-start'
+   */
+  placement?: MaybeRefOrGetter<Placement | undefined>
+
+  /**
+   * The type of CSS position property to use.
+   * @default 'absolute'
+   */
+  strategy?: MaybeRefOrGetter<Strategy | undefined>
+
+  /**
+   * These are plain objects that modify the positioning coordinates in some fashion, or provide useful data for the consumer to use.
+   *  *DO NOT USE SIZE MIDDLEWARE HERE*, use the autoMinWidth option.
+   */
+  middleware?: MaybeRefOrGetter<Middleware[]>
+
+  /**
+   * Whether to auto set the floatingEl min-width to the width of the referenceEl
+   */
+  autoMinWidth?: MaybeRefOrGetter<boolean | undefined>
+
+  /**
+   * The distance between the referenceEl and the floatingEl
    */
   offset?: number
-
-  /**
-   * the floatingEl placement relative to triggerEl.
-   */
-  placement?: Placement
-
-  /**
-   * whether to toggle visibility on `hover` or `click`
-   */
-  toggleAction?: 'click' | 'hover'
-
-  /**
-   * sets floatingEl `min-width `to the `width` of triggerEl,
-   */
-  autoMinWidth?: boolean
-
-  /**
-   * specifies the distance between the edge of the arrow and the edge of floatingEl,
-   * positive values will add more distance and shows more of the arrow.
-   */
-  arrowPadding?: number
-
-  /**
-   * whether to hide the floatingEl when its clicked
-   */
-  hideOnClick?: boolean
 }
 
-/**
- * a wrapper composable around `useFloating` from `floating-ui`
- *
- * overload 1: without arrow
- *
- * @param isFloatingElVisible whether the floating element is visible
- * @param Trigger floating-ui reference element
- * @param floating floating-ui floating element
- * @param opt options object, it can be `Reactive` or plain
- */
 export function useFloating(
-  isFloatingElVisible: Ref<boolean>,
-  Trigger: MaybeRefOrGetter<HTMLElement | null>,
+  reference: MaybeRefOrGetter<HTMLElement | null>,
   floating: MaybeRefOrGetter<HTMLElement | null>,
-  opt: UseFloatingOptions
-): UseFloatingReturn
-
-/**
- * a wrapper composable around `useFloating` from `floating-ui`
- *
- * overload 2: with arrow
- *
- * @param isFloatingElVisible whether the floating element is visible
- * @param Trigger floating-ui reference element
- * @param floating floating-ui floating element
- * @param opt options object, it can be `Reactive` or plain
- * @param arrow floating-ui arrow element
- */
-export function useFloating(
-  isFloatingElVisible: Ref<boolean>,
-  Trigger: MaybeRefOrGetter<HTMLElement | null>,
-  floating: MaybeRefOrGetter<HTMLElement | null>,
-  opt: UseFloatingOptions,
-  arrow: MaybeRefOrGetter<HTMLElement | null>
-): UseFloatingReturn & { arrowStyles: ComputedRef<StyleValue> }
-
-export function useFloating(
-  isFloatingElVisible: Ref<boolean>,
-  Trigger: MaybeRefOrGetter<HTMLElement | null>,
-  floating: MaybeRefOrGetter<HTMLElement | null>,
-  opt: UseFloatingOptions,
-  arrow?: MaybeRefOrGetter<HTMLElement | null>
-): UseFloatingReturn & { arrowStyles?: ComputedRef<StyleValue> } {
+  visible: MaybeRefOrGetter<boolean>,
+  options: UseFloatingOptions = {
+    middleware: [],
+    placement: 'bottom-start',
+    strategy: 'absolute',
+    offset: 4,
+  }
+) {
   //----------------------------------------------------------------------------------------------------
 
-  const TriggerEl = toRef(Trigger)
   const FloatingEl = toRef(floating)
-  const ArrowEl = arrow ? toRef(arrow) : null
+  const ReferenceEl = toRef(reference)
+  const isFloatingElVisible = toRef(visible)
 
-  //----------------------------------------------------------------------------------------------------
-  // 📌 visibility
-  //----------------------------------------------------------------------------------------------------
+  const strategy = toRef(options.strategy)
+  const placement = toRef(options.placement)
+  const middleware = toRef(options.middleware)
 
-  // TODO: move this functionality out
-  useEventListener(FloatingEl, 'click', () => {
-    if (opt.hideOnClick) {
-      isFloatingElVisible.value = false
-    }
-  })
+  const x = ref(0)
+  const y = ref(0)
 
-  if (opt.toggleAction === 'click') {
-    useEventListener(TriggerEl, 'click', () => {
-      isFloatingElVisible.value = !isFloatingElVisible.value
-    })
+  const newStrategy = ref(toValue(options.strategy) || 'absolute')
+  const newPlacement = ref(toValue(options.placement) || 'bottom-start')
 
-    onClickOutside(
-      FloatingEl,
-      () => {
-        isFloatingElVisible.value = false
-      },
-      { ignore: [TriggerEl] }
-    )
-  }
-
-  if (opt.toggleAction === 'hover') {
-    let timeoutId: number
-
-    function setInvisible(e: Event) {
-      timeoutId = setTimeout(() => (isFloatingElVisible.value = false), 100)
-    }
-
-    function setVisible(e: Event) {
-      clearTimeout(timeoutId)
-      isFloatingElVisible.value = true
-    }
-
-    useEventListener(TriggerEl, 'mouseenter', setVisible)
-    useEventListener(TriggerEl, 'mouseleave', setInvisible)
-
-    useEventListener(FloatingEl, 'mouseenter', setVisible)
-    useEventListener(FloatingEl, 'mouseleave', setInvisible)
-
-    onScopeDispose(() => {
-      clearTimeout(timeoutId)
-    })
-  }
+  const middlewareData = shallowRef<MiddlewareData>({})
+  const isPositioned = ref(false)
 
   //----------------------------------------------------------------------------------------------------
   // 📌 middleware
+  // TODO: maybe default middleware could be abstracted into a separate module?
   //----------------------------------------------------------------------------------------------------
 
-  const middleware = computed<Middleware[]>(() => {
-    const mw = [offset(opt.offset), flip(), shift({ padding: 8 })]
+  const _middleware = useComputed(() => {
+    const mw = [offset(toValue(options.offset) || 4), flip(), shift({ padding: 8 })]
 
-    if (opt.autoMinWidth) {
+    // size middleware needs to be towards the start according to the docs
+    if (toValue(options.autoMinWidth)) {
       mw.unshift(
         size({
           apply({ rects, elements }) {
@@ -160,63 +99,182 @@ export function useFloating(
       )
     }
 
-    if (ArrowEl) {
-      mw.push(arrowMiddleware({ element: ArrowEl, padding: opt.arrowPadding }))
+    if (middleware.value) {
+      mw.push(...middleware.value)
     }
 
     return mw
   })
 
   //----------------------------------------------------------------------------------------------------
-  // 📌 floating-ui
+  // 📌 floating styles
   //----------------------------------------------------------------------------------------------------
 
-  const data = useFloatingUi(TriggerEl, FloatingEl, {
-    placement: opt.placement,
-    whileElementsMounted: autoUpdate,
-    middleware,
-    open: isFloatingElVisible,
+  const floatingStyles = useComputed(getFloatingStyles, [x, y], {
+    flush: 'pre',
   })
 
+  function getFloatingStyles() {
+    const initialStyles = {
+      position: newStrategy.value,
+      left: '0',
+      top: '0',
+    }
+
+    if (!isFloatingElVisible.value || !FloatingEl.value) return initialStyles
+
+    const xVal = roundByDPR(FloatingEl.value, x.value)
+    const yVal = roundByDPR(FloatingEl.value, y.value)
+
+    return {
+      ...initialStyles,
+      // left: `${xVal ?? 0}px`,
+      // top: `${yVal ?? 0}px`,
+      transform: `translate(${xVal}px, ${yVal}px)`,
+      ...(getDPR(FloatingEl.value) >= 1.5 && {
+        willChange: 'transform',
+      }),
+    }
+  }
+
   //----------------------------------------------------------------------------------------------------
-  // 📌 arrow
+  // 📌 update
   //----------------------------------------------------------------------------------------------------
 
-  let arrowStyles: ComputedRef<StyleValue> | null = null
+  function update() {
+    if (!isFloatingElVisible.value || !FloatingEl.value || !ReferenceEl.value) return
 
-  if (ArrowEl) {
-    const arrowX = computed(() => data.middlewareData.value.arrow?.x ?? null)
-    const arrowY = computed(() => data.middlewareData.value.arrow?.y ?? null)
-
-    arrowStyles = computed<StyleValue>(() => {
-      const side = data.placement.value.split('-')[0]
-      const staticSide =
-        {
-          top: 'bottom',
-          right: 'left',
-          bottom: 'top',
-          left: 'right',
-        }[side] ?? 'bottom'
-
-      return {
-        position: 'absolute',
-        left: arrowX.value != null ? `${arrowX.value}px` : '',
-        top: arrowY.value != null ? `${arrowY.value}px` : '',
-        [staticSide]: `-2px`,
-      }
+    computePosition(ReferenceEl.value, FloatingEl.value, {
+      middleware: _middleware.value,
+      placement: placement.value || 'bottom-start',
+      strategy: strategy.value || 'absolute',
+    }).then((position) => {
+      x.value = position.x
+      y.value = position.y
+      newPlacement.value = position.placement
+      newStrategy.value = position.strategy
+      middlewareData.value = position.middlewareData
+      isPositioned.value = true
     })
   }
 
+  watch([middleware, placement, strategy], update)
+
+  //----------------------------------------------------------------------------------------------------
+  // 📌 attach
   //----------------------------------------------------------------------------------------------------
 
-  if (arrowStyles) {
-    return {
-      arrowStyles,
-      ...data,
+  let autoUpdateCleanup: (() => void) | undefined
+
+  watch([ReferenceEl, FloatingEl, isFloatingElVisible], ([reference, floating, visible]) => {
+    autoUpdateCleanup?.()
+    autoUpdateCleanup = undefined
+
+    if (!visible || !floating || !reference) return
+    autoUpdateCleanup = autoUpdate(reference, floating, update)
+  })
+
+  tryOnScopeDispose(() => autoUpdateCleanup?.())
+
+  //----------------------------------------------------------------------------------------------------
+
+  watch(isFloatingElVisible, (visible) => {
+    if (!visible) {
+      isPositioned.value = false
     }
-  } else {
-    return {
-      ...data,
-    }
+  })
+
+  return {
+    x: shallowReadonly(x),
+    y: shallowReadonly(y),
+    strategy: shallowReadonly(newStrategy),
+    placement: shallowReadonly(newPlacement),
+    middlewareData: shallowReadonly(middlewareData),
+    isPositioned: shallowReadonly(isPositioned),
+    floatingStyles,
+    update,
   }
+}
+
+//----------------------------------------------------------------------------------------------------
+// 📌 arrow
+//----------------------------------------------------------------------------------------------------
+
+type ArrowOptions = {
+  element: MaybeRefOrGetter<HTMLElement | null>
+  padding?: Padding
+}
+
+/**
+ * Positions an inner element of the floating element such that it is centered to the reference element.
+ * @param options The arrow options.
+ * @see https://floating-ui.com/docs/arrow
+ */
+export function arrowMiddleware(
+  arrowEl: MaybeRefOrGetter<HTMLElement | null>,
+  padding: Padding = 0
+) {
+  return {
+    name: 'arrow',
+    options: {},
+    fn(args: MiddlewareState) {
+      const element = toValue(arrowEl)
+      if (!element) return {}
+
+      return arrow({
+        element,
+        padding,
+      }).fn(args)
+    },
+  }
+}
+
+export function useArrow(
+  middlewareData: MaybeRefOrGetter<MiddlewareData>,
+  placement: MaybeRefOrGetter<Placement>
+) {
+  const _placement = toRef(placement)
+  const _middlewareData = toRef(middlewareData)
+
+  const styles = useComputed<StyleValue>(() => {
+    const x = _middlewareData.value.arrow?.x ?? null
+    const y = _middlewareData.value.arrow?.y ?? null
+
+    const side = _placement.value.split('-')[0]
+    const staticSide =
+      {
+        top: 'bottom',
+        right: 'left',
+        bottom: 'top',
+        left: 'right',
+      }[side] ?? 'bottom'
+
+    // TODO: what's this `-2px` value?
+    return {
+      position: 'absolute',
+      left: x ? `${x}px` : '',
+      top: y ? `${y}px` : '',
+      [staticSide]: `-1px`,
+    }
+  })
+
+  return styles
+}
+
+//----------------------------------------------------------------------------------------------------
+// 📌 utils
+//----------------------------------------------------------------------------------------------------
+
+// DPR = device pixel ratio
+function getDPR(el: HTMLElement) {
+  if (typeof window === 'undefined') {
+    return 1
+  }
+  const win = el.ownerDocument.defaultView || window
+  return win.devicePixelRatio || 1
+}
+
+function roundByDPR(el: HTMLElement, value: number) {
+  const dpr = getDPR(el)
+  return Math.round(value * dpr) / dpr
 }
