@@ -80,9 +80,13 @@ const slots = defineSlots<{
 
 //----------------------------------------------------------------------------------------------------
 
-const role = toRef(() => p.role)
 const DROPDOWN_ID = useID()
 const TRIGGER_ID = useID()
+
+const role = toRef(() => p.role)
+
+const DropdownEl = ref<HTMLElement | null>(null)
+const TriggerEl = ref<HTMLElement | null>(null)
 
 const __isOpen = ref(false)
 const isDropdownOpen = computed<boolean>({
@@ -96,7 +100,6 @@ const isDropdownOpen = computed<boolean>({
 // 📌 Trigger
 //----------------------------------------------------------------------------------------------------
 
-const TriggerEl = ref<HTMLElement | null>(null)
 const INVALID_VNODE_TYPES: VNodeTypes[] = [Fragment, Comment, Text, 'template']
 
 const TriggerVNode = (): VNode => {
@@ -125,11 +128,15 @@ function getElementFromRef(vm: ComponentPublicInstance | Element | null): HTMLEl
   throw new Error(`[vex] <Dropdown> trigger slot received a non Element root child`)
 }
 
-watch([isDropdownOpen, role, TriggerEl], ([visible, role, el]) => {
-  if (!el) return
-  el.setAttribute('aria-haspopup', `${role}`)
-  el.setAttribute('aria-expanded', `${visible}`)
-})
+watch(
+  [isDropdownOpen, role, TriggerEl],
+  ([open, role, el]) => {
+    if (!el) return
+    el.setAttribute('aria-haspopup', `${role}`)
+    el.setAttribute('aria-expanded', `${open}`)
+  },
+  { flush: 'post' }
+)
 
 //----------------------------------------------------------------------------------------------------
 // 📌 open / close
@@ -141,8 +148,6 @@ const { close: closeDropdown, open: openDropdown } = useDelayedOpen({
   defaultOpenDelay: () => p.openDelay,
   defaultCloseDelay: () => p.closeDelay,
 })
-
-const DropdownEl = ref<HTMLElement | null>(null)
 
 useEventListener(TriggerEl, 'keydown', (e: KeyboardEvent) => {
   if (e.shiftKey || e.altKey || e.ctrlKey) return
