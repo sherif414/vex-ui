@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useFloating, useID, useDelayedOpen } from '@/composables'
+import { useFloating, useID, useDelayedOpen, useComputed } from '@/composables'
 import type { Placement, Strategy } from '@floating-ui/vue'
 import { useEventListener } from '@vueuse/core'
 import type { ComponentPublicInstance, VNode, VNodeTypes } from 'vue'
@@ -60,7 +60,12 @@ const p = withDefaults(
      */
     closeDelay?: number
 
+    /**
+     * Specifies the action that opens the dropdown.
+     */
     triggerOn?: 'hover' | 'click'
+
+    triggerEl?: HTMLElement | null
   }>(),
   {
     placement: 'bottom-start',
@@ -70,6 +75,7 @@ const p = withDefaults(
     openDelay: 150,
     closeDelay: 150,
     triggerOn: 'click',
+    triggerEl: null,
   }
 )
 
@@ -86,7 +92,8 @@ const TRIGGER_ID = useID()
 const role = toRef(() => p.role)
 
 const DropdownEl = ref<HTMLElement | null>(null)
-const TriggerEl = ref<HTMLElement | null>(null)
+const TriggerSlotEl = ref<HTMLElement | null>(null)
+const TriggerEl = useComputed(() => (slots.trigger ? TriggerSlotEl.value : p.triggerEl))
 
 const __isOpen = ref(false)
 const isDropdownOpen = computed<boolean>({
@@ -112,9 +119,7 @@ const TriggerVNode = (): VNode => {
   return cloneVNode(
     vNodes[0],
     {
-      ref: (vm) => (TriggerEl.value = getElementFromRef(vm)),
-      id: TRIGGER_ID,
-      'aria-controls': DROPDOWN_ID,
+      ref: (vm) => (TriggerSlotEl.value = getElementFromRef(vm)),
     },
     true
   )
@@ -128,9 +133,18 @@ function getElementFromRef(vm: ComponentPublicInstance | Element | null): HTMLEl
   throw new Error(`[vex] <Dropdown> trigger slot received a non Element root child`)
 }
 
+watch(TriggerEl, (el) => {
+  if (!el) return
+  el.setAttribute('aria-expanded', `${isDropdownOpen.value}`)
+  el.setAttribute('aria-haspopup', `${role.value}`)
+  el.setAttribute('aria-controls', `${DROPDOWN_ID}`)
+  el.setAttribute('id', `${TRIGGER_ID}`)
+})
+
 watch(
-  [isDropdownOpen, role, TriggerEl],
-  ([open, role, el]) => {
+  [isDropdownOpen, role],
+  ([open, role]) => {
+    const el = TriggerEl.value
     if (!el) return
     el.setAttribute('aria-haspopup', `${role}`)
     el.setAttribute('aria-expanded', `${open}`)
@@ -188,10 +202,12 @@ defineExpose({
 </script>
 
 <template>
-  <Component :is="TriggerVNode" />
+  <template v-if="slots.trigger">
+    <Component :is="TriggerVNode" />
+  </template>
 
   <Transition name="vex-fade">
-    <Teleport to="body">
+    <Teleport disabled to="body">
       <div
         ref="DropdownEl"
         v-bind="$attrs"
