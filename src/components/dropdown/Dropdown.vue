@@ -145,7 +145,7 @@ useEventListener(TriggerEl, 'keydown', (e: KeyboardEvent) => {
   if (isOpenKey(e.key)) {
     e.preventDefault()
     isDropdownOpen.value || openDropdown()
-    nextTick(() => DropdownEl.value?.focus({ preventScroll: true }))
+    nextTick(focusFirstChild)
     return
   }
 
@@ -168,8 +168,13 @@ if (p.triggerOn === 'hover') {
 function isOpenKey(key: string) {
   return ['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(key)
 }
+
 function isCloseKey(key: string) {
   return ['Escape'].includes(key)
+}
+
+function focusFirstChild() {
+  ;(DropdownEl.value?.firstElementChild as HTMLElement)?.focus({ preventScroll: true })
 }
 
 //----------------------------------------------------------------------------------------------------
