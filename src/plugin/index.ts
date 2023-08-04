@@ -1,5 +1,5 @@
 import * as components from '../components'
-import * as directives from '../directives'
+// import * as directives from '../directives'
 
 import type { Plugin } from 'vue'
 
