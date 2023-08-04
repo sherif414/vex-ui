@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import { useFloating, useID, useDelayedOpen, useComputed } from '@/composables'
+import { useComputed, useDelayedOpen, useFloating, useID, useInjectRef } from '@/composables'
+import { EXPOSED_EL } from '@/config'
 import type { Placement, Strategy } from '@floating-ui/vue'
 import { useEventListener } from '@vueuse/core'
-import type { ComponentPublicInstance, VNode, VNodeTypes } from 'vue'
-import { cloneVNode, Comment, computed, Fragment, nextTick, ref, Text, toRef, watch } from 'vue'
+import type { VNode } from 'vue'
+import { computed, nextTick, ref, toRef, watch } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -88,15 +89,12 @@ const slots = defineSlots<{
 
 const DROPDOWN_ID = useID()
 const TRIGGER_ID = useID()
-
 const role = toRef(() => p.role)
 
 const DropdownEl = ref<HTMLElement | null>(null)
-const TriggerSlotEl = ref<HTMLElement | null>(null)
-const TriggerEl = useComputed(() => (slots.trigger ? TriggerSlotEl.value : p.triggerEl))
 
 const __isOpen = ref(false)
-const isDropdownOpen = computed<boolean>({
+const isDropdownOpen = useComputed({
   get: () => __isOpen.value && !p.disabled,
   set: (val) => {
     if (val !== __isOpen.value) __isOpen.value = val
@@ -107,31 +105,9 @@ const isDropdownOpen = computed<boolean>({
 // 📌 Trigger
 //----------------------------------------------------------------------------------------------------
 
-const INVALID_VNODE_TYPES: VNodeTypes[] = [Fragment, Comment, Text, 'template']
-
-const TriggerVNode = (): VNode => {
-  const vNodes = slots.trigger?.({})
-  if (!vNodes || vNodes?.length !== 1 || INVALID_VNODE_TYPES.includes(vNodes[0].type)) {
-    throw new Error(
-      '[vex] <Dropdown> trigger slot requires exactly a single root child at all times'
-    )
-  }
-  return cloneVNode(
-    vNodes[0],
-    {
-      ref: (vm) => (TriggerSlotEl.value = getElementFromRef(vm)),
-    },
-    true
-  )
-}
-
-function getElementFromRef(vm: ComponentPublicInstance | Element | null): HTMLElement | null {
-  if (vm == null) return null
-  if (vm instanceof Element) return vm as HTMLElement
-  if (vm.$el instanceof Element) return vm.$el as HTMLElement
-
-  throw new Error(`[vex] <Dropdown> trigger slot received a non Element root child`)
-}
+const TriggerSlotEl = ref<HTMLElement | null>(null)
+const TriggerEl = useComputed(() => (slots.trigger ? TriggerSlotEl.value : p.triggerEl))
+const TriggerComponent = useInjectRef(TriggerSlotEl, () => slots.trigger?.({}), 'Dropdown')
 
 watch(TriggerEl, (el) => {
   if (!el) return
@@ -166,16 +142,18 @@ const { close: closeDropdown, open: openDropdown } = useDelayedOpen({
 useEventListener(TriggerEl, 'keydown', (e: KeyboardEvent) => {
   if (e.shiftKey || e.altKey || e.ctrlKey) return
 
-  if ((e.key === 'ArrowDown' || e.key === 'ArrowUp', e.key === 'Enter' || e.key === ' ')) {
+  if (isOpenKey(e.key)) {
     e.preventDefault()
     isDropdownOpen.value || openDropdown()
     nextTick(() => DropdownEl.value?.focus({ preventScroll: true }))
+    return
   }
 
-  if (e.key === 'Escape') {
+  if (isCloseKey(e.key)) {
     e.preventDefault()
     isDropdownOpen.value && closeDropdown()
     nextTick(() => TriggerEl.value?.focus({ preventScroll: true }))
+    return
   }
 })
 
@@ -185,6 +163,13 @@ if (p.triggerOn === 'hover') {
 
   useEventListener(DropdownEl, 'pointerenter', () => openDropdown())
   useEventListener(DropdownEl, 'pointerleave', () => closeDropdown())
+}
+
+function isOpenKey(key: string) {
+  return ['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(key)
+}
+function isCloseKey(key: string) {
+  return ['Escape'].includes(key)
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -198,29 +183,26 @@ const { floatingStyles } = useFloating(TriggerEl, DropdownEl, isDropdownOpen, {
 defineExpose({
   isDropdownOpen,
   DropdownEl,
+  [EXPOSED_EL]: TriggerEl,
 })
 </script>
 
 <template>
-  <template v-if="slots.trigger">
-    <Component :is="TriggerVNode" />
-  </template>
+  <Component v-if="slots.trigger" :is="TriggerComponent" />
 
   <Transition name="vex-fade">
-    <Teleport disabled to="body">
-      <div
-        ref="DropdownEl"
-        v-bind="$attrs"
-        v-show.lazy="isDropdownOpen"
-        tabindex="-1"
-        class="vex-dropdown"
-        :id="DROPDOWN_ID"
-        :aria-labelledby="TRIGGER_ID"
-        :role="role"
-        :style="floatingStyles"
-      >
-        <slot />
-      </div>
-    </Teleport>
+    <div
+      ref="DropdownEl"
+      v-bind="$attrs"
+      v-show.lazy="isDropdownOpen"
+      tabindex="-1"
+      class="vex-dropdown"
+      :id="DROPDOWN_ID"
+      :aria-labelledby="TRIGGER_ID"
+      :role="role"
+      :style="floatingStyles"
+    >
+      <slot />
+    </div>
   </Transition>
 </template>
