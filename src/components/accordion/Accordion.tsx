@@ -62,9 +62,7 @@ const AccordionImpl = (p: AccordionProps, { slots }: SetupContext) => {
     </div>
   )
 }
-/**
- * demo title
- */
+
 export const Accordion = defineComponent({ setup: AccordionImpl, props: AccordionProps })
 export type Accordion = InstanceType<typeof Accordion>
 
