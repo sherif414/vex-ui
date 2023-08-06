@@ -207,7 +207,8 @@ type ArrowOptions = {
 
 /**
  * Positions an inner element of the floating element such that it is centered to the reference element.
- * @param options The arrow options.
+ * @param arrowEl The arrow.
+ * @param padding The padding.
  * @see https://floating-ui.com/docs/arrow
  */
 export function arrowMiddleware(
