@@ -1,23 +1,16 @@
-import type { MaybeSetter } from '@/types'
-import { shallowRef, triggerRef } from 'vue'
+import type { Signal } from '@/types'
+import { shallowRef } from 'vue'
+import { isFunction } from './helpers'
 
-interface UseSignalOptions {
-  equals: boolean
-}
-
-export function useSignal<T>(value: T, options?: UseSignalOptions) {
+export function useSignal<T>(value: T): Signal<T> {
   const r = shallowRef(value)
 
-  const get = (): T => r.value
-  const set = (v: MaybeSetter<T>) => {
-    if (v instanceof Function) {
-      r.value = v(r.value)
-    } else {
-      r.value = v
-    }
-
-    if (options?.equals === false) triggerRef(r)
-  }
-
-  return [get, set] as const
+  return [
+    function get() {
+      return r.value
+    },
+    function set(v) {
+      r.value = isFunction(v) ? v(r.value) : v
+    },
+  ]
 }

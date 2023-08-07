@@ -5,8 +5,8 @@ import { toValue } from 'vue'
 interface UseDelayedOpenArgs {
   open(): void
   close(): void
-  defaultOpenDelay?: MaybeRefOrGetter<number>
-  defaultCloseDelay?: MaybeRefOrGetter<number>
+  defaultOpenDelay?: MaybeRefOrGetter<number | undefined>
+  defaultCloseDelay?: MaybeRefOrGetter<number | undefined>
 }
 
 export function useDelayedOpen(args: UseDelayedOpenArgs) {

@@ -1,15 +1,14 @@
-import { EXPOSED_EL } from '@/config'
-import { Fragment, Comment, Text, cloneVNode } from 'vue'
+import type { ComponentPublicInstance, VNode, VNodeTypes } from 'vue'
+import { Comment, Fragment, Text, cloneVNode } from 'vue'
 
-import type { FunctionalComponent, ComponentPublicInstance, VNodeTypes, Ref, VNode } from 'vue'
 const INVALID_VNODE_TYPES: VNodeTypes[] = [Fragment, Comment, Text, 'template']
 
 export function useInjectRef(
-  templateRef: Ref<HTMLElement | null>,
+  setTemplateRef: (vm: HTMLElement | ComponentPublicInstance | null) => void,
   slot: () => VNode[] | undefined,
   component: string
-): FunctionalComponent {
-  const vnode = (): VNode => {
+) {
+  const Trigger = () => {
     const vNodes = slot()
     if (!vNodes || vNodes.length !== 1 || INVALID_VNODE_TYPES.includes(vNodes[0].type)) {
       throw new Error(`[vex] <${component}> requires exactly a single root child at all times`)
@@ -17,25 +16,15 @@ export function useInjectRef(
     return cloneVNode(
       vNodes[0],
       {
-        ref: (vm) => (templateRef.value = getElementFromRef(vm, component)),
+        ref: setTemplateRef,
       },
       true
     )
   }
 
-  return vnode
-}
-
-function getElementFromRef(
-  vm: ComponentPublicInstance | Element | null,
-  component: string
-): HTMLElement | null {
-  if (vm == null) return null
-  if (vm instanceof Element) return vm as HTMLElement
-  if (EXPOSED_EL in vm && vm[EXPOSED_EL] instanceof Element) return vm[EXPOSED_EL] as HTMLElement
-  if (vm.$el instanceof Element) return vm.$el as HTMLElement
-
-  throw new Error(`[vex] <${component}> received a non Element root child`)
+  Trigger.inheritAttrs = true
+  Trigger.props = [] as any
+  return Trigger
 }
 
 // function getValidVNode(vnode: VNode | null){
