@@ -59,7 +59,7 @@ function onError() {
 </script>
 
 <template>
-  <div :class="p.class" :style="p.style">
+  <div :class="[p.class, 'vex-avatar --size-sm --rounded-full']" :style="p.style">
     <slot v-if="loadStatus !== 'loaded'" :load-status="loadStatus" />
 
     <img v-else v-bind="$attrs" :src="p.src" />
