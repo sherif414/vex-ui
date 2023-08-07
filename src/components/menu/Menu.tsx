@@ -117,7 +117,7 @@ const MenuTrigger = defineComponent<MenuTriggerProps>(
     useClickOpen(TriggerEl, ContentEl, [isMenuOpen, setIsMenuOpen])
 
     return () =>
-      p.asChild ? (
+      p.asChild || isSubMenu ? (
         cloneVNode(
           slots.default!()[0],
           {
