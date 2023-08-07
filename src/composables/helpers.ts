@@ -40,7 +40,7 @@ export function getElementFromRef(
   if (EXPOSED_EL in vm && vm[EXPOSED_EL] instanceof Element) return vm[EXPOSED_EL] as HTMLElement
   if (vm.$el instanceof Element) return vm.$el as HTMLElement
 
-  throw new Error(`[vex] <${component}> received a non Element root child`)
+  throw new Error(`[vex] <${component}> has a non Element root child`)
 }
 
 //----------------------------------------------------------------------------------------------------
