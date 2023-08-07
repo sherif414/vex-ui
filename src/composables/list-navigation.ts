@@ -4,7 +4,7 @@
  * @param  childrenSelector - css selector for the list's elements.
  * @param  loop - Whether to loop back to the other side of the list when reaching an end.
  */
-export function useListNavigation(childrenSelector: string, loop: boolean = false) {
+export function useListNavigation(childrenSelector: string, loop: boolean = true) {
   /**
    * must be bound to a keydown event on the parent element
    * and the parent must not be focusable by `tab`.
