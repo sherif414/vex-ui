@@ -2,7 +2,7 @@
 import { useComputed, useDelayedOpen, useFloating, useID, useInjectRef } from '@/composables'
 import { EXPOSED_EL } from '@/config'
 import type { Placement, Strategy } from '@floating-ui/vue'
-import { useEventListener } from '@vueuse/core'
+import { onClickOutside, useEventListener } from '@vueuse/core'
 import type { VNode } from 'vue'
 import { computed, nextTick, ref, toRef, watch } from 'vue'
 
@@ -66,7 +66,16 @@ const p = withDefaults(
      */
     triggerOn?: 'hover' | 'click'
 
+    /**
+     * the element to position the dropdown relative to
+     */
     triggerEl?: HTMLElement | null
+
+    triggerId?: string
+
+    dropdownId?: string
+
+    teleport?: boolean
   }>(),
   {
     placement: 'bottom-start',
@@ -85,10 +94,14 @@ const slots = defineSlots<{
   trigger?: (props: {}) => VNode[]
 }>()
 
+const emit = defineEmits<{
+  open: [e: Event]
+}>()
+
 //----------------------------------------------------------------------------------------------------
 
-const DROPDOWN_ID = useID()
-const TRIGGER_ID = useID()
+const DROPDOWN_ID = p.dropdownId || useID()
+const TRIGGER_ID = p.triggerId || useID()
 const role = toRef(() => p.role)
 
 const DropdownEl = ref<HTMLElement | null>(null)
@@ -145,7 +158,8 @@ useEventListener(TriggerEl, 'keydown', (e: KeyboardEvent) => {
   if (isOpenKey(e.key)) {
     e.preventDefault()
     isDropdownOpen.value || openDropdown()
-    nextTick(focusFirstChild)
+    emit('open', e)
+    e.stopImmediatePropagation()
     return
   }
 
@@ -165,16 +179,17 @@ if (p.triggerOn === 'hover') {
   useEventListener(DropdownEl, 'pointerleave', () => closeDropdown())
 }
 
+if (p.triggerOn === 'click') {
+  useEventListener(TriggerEl, 'pointerdown', () => openDropdown())
+  onClickOutside(DropdownEl, () => closeDropdown(), { ignore: [TriggerEl] })
+}
+
 function isOpenKey(key: string) {
   return ['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(key)
 }
 
 function isCloseKey(key: string) {
   return ['Escape'].includes(key)
-}
-
-function focusFirstChild() {
-  ;(DropdownEl.value?.firstElementChild as HTMLElement)?.focus({ preventScroll: true })
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -188,6 +203,7 @@ const { floatingStyles } = useFloating(TriggerEl, DropdownEl, isDropdownOpen, {
 defineExpose({
   isDropdownOpen,
   DropdownEl,
+  TriggerEl,
   [EXPOSED_EL]: TriggerEl,
 })
 </script>
@@ -195,19 +211,21 @@ defineExpose({
 <template>
   <Component v-if="slots.trigger" :is="TriggerComponent" />
 
-  <Transition name="vex-fade">
-    <div
-      ref="DropdownEl"
-      v-bind="$attrs"
-      v-show.lazy="isDropdownOpen"
-      tabindex="-1"
-      class="vex-dropdown"
-      :id="DROPDOWN_ID"
-      :aria-labelledby="TRIGGER_ID"
-      :role="role"
-      :style="floatingStyles"
-    >
-      <slot />
-    </div>
-  </Transition>
+  <Teleport to="body" :disabled="!p.teleport">
+    <Transition name="vex-fade">
+      <div
+        ref="DropdownEl"
+        v-bind="$attrs"
+        v-show.lazy="isDropdownOpen"
+        tabindex="-1"
+        class="vex-dropdown"
+        :id="DROPDOWN_ID"
+        :aria-labelledby="TRIGGER_ID"
+        :role="role"
+        :style="floatingStyles"
+      >
+        <slot />
+      </div>
+    </Transition>
+  </Teleport>
 </template>
