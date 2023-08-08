@@ -1,9 +1,9 @@
-import type { Get, ComputedGet, Signal } from '@/types'
+import type { Getter, ComputedGet, Signal, Setter } from '@/types'
 import { watch } from 'vue'
 
 interface UseSelectOptions {
-  multiSelect?: Get<boolean>
-  deSelectOnReSelect?: Get<boolean>
+  multiSelect?: Getter<boolean>
+  deSelectOnReSelect?: Getter<boolean>
 }
 
 /**
@@ -12,7 +12,7 @@ interface UseSelectOptions {
 export const useSelect = <T>(
   signal: Signal<T | T[] | undefined>,
   options: UseSelectOptions = {}
-): [ComputedGet<T | T[] | undefined>, (value: T) => void] => {
+): [ComputedGet<T | T[] | undefined>, Setter<T>] => {
   const [_getter, _setter] = signal
 
   const setter = (value: T) => {
