@@ -1,4 +1,4 @@
-import type { MaybeRefOrGetter, RefOrGetter, Getter } from '@/types'
+import type { MaybeRefOrGetter, RefOrGetter, ComputedGet } from '@/types'
 import { toRef, toValue, watch } from 'vue'
 
 interface UseDropdownOptions {
@@ -6,15 +6,15 @@ interface UseDropdownOptions {
   dropdownId?: string
   triggerId?: string
   ariaExpanded?: MaybeRefOrGetter<boolean>
-  ariaActiveDescendant: Getter<string>
+  ariaActiveDescendant: ComputedGet<string>
 }
 
 /**
  * handles setting aria attributes
  */
 export function useDropdownAria(
-  trigger: Getter<HTMLElement | null>,
-  dropdown: Getter<HTMLElement | null>,
+  trigger: ComputedGet<HTMLElement | null>,
+  dropdown: ComputedGet<HTMLElement | null>,
   options: UseDropdownOptions
 ) {
   //----------------------------------------------------------------------------------------------------

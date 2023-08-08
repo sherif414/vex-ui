@@ -1,9 +1,9 @@
 import type { ComponentPublicInstance } from 'vue'
 import { useSignal } from '.'
 import { getElementFromRef } from './helpers'
-import type { Getter } from '@/types'
+import type { ComputedGet } from '@/types'
 
-export type getTemplateRef = Getter<HTMLElement | null>
+export type getTemplateRef = ComputedGet<HTMLElement | null>
 export type setTemplateRef = (vm: HTMLElement | ComponentPublicInstance | null) => void
 export type TemplateRef = [getTemplateRef, setTemplateRef]
 

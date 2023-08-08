@@ -11,7 +11,7 @@ import {
   useVModel,
 } from '@/composables'
 import type { TemplateRef } from '@/composables/template-ref'
-import type { Getter, Setter, Signal } from '@/types'
+import type { ComputedGet, ComputedSet, Signal } from '@/types'
 import type { Placement } from '@floating-ui/vue'
 import { useEventListener } from '@vueuse/core'
 import type { ExtractPropTypes, InjectionKey, PropType, SetupContext, Prop } from 'vue'
@@ -39,7 +39,7 @@ type Selected = Value | Value[] | undefined
 
 const MENU_CTX = Symbol() as InjectionKey<{
   highlighted: Signal<number>
-  selected: [Getter<Selected>, (v: Value) => void]
+  selected: [ComputedGet<Selected>, (v: Value) => void]
   TriggerEl: TemplateRef
   ContentEl: TemplateRef
   isMenuOpen: Signal<boolean>
@@ -194,9 +194,9 @@ export type MenuTrigger = InstanceType<typeof MenuTrigger>
 
 const MENU_CONTENT_CTX = Symbol() as InjectionKey<{
   highlighted: Signal<number>
-  selected: [Getter<Selected>, (v: Value) => void]
+  selected: [ComputedGet<Selected>, (v: Value) => void]
   items: Set<HTMLElement>
-  isMenuOpen: Getter<boolean>
+  isMenuOpen: ComputedGet<boolean>
   CONTENT_ID: string
 }>
 
@@ -391,7 +391,7 @@ export type MenuItem = InstanceType<typeof MenuItem>
 //----------------------------------------------------------------------------------------------------
 
 function useListHighlight(
-  list: Getter<HTMLElement | null>,
+  list: ComputedGet<HTMLElement | null>,
   highlight: Signal<number>,
   items: Set<HTMLElement>
 ): void {
@@ -432,8 +432,8 @@ function useListHighlight(
 }
 
 function useClickOpen(
-  reference: Getter<HTMLElement | null>,
-  floating: Getter<HTMLElement | null>,
+  reference: ComputedGet<HTMLElement | null>,
+  floating: ComputedGet<HTMLElement | null>,
   open: Signal<boolean>
 ) {
   const [isOpen, setIsOpen] = open
@@ -448,9 +448,9 @@ function useClickOpen(
 }
 
 function useKeydownOpen(
-  reference: Getter<HTMLElement | null>,
-  floating: Getter<HTMLElement | null>,
-  setIsOpen: Setter<boolean>
+  reference: ComputedGet<HTMLElement | null>,
+  floating: ComputedGet<HTMLElement | null>,
+  setIsOpen: ComputedSet<boolean>
 ) {
   useEventListener(reference, 'keydown', (e: KeyboardEvent) => {
     if (['ArrowUp', 'ArrowDown', ' ', 'Enter'].includes(e.key)) {
@@ -474,9 +474,9 @@ function useKeydownOpen(
 }
 
 function useHoverOpen(
-  reference: Getter<HTMLElement | null>,
-  floating: Getter<HTMLElement | null>,
-  setIsMenuOpen: Setter<boolean>
+  reference: ComputedGet<HTMLElement | null>,
+  floating: ComputedGet<HTMLElement | null>,
+  setIsMenuOpen: ComputedSet<boolean>
 ) {
   const { close, open } = useDelayedOpen({
     open: () => setIsMenuOpen(true),
