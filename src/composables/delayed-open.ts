@@ -1,46 +1,43 @@
-import type { MaybeRefOrGetter } from '@/types'
+import type { Fn, Getter } from '@/types'
 import { tryOnScopeDispose } from '@vueuse/core'
-import { toValue } from 'vue'
 
-interface UseDelayedOpenArgs {
-  open(): void
-  close(): void
-  defaultOpenDelay?: MaybeRefOrGetter<number | undefined>
-  defaultCloseDelay?: MaybeRefOrGetter<number | undefined>
+interface UseDelayedOpenOptions {
+  defaultShowDelay?: Getter<number | undefined>
+  defaultHideDelay?: Getter<number | undefined>
 }
 
-export function useDelayedOpen(args: UseDelayedOpenArgs) {
-  let openTimeoutID: ReturnType<typeof setTimeout> = -1
-  let closeTimeoutID: ReturnType<typeof setTimeout> = -1
+export function useDelayedOpen(show: Fn, hide: Fn, options: UseDelayedOpenOptions) {
+  let showTimeoutID: ReturnType<typeof setTimeout> = -1
+  let hideTimeoutID: ReturnType<typeof setTimeout> = -1
 
-  const open = (delay?: number) => {
-    const _delay = delay ?? toValue(args.defaultOpenDelay) ?? 0
+  const _show = (delay?: number) => {
     clearTimeouts()
+    const _delay = delay ?? options.defaultShowDelay?.() ?? 0
 
     if (_delay === 0) {
-      args.open()
+      show()
     } else {
-      openTimeoutID = window.setTimeout(args.open, _delay)
+      showTimeoutID = setTimeout(show, _delay)
     }
   }
 
-  const close = (delay?: number) => {
-    const _delay = delay ?? toValue(args.defaultCloseDelay) ?? 0
+  const _hide = (delay?: number) => {
     clearTimeouts()
+    const _delay = delay ?? options.defaultHideDelay?.() ?? 0
 
     if (_delay === 0) {
-      args.close()
+      hide()
     } else {
-      closeTimeoutID = window.setTimeout(args.close, _delay)
+      hideTimeoutID = setTimeout(hide, _delay)
     }
   }
 
   const clearTimeouts = () => {
-    window.clearTimeout(openTimeoutID)
-    window.clearTimeout(closeTimeoutID)
+    clearTimeout(showTimeoutID)
+    clearTimeout(hideTimeoutID)
   }
 
   tryOnScopeDispose(clearTimeouts)
 
-  return { open, close }
+  return { show: _show, hide: _hide }
 }
