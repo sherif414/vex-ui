@@ -1,42 +1,42 @@
 import type { Getter, Signal } from '@/types'
 import { watch } from 'vue'
 
+interface UseSelectOptions {
+  multiSelect: Getter<boolean>
+  deSelectOnReSelect?: Getter<boolean>
+}
+
 /**
- * handles selection for a list of items.
- *
- * @param selected a ref that holds the selected items.
- * @param multiSelect whether to allow multi-select.
- * @param options options object.
+ * handles multi and single select for a list of items.
  */
 export const useSelect = <T>(
   signal: Signal<T | T[] | undefined>,
-  multiSelect: Getter<boolean>,
-  DeSelectOnReSelect?: Getter<boolean>
-): [Getter<T | T[] | undefined>, (v: T) => void] => {
+  options: UseSelectOptions
+): [Getter<T | T[] | undefined>, (value: T) => void] => {
   const [_getter, _setter] = signal
 
-  const setter = (newVal: T) => {
+  const setter = (value: T) => {
     const prev = _getter()
 
     // multi-select
     if (Array.isArray(prev)) {
-      _setter(prev.includes(newVal) ? prev.filter((v) => v !== newVal) : [...prev, newVal])
+      _setter(prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value])
       return
     }
 
     // single-select
-    if (prev !== newVal) {
-      _setter(newVal)
+    if (prev !== value) {
+      _setter(value)
       return
     }
 
     // deselect
-    if (DeSelectOnReSelect?.()) {
+    if (options.deSelectOnReSelect?.()) {
       _setter(undefined)
     }
   }
 
-  watch(multiSelect, (val) => {
+  watch(options.multiSelect, (val) => {
     _setter(val ? [] : undefined)
   })
 

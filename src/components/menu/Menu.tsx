@@ -73,8 +73,10 @@ const MenuImpl = (p: MenuProps, { slots, emit }: SetupContext<MenuEmits>) => {
 
   const [selected, setSelected] = useSelect(
     useVModel(() => p.modelValue),
-    () => p.multiple,
-    () => p.deselectOnReselect
+    {
+      multiSelect: () => p.multiple,
+      deSelectOnReSelect: () => p.deselectOnReselect,
+    }
   )
 
   const items = shallowReactive(new Set<HTMLElement>())
