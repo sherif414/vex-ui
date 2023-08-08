@@ -145,6 +145,7 @@ const MenuTrigger = defineComponent({
   name: 'MenuTrigger',
   inheritAttrs: false,
 })
+export type MenuTrigger = InstanceType<typeof MenuTrigger>
 
 //----------------------------------------------------------------------------------------------------
 // 📌 Menu Content
