@@ -11,7 +11,7 @@ import {
   useVModel,
 } from '@/composables'
 import type { TemplateRef } from '@/composables/template-ref'
-import type { ComputedGet, ComputedSet, Signal } from '@/types'
+import type { ComputedGet, ComputedSet, Fn, Setter, Signal } from '@/types'
 import type { Placement } from '@floating-ui/vue'
 import { useEventListener } from '@vueuse/core'
 import type { ExtractPropTypes, InjectionKey, PropType, SetupContext, Prop } from 'vue'
@@ -39,14 +39,14 @@ type Selected = Value | Value[] | undefined
 
 const MENU_CTX = Symbol() as InjectionKey<{
   highlighted: Signal<number>
-  selected: [ComputedGet<Selected>, (v: Value) => void]
+  selected: [ComputedGet<Selected>, Setter<Value>]
   TriggerEl: TemplateRef
   ContentEl: TemplateRef
   isMenuOpen: Signal<boolean>
   items: Set<HTMLElement>
   CONTENT_ID: string
-  focusParentContent: () => void
-  highlightOwnTrigger: () => void
+  focusParentContent: Fn
+  highlightOwnTrigger: Fn
   isSubMenu: boolean
 }>
 const useMenuCtx = (component: string) => useContext(MENU_CTX, 'Menu', component)
@@ -74,8 +74,8 @@ const MenuImpl = (p: MenuProps, { slots, emit }: SetupContext<MenuEmits>) => {
   const [selected, setSelected] = useSelect(
     useVModel(() => p.modelValue),
     {
-      multiSelect: () => p.multiple,
-      deSelectOnReSelect: () => p.deselectOnReselect,
+      multiselect: () => p.multiple,
+      deselection: () => p.deselectOnReselect,
     }
   )
 
@@ -194,7 +194,7 @@ export type MenuTrigger = InstanceType<typeof MenuTrigger>
 
 const MENU_CONTENT_CTX = Symbol() as InjectionKey<{
   highlighted: Signal<number>
-  selected: [ComputedGet<Selected>, (v: Value) => void]
+  selected: [ComputedGet<Selected>, Setter<Value>]
   items: Set<HTMLElement>
   isMenuOpen: ComputedGet<boolean>
   CONTENT_ID: string

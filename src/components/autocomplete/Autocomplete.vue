@@ -148,7 +148,7 @@ useEventListener(TriggerEl, 'keydown', (e: KeyboardEvent) => {
 // 📌 highlighting
 //----------------------------------------------------------------------------------------------------
 
-let highlighted = ref(-1)
+const highlighted = ref(-1)
 
 function setHighlighted(index: number): void {
   const itemsLength = ListboxItemsElements.value.length
@@ -242,7 +242,7 @@ watch(FormEl, (form, _, onCleanup) => {
 
 //----------------------------------------------------------------------------------------------------
 
-const { floatingStyles: listboxStyles } = useFloating(isListboxVisible, TriggerEl, ListboxEl, {
+const { floatingStyles: listboxStyles } = useFloating(TriggerEl, ListboxEl, isListboxVisible, {
   placement: 'bottom-start',
   toggleAction: 'click',
   offset: 4,
