@@ -49,7 +49,10 @@ const MENU_CTX = Symbol() as InjectionKey<{
   highlightOwnTrigger: Fn
   isSubMenu: boolean
 }>
-const useMenuCtx = (component: string) => useContext(MENU_CTX, 'Menu', component)
+
+function useMenuCtx(component: string) {
+  return useContext(MENU_CTX, 'Menu', component)
+}
 
 const MenuProps = {
   modelValue: [String, Array] as PropType<Selected>,
@@ -129,9 +132,7 @@ function useMenuTriggerCtx() {
   return inject(MENU_TRIGGER_CTX, null)
 }
 
-const MenuTriggerProps = {
-  asChild: Boolean,
-}
+const MenuTriggerProps = { asChild: Boolean }
 type MenuTriggerProps = ExtractPropTypes<typeof MenuTriggerProps>
 
 //----------------------------------------------------------------------------------------------------
