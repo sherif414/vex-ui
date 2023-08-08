@@ -1,4 +1,4 @@
-import { useID, useListNavigation, useListSelection } from '@/composables'
+import { useContext, useID, useListNavigation, useListSelection } from '@/composables'
 import { IAdd } from 'iconsax-vue/linear'
 import { TransitionExpand } from '@/transitions'
 import {
@@ -8,7 +8,7 @@ import {
   type Ref,
   type SetupContext,
 } from 'vue'
-import { computed, defineComponent, inject, provide, ref } from 'vue'
+import { computed, defineComponent, provide, ref } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 Accordion
@@ -37,6 +37,8 @@ const ACCORDION_CTX = Symbol() as InjectionKey<{
   expandedItems: Ref<ExpandedItems>
   getIndex: () => string
 }>
+
+const useAccordionCtx = (component: string) => useContext(ACCORDION_CTX, 'Accordion', component)
 
 //----------------------------------------------------------------------------------------------------
 
@@ -86,14 +88,13 @@ const ACCORDION_ITEM_CTX = Symbol() as InjectionKey<{
   index: string
 }>
 
+const useAccordionItemCtx = (component: string) =>
+  useContext(ACCORDION_ITEM_CTX, 'AccordionItem', component)
+
 //----------------------------------------------------------------------------------------------------
 
 const AccordionItemImpl = (p: AccordionItemProps, { slots }: SetupContext) => {
-  const ctx = inject(ACCORDION_CTX, null)
-  if (!ctx) {
-    throw new Error('[vex] <AccordionItem> is missing an <Accordion> parent component.')
-  }
-  const { expandedItems, getIndex, setExpanded } = ctx
+  const { expandedItems, getIndex, setExpanded } = useAccordionCtx('AccordionItem')
 
   const index = getIndex()
   const isExpanded = computed<boolean>(() => {
@@ -137,11 +138,8 @@ type AccordionTriggerProps = ExtractPropTypes<typeof AccordionTriggerProps>
 //----------------------------------------------------------------------------------------------------
 
 const AccordionTriggerImpl = (p: AccordionTriggerProps, { slots }: SetupContext) => {
-  const ctx = inject(ACCORDION_ITEM_CTX, null)
-  if (!ctx) {
-    throw new Error('[vex] <AccordionTrigger> is missing an <AccordionItem> parent component.')
-  }
-  const { setExpanded, contentID, isExpanded, triggerID, index } = ctx
+  const { setExpanded, contentID, isExpanded, triggerID, index } =
+    useAccordionItemCtx('AccordionTrigger')
 
   return () => (
     <h3 class="vex-accordion-item-trigger">
@@ -170,12 +168,13 @@ export type AccordionTrigger = InstanceType<typeof AccordionTrigger>
 // 📌 Accordion Content
 //----------------------------------------------------------------------------------------------------
 
-function AccordionContentImpl(_: {}, { slots }: SetupContext) {
-  const ctx = inject(ACCORDION_ITEM_CTX, null)
-  if (!ctx) {
-    throw new Error('[vex] <AccordionContent> is missing an <AccordionItem> parent component.')
-  }
-  const { contentID, isExpanded, triggerID } = ctx
+const AccordionContentProps = {}
+type AccordionContentProps = ExtractPropTypes<typeof AccordionContentProps>
+
+//----------------------------------------------------------------------------------------------------
+
+function AccordionContentImpl(_: AccordionContentProps, { slots }: SetupContext) {
+  const { contentID, isExpanded, triggerID } = useAccordionItemCtx('AccordionContent')
 
   return () => (
     <TransitionExpand>
@@ -193,5 +192,8 @@ function AccordionContentImpl(_: {}, { slots }: SetupContext) {
   )
 }
 
-export const AccordionContent = defineComponent({ setup: AccordionContentImpl })
+export const AccordionContent = defineComponent({
+  setup: AccordionContentImpl,
+  props: AccordionContentProps,
+})
 export type AccordionContent = InstanceType<typeof AccordionContent>
