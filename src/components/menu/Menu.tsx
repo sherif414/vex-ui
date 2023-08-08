@@ -9,6 +9,7 @@ import {
   useSignal,
   useTemplateRef,
   useVModel,
+  useSelect,
 } from '@/composables'
 import type { TemplateRef } from '@/composables/template-ref'
 import type { ComputedGet, ComputedSet, Fn, Setter, Signal } from '@/types'
@@ -28,7 +29,6 @@ import {
   watch,
 } from 'vue'
 import { ChevronRightIcon, CheckIcon } from '@heroicons/vue/20/solid'
-import { useSelect } from '@/composables/select'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 Menu
