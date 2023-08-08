@@ -8,12 +8,13 @@ import {
   useID,
   useSignal,
   useTemplateRef,
+  useVModel,
 } from '@/composables'
 import type { TemplateRef } from '@/composables/template-ref'
 import type { Getter, Setter, Signal } from '@/types'
 import type { Placement } from '@floating-ui/vue'
 import { useEventListener } from '@vueuse/core'
-import type { ExtractPropTypes, InjectionKey, PropType, SetupContext } from 'vue'
+import type { ExtractPropTypes, InjectionKey, PropType, SetupContext, Prop } from 'vue'
 import {
   Teleport,
   Transition,
@@ -27,13 +28,18 @@ import {
   watch,
 } from 'vue'
 import { ChevronRightIcon, CheckIcon } from '@heroicons/vue/20/solid'
+import { useSelect } from '@/composables/select'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 Menu
 //----------------------------------------------------------------------------------------------------
 
+type Value = string
+type Selected = Value | Value[] | undefined
+
 const MENU_CTX = Symbol() as InjectionKey<{
   highlighted: Signal<number>
+  selected: [Getter<Selected>, (v: Value) => void]
   TriggerEl: TemplateRef
   ContentEl: TemplateRef
   isMenuOpen: Signal<boolean>
@@ -45,18 +51,31 @@ const MENU_CTX = Symbol() as InjectionKey<{
 }>
 const useMenuCtx = (component: string) => useContext(MENU_CTX, 'Menu', component)
 
-const MenuProps = {}
+const MenuProps = {
+  modelValue: [String, Array] as PropType<Selected>,
+  multiple: Boolean,
+  deselectOnReselect: Boolean,
+}
 type MenuProps = ExtractPropTypes<typeof MenuProps>
+type MenuEmits = ['update:modelValue']
 
 //----------------------------------------------------------------------------------------------------
 
-const MenuImpl = (p: MenuProps, { slots }: SetupContext) => {
+const MenuImpl = (p: MenuProps, { slots, emit }: SetupContext<MenuEmits>) => {
   const TRIGGER_ID = useID()
   const CONTENT_ID = useID()
+
   const [TriggerEl, setTriggerEl] = useTemplateRef('MenuTrigger')
   const [ContentEl, setContentEl] = useTemplateRef('MenuContent')
+
   const [isMenuOpen, setIsMenuOpen] = useSignal(false)
   const [highlighted, setHighlighted] = useSignal(-1)
+
+  const [selected, setSelected] = useSelect(
+    useVModel(() => p.modelValue),
+    () => p.multiple,
+    () => p.deselectOnReselect
+  )
 
   const items = shallowReactive(new Set<HTMLElement>())
 
@@ -73,6 +92,7 @@ const MenuImpl = (p: MenuProps, { slots }: SetupContext) => {
 
   provide(MENU_CTX, {
     highlighted: [highlighted, setHighlighted],
+    selected: [selected, setSelected],
     isMenuOpen: [isMenuOpen, setIsMenuOpen],
     TriggerEl: [TriggerEl, setTriggerEl],
     ContentEl: [ContentEl, setContentEl],
@@ -88,7 +108,8 @@ const MenuImpl = (p: MenuProps, { slots }: SetupContext) => {
 
 const Menu = defineComponent({
   setup: MenuImpl,
-  // props: MenuProps,
+  props: MenuProps,
+  emits: ['update:modelValue'],
   name: 'Menu',
   inheritAttrs: false,
 })
@@ -121,6 +142,11 @@ const MenuTriggerImpl = (p: MenuTriggerProps, { slots, attrs }: SetupContext) =>
     isSubMenu,
   } = useMenuCtx('MenuTrigger')
 
+  /*
+   for now: 
+   top level menus does not support hover open.
+   submenus does not support ArrowKey open. 
+  */
   isSubMenu
     ? useHoverOpen(TriggerEl, ContentEl, setIsMenuOpen)
     : useKeydownOpen(TriggerEl, ContentEl, setIsMenuOpen)
@@ -166,6 +192,7 @@ export type MenuTrigger = InstanceType<typeof MenuTrigger>
 
 const MENU_CONTENT_CTX = Symbol() as InjectionKey<{
   highlighted: Signal<number>
+  selected: [Getter<Selected>, (v: Value) => void]
   items: Set<HTMLElement>
   isMenuOpen: Getter<boolean>
   CONTENT_ID: string
@@ -187,6 +214,7 @@ const MenuContentImpl = (p: MenuContentProps, { slots, attrs }: SetupContext) =>
   const {
     isMenuOpen: [isMenuOpen, setIsMenuOpen],
     highlighted: [highlighted, setHighlighted],
+    selected,
     TriggerEl: [TriggerEl],
     ContentEl: [ContentEl, setContentEl],
     CONTENT_ID,
@@ -240,6 +268,7 @@ const MenuContentImpl = (p: MenuContentProps, { slots, attrs }: SetupContext) =>
   provide(MENU_CONTENT_CTX, {
     highlighted: [highlighted, setHighlighted],
     isMenuOpen,
+    selected,
     items,
     CONTENT_ID,
   })
@@ -290,7 +319,7 @@ export type MenuContent = InstanceType<typeof MenuContent>
 const MenuItemProps = {
   disabled: Boolean,
   closeOnClick: Boolean,
-  checked: Boolean,
+  value: { type: String as PropType<Value>, required: true } as const,
 }
 type MenuItemProps = ExtractPropTypes<typeof MenuItemProps>
 
@@ -299,11 +328,11 @@ type MenuItemProps = ExtractPropTypes<typeof MenuItemProps>
 const MenuItemImpl = (p: MenuItemProps, { slots, attrs }: SetupContext) => {
   const {
     highlighted: [_, setHighlighted],
+    selected: [selected, setSelected],
     items,
     CONTENT_ID,
   } = useMenuContentCxt('MenuItem')
   const isTrigger = !!useMenuTriggerCtx()
-
   const [getItemEl, setItemEl] = useTemplateRef('MenuItem')
 
   onMounted(() => {
@@ -318,6 +347,10 @@ const MenuItemImpl = (p: MenuItemProps, { slots, attrs }: SetupContext) => {
   onBeforeUnmount(() => items.delete(getItemEl()!))
 
   const index = useComputed(() => [...items].indexOf(getItemEl()!))
+  const isSelected = useComputed(() => {
+    const _selected = selected()
+    return Array.isArray(_selected) ? _selected.includes(p.value) : _selected === p.value
+  })
 
   return () => (
     <button
@@ -328,10 +361,11 @@ const MenuItemImpl = (p: MenuItemProps, { slots, attrs }: SetupContext) => {
       disabled={p.disabled}
       role="menuitem"
       class={['vex-menu-item', isTrigger && '--is-trigger']}
+      onClick={() => !isTrigger && setSelected(p.value)}
       onPointerenter={() => setHighlighted(index.value)}
       onPointerleave={() => setHighlighted(-1)}
     >
-      <div class="vex-menu-item-check">{p.checked && <CheckIcon />}</div>
+      <div class="vex-menu-item-check">{isSelected.value && <CheckIcon />}</div>
       {slots.default?.()}
       {isTrigger && (
         <div class="vex-menu-item-chevron">
