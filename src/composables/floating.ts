@@ -93,7 +93,10 @@ export function useFloating(
       mw.unshift(
         size({
           apply({ rects, elements }) {
-            elements.floating.style.minWidth = `${Math.round(rects.reference.width)}px`
+            elements.floating.style.setProperty(
+              '--vex-auto-min-width',
+              `${Math.round(rects.reference.width)}px`
+            )
           },
         })
       )
