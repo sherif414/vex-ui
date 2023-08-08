@@ -53,8 +53,8 @@ const useMenuCtx = (component: string) => useContext(MENU_CTX, 'Menu', component
 
 const MenuProps = {
   modelValue: [String, Array] as PropType<Selected>,
-  multiple: Boolean,
-  deselectOnReselect: Boolean,
+  multiselect: Boolean,
+  deselection: Boolean,
 }
 type MenuProps = ExtractPropTypes<typeof MenuProps>
 type MenuEmits = ['update:modelValue']
@@ -74,8 +74,8 @@ const MenuImpl = (p: MenuProps, { slots, emit }: SetupContext<MenuEmits>) => {
   const [selected, setSelected] = useSelect(
     useVModel(() => p.modelValue),
     {
-      multiselect: () => p.multiple,
-      deselection: () => p.deselectOnReselect,
+      multiselect: () => p.multiselect,
+      deselection: () => p.deselection,
     }
   )
 
