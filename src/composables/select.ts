@@ -2,8 +2,8 @@ import type { Getter, ComputedGet, Signal, Setter } from '@/types'
 import { watch } from 'vue'
 
 interface UseSelectOptions {
-  multiSelect?: Getter<boolean>
-  deSelectOnReSelect?: Getter<boolean>
+  multiselect?: Getter<boolean>
+  deselection?: Getter<boolean>
 }
 
 /**
@@ -31,13 +31,13 @@ export const useSelect = <T>(
     }
 
     // deselect
-    if (options.deSelectOnReSelect?.()) {
+    if (options.deselection?.()) {
       _setter(undefined)
     }
   }
 
-  if (options.multiSelect) {
-    watch(options.multiSelect, (val) => {
+  if (options.multiselect) {
+    watch(options.multiselect, (val) => {
       _setter(val ? [] : undefined)
     })
   }
