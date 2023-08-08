@@ -1,49 +1,44 @@
-import type { MaybeRefOrGetter, RefOrGetter, ComputedGet } from '@/types'
-import { toRef, toValue, watch } from 'vue'
+import type { Getter } from '@/types'
+import { watch } from 'vue'
 
 interface UseDropdownOptions {
-  role?: 'menu' | 'listbox'
-  dropdownId?: string
-  triggerId?: string
-  ariaExpanded?: MaybeRefOrGetter<boolean>
-  ariaActiveDescendant: ComputedGet<string>
+  role: 'menu' | 'listbox'
+  dropdownID: string
+  targetElID: string
+  ariaExpanded: Getter<boolean>
+  ariaActiveDescendant: Getter<string>
 }
 
 /**
- * handles setting aria attributes
+ * handles setting aria attributes for floating elements and triggers
  */
 export function useDropdownAria(
-  trigger: ComputedGet<HTMLElement | null>,
-  dropdown: ComputedGet<HTMLElement | null>,
+  TargetEl: Getter<HTMLElement | null>,
+  Dropdown: Getter<HTMLElement | null>,
   options: UseDropdownOptions
 ) {
-  //----------------------------------------------------------------------------------------------------
-  // 📌 attributes
-  //----------------------------------------------------------------------------------------------------
+  const { ariaActiveDescendant, dropdownID, targetElID, role, ariaExpanded } = options
 
-  const { ariaActiveDescendant, dropdownId, triggerId, role } = options
-  const isExpanded = toRef(options.ariaExpanded)
-
-  watch(trigger, (el) => {
+  watch(TargetEl, (el) => {
     if (!el) return
-    el.setAttribute('aria-expanded', `${isExpanded.value}`)
-    el.setAttribute('aria-controls', `${dropdownId}`)
+    el.setAttribute('aria-expanded', `${ariaExpanded()}`)
+    el.setAttribute('aria-controls', `${dropdownID}`)
     el.setAttribute('aria-haspopup', `${role}`)
-    el.setAttribute('id', `${triggerId}`)
+    el.setAttribute('id', `${targetElID}`)
   })
 
-  watch(dropdown, (el) => {
+  watch(Dropdown, (el) => {
     if (!el) return
-    el.setAttribute('aria-labelledby', `${triggerId}`)
+    el.setAttribute('aria-labelledby', `${targetElID}`)
     el.setAttribute('role', `${role}`)
-    el.setAttribute('id', `${dropdownId}`)
+    el.setAttribute('id', `${dropdownID}`)
   })
 
-  watch(isExpanded, (expanded) => {
-    trigger()?.setAttribute('aria-expanded', `${expanded}`)
+  watch(ariaExpanded, (isExpanded) => {
+    TargetEl()?.setAttribute('aria-expanded', `${isExpanded}`)
   })
 
   watch(ariaActiveDescendant, (active) => {
-    dropdown()?.setAttribute('aria-activedescendant', `${active}`)
+    Dropdown()?.setAttribute('aria-activedescendant', `${active}`)
   })
 }
