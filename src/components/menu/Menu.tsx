@@ -26,6 +26,7 @@ import {
   shallowReactive,
   watch,
 } from 'vue'
+import { ChevronRightIcon, CheckIcon } from '@heroicons/vue/20/solid'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 Menu
@@ -97,6 +98,14 @@ export type Menu = InstanceType<typeof Menu>
 // 📌 Menu Trigger
 //----------------------------------------------------------------------------------------------------
 
+const MENU_TRIGGER_CTX = Symbol() as InjectionKey<{
+  isTrigger: boolean
+}>
+
+function useMenuTriggerCtx() {
+  return inject(MENU_TRIGGER_CTX, null)
+}
+
 const MenuTriggerProps = {
   asChild: Boolean,
 }
@@ -122,6 +131,10 @@ const MenuTriggerImpl = (p: MenuTriggerProps, { slots, attrs }: SetupContext) =>
   }
 
   useClickOpen(TriggerEl, ContentEl, [isMenuOpen, setIsMenuOpen])
+
+  provide(MENU_TRIGGER_CTX, {
+    isTrigger: true,
+  })
 
   return () =>
     isSubMenu || p.asChild ? (
@@ -164,6 +177,7 @@ function useMenuContentCxt(component: string) {
 
 const MenuContentProps = {
   placement: String as PropType<Placement>,
+  noAutoMinWidth: Boolean,
 }
 type MenuContentProps = ExtractPropTypes<typeof MenuContentProps>
 
@@ -215,7 +229,7 @@ const MenuContentImpl = (p: MenuContentProps, { slots, attrs }: SetupContext) =>
 
   const { floatingStyles } = useFloating(TriggerEl, ContentEl, isMenuOpen, {
     placement: () => (p.placement ?? isSubMenu ? 'right-start' : 'bottom-start'),
-    autoMinWidth: true,
+    autoMinWidth: () => !p.noAutoMinWidth,
     strategy: 'absolute',
     offset: isSubMenu ? -1 : undefined,
   })
@@ -239,7 +253,7 @@ const MenuContentImpl = (p: MenuContentProps, { slots, attrs }: SetupContext) =>
             {...attrs}
             style={floatingStyles.value}
             ref={setContentEl}
-            class="vex-menu"
+            class={['vex-menu-content', !p.noAutoMinWidth && '--auto-min-width']}
             onFocus={() => {
               /**
                * a menu/submenu content will gain focus from two interactions:
@@ -276,6 +290,7 @@ export type MenuContent = InstanceType<typeof MenuContent>
 const MenuItemProps = {
   disabled: Boolean,
   closeOnClick: Boolean,
+  checked: Boolean,
 }
 type MenuItemProps = ExtractPropTypes<typeof MenuItemProps>
 
@@ -287,6 +302,7 @@ const MenuItemImpl = (p: MenuItemProps, { slots, attrs }: SetupContext) => {
     items,
     CONTENT_ID,
   } = useMenuContentCxt('MenuItem')
+  const isTrigger = !!useMenuTriggerCtx()
 
   const [getItemEl, setItemEl] = useTemplateRef('MenuItem')
 
@@ -311,11 +327,17 @@ const MenuItemImpl = (p: MenuItemProps, { slots, attrs }: SetupContext) => {
       id={`${CONTENT_ID}-${index.value}`}
       disabled={p.disabled}
       role="menuitem"
-      class="vex-menu-item"
+      class={['vex-menu-item', isTrigger && '--is-trigger']}
       onPointerenter={() => setHighlighted(index.value)}
       onPointerleave={() => setHighlighted(-1)}
     >
+      <div class="vex-menu-item-check">{p.checked && <CheckIcon />}</div>
       {slots.default?.()}
+      {isTrigger && (
+        <div class="vex-menu-item-chevron">
+          <ChevronRightIcon />
+        </div>
+      )}
     </button>
   )
 }
