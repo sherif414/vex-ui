@@ -1,13 +1,7 @@
 import { useContext, useID, useListNavigation, useListSelection } from '@/composables'
 import { IAdd } from 'iconsax-vue/linear'
 import { TransitionExpand } from '@/transitions'
-import {
-  type ExtractPropTypes,
-  type InjectionKey,
-  type PropType,
-  type Ref,
-  type SetupContext,
-} from 'vue'
+import type { ExtractPropTypes, InjectionKey, PropType, Ref, SetupContext } from 'vue'
 import { computed, defineComponent, provide, ref } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
@@ -173,13 +167,14 @@ type AccordionContentProps = ExtractPropTypes<typeof AccordionContentProps>
 
 //----------------------------------------------------------------------------------------------------
 
-function AccordionContentImpl(_: AccordionContentProps, { slots }: SetupContext) {
+const AccordionContentImpl = (_: AccordionContentProps, { slots, attrs }: SetupContext) => {
   const { contentID, isExpanded, triggerID } = useAccordionItemCtx('AccordionContent')
 
   return () => (
     <TransitionExpand>
       {isExpanded.value && (
         <div
+          {...attrs}
           class="vex-accordion-item-content"
           aria-labelledby={triggerID}
           role="region"
@@ -195,5 +190,7 @@ function AccordionContentImpl(_: AccordionContentProps, { slots }: SetupContext)
 export const AccordionContent = defineComponent({
   setup: AccordionContentImpl,
   props: AccordionContentProps,
+  inheritAttrs: false,
+  name: 'AccordionContent',
 })
 export type AccordionContent = InstanceType<typeof AccordionContent>
