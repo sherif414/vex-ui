@@ -3,11 +3,11 @@ import type { Ref } from 'vue'
 export type Fn = () => void
 
 // signal reactivity types
-export type Get<T> = () => T
+export type Getter<T> = () => T
 export type ComputedGet<T> = (compute?: (v: T) => T) => T
 
-export type Set<T> = (value: T) => void
-export type ComputedSet<T> = Set<((v: T) => T) | T>
+export type Setter<T> = (value: T) => void
+export type ComputedSet<T> = Setter<((v: T) => T) | T>
 
 export type Signal<T> = [ComputedGet<T>, ComputedSet<T>]
 
