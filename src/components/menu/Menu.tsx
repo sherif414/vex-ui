@@ -1,8 +1,9 @@
 import {
-  useClickOutside,
+  useKeyboardOpen,
+  usePointerOpen,
+  useClickOpen,
   useComputed,
   useContext,
-  useDelayedOpen,
   useDropdownAria,
   useFloating,
   useID,
@@ -10,6 +11,7 @@ import {
   useTemplateRef,
   useVModel,
   useSelect,
+  useListHighlight,
 } from '@/composables'
 import type { TemplateRef } from '@/composables/template-ref'
 import type { ComputedGet, ComputedSet, Fn, Setter, Signal } from '@/types'
@@ -86,8 +88,8 @@ const MenuImpl = (p: MenuProps, { slots, emit }: SetupContext<MenuEmits>) => {
 
   useDropdownAria(TriggerEl, ContentEl, {
     ariaExpanded: isMenuOpen,
-    dropdownId: CONTENT_ID,
-    triggerId: TRIGGER_ID,
+    dropdownID: CONTENT_ID,
+    targetElID: TRIGGER_ID,
     role: 'menu',
     ariaActiveDescendant: () => `${CONTENT_ID}-${highlighted()}`,
   })
@@ -151,8 +153,8 @@ const MenuTriggerImpl = (p: MenuTriggerProps, { slots, attrs }: SetupContext) =>
    submenus does not support ArrowKey open. 
   */
   isSubMenu
-    ? useHoverOpen(TriggerEl, ContentEl, setIsMenuOpen)
-    : useKeydownOpen(TriggerEl, ContentEl, setIsMenuOpen)
+    ? usePointerOpen(TriggerEl, ContentEl, setIsMenuOpen)
+    : useKeyboardOpen(TriggerEl, ContentEl, setIsMenuOpen)
 
   if (!isSubMenu) {
     // restore focus to trigger when menu closes
@@ -388,109 +390,8 @@ const MenuItem = defineComponent({
 export type MenuItem = InstanceType<typeof MenuItem>
 
 //----------------------------------------------------------------------------------------------------
-// 📌 Utils
+// 📌 exports
 //----------------------------------------------------------------------------------------------------
-
-function useListHighlight(
-  list: ComputedGet<HTMLElement | null>,
-  highlight: Signal<number>,
-  items: Set<HTMLElement>
-): void {
-  const [highlighted, setHighlighted] = highlight
-
-  watch(
-    highlighted,
-    (newHighlighted, oldHighlighted) => {
-      const _items = [...items]
-      _items[oldHighlighted]?.classList.remove('--highlighted')
-      _items[newHighlighted]?.classList.add('--highlighted')
-    },
-    { flush: 'sync' }
-  )
-
-  useEventListener(list, 'keydown', (e: KeyboardEvent) => {
-    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) return
-
-    const last = items.size - 1
-    e.preventDefault()
-    e.stopPropagation()
-
-    switch (e.key) {
-      case 'ArrowDown':
-        setHighlighted((v) => (v >= last ? 0 : v + 1))
-        break
-      case 'ArrowUp':
-        setHighlighted((v) => (v <= 0 ? last : v - 1))
-        break
-      case 'Home':
-        setHighlighted(0)
-        break
-      case 'End':
-        setHighlighted(last)
-        break
-    }
-  })
-}
-
-function useClickOpen(
-  reference: ComputedGet<HTMLElement | null>,
-  floating: ComputedGet<HTMLElement | null>,
-  open: Signal<boolean>
-) {
-  const [isOpen, setIsOpen] = open
-
-  useEventListener(reference, 'click', () => {
-    setIsOpen((v) => !v)
-    if (!isOpen()) return
-    setTimeout(() => floating()?.focus())
-  })
-
-  useClickOutside(floating, () => setIsOpen(false), { ignore: [reference] })
-}
-
-function useKeydownOpen(
-  reference: ComputedGet<HTMLElement | null>,
-  floating: ComputedGet<HTMLElement | null>,
-  setIsOpen: ComputedSet<boolean>
-) {
-  useEventListener(reference, 'keydown', (e: KeyboardEvent) => {
-    if (['ArrowUp', 'ArrowDown', ' ', 'Enter'].includes(e.key)) {
-      e.preventDefault()
-      setIsOpen(true)
-      setTimeout(() => floating()?.focus())
-    }
-  })
-
-  useEventListener(floating, 'keydown', (e: KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      e.preventDefault()
-      setIsOpen(false)
-    }
-  })
-
-  // firefox bug
-  useEventListener(reference, 'keyup', (e: KeyboardEvent) => {
-    if (e.key === ' ') e.preventDefault()
-  })
-}
-
-function useHoverOpen(
-  reference: ComputedGet<HTMLElement | null>,
-  floating: ComputedGet<HTMLElement | null>,
-  setIsMenuOpen: ComputedSet<boolean>
-) {
-  const { close, open } = useDelayedOpen({
-    open: () => setIsMenuOpen(true),
-    close: () => setIsMenuOpen(false),
-    defaultOpenDelay: () => 100,
-    defaultCloseDelay: () => 100,
-  })
-
-  useEventListener(reference, 'pointerenter', () => open())
-  useEventListener(reference, 'pointerleave', () => close())
-  useEventListener(floating, 'pointerenter', () => open())
-  useEventListener(floating, 'pointerleave', () => close())
-}
 
 const Root = Menu
 const Trigger = MenuTrigger
