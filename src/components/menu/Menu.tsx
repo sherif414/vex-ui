@@ -1,31 +1,25 @@
 import {
-  useKeyboardOpen,
-  usePointerOpen,
   useClickOpen,
   useComputed,
   useContext,
   useDropdownAria,
   useFloating,
   useID,
+  useKeyboardOpen,
+  useListHighlight,
+  usePointerOpen,
+  useSelect,
   useSignal,
   useTemplateRef,
   useVModel,
-  useSelect,
-  useListHighlight,
 } from '@/composables'
+import { createCollection, type CollectionContext } from '@/composables/collection'
 import type { TemplateRef } from '@/composables/template-ref'
-import type { ComputedGet, ComputedSet, Fn, Setter, Signal } from '@/types'
+import type { ComputedGet, Fn, Setter, Signal } from '@/types'
 import type { Placement } from '@floating-ui/vue'
+import { CheckIcon, ChevronRightIcon } from '@heroicons/vue/20/solid'
 import { useEventListener } from '@vueuse/core'
-import type {
-  ExtractPropTypes,
-  InjectionKey,
-  PropType,
-  SetupContext,
-  Prop,
-  Ref,
-  IntrinsicElementAttributes,
-} from 'vue'
+import type { ExtractPropTypes, InjectionKey, PropType, SetupContext } from 'vue'
 import {
   Teleport,
   Transition,
@@ -35,12 +29,9 @@ import {
   onBeforeUnmount,
   onMounted,
   provide,
-  shallowReactive,
   toRef,
   watch,
 } from 'vue'
-import { ChevronRightIcon, CheckIcon } from '@heroicons/vue/20/solid'
-import { createCollection, type CollectionContext } from '@/composables/collection'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 Menu
@@ -236,37 +227,8 @@ const MenuContentImpl = (p: MenuContentProps, { slots, attrs }: SetupContext) =>
   const [getItems, useMenuCollection] = createCollection(ContentEl)
   useListHighlight(ContentEl, [highlighted, setHighlighted], getItems)
 
-  /**
-   * submenus have few unique interactions to top level menus:
-   *
-   * - when a user hovers a submenu, its trigger (a menuitem) should be highlighted.
-   * - when highlight is on a submenu trigger and the user presses `ArrowRight` key the submenu should open.
-   * - when a user presses the `ArrowLeft` key the submenu should close and focus should be restored to parent menu-content.
-   */
-  if (isSubMenu) {
-    useEventListener(ContentEl, 'pointerenter', function highlightOwnTrigger() {
-      // TODO: implement
-      throw 'not implemented'
-    })
-  }
-  useEventListener(ContentEl, 'keydown', function onKeydown(e: KeyboardEvent) {
-    if (!['ArrowLeft', 'ArrowRight'].includes(e.key)) return
-    e.preventDefault()
-    e.stopPropagation()
-
-    switch (e.key) {
-      case 'ArrowRight':
-        const item = getItems()[highlighted()]
-        item?.click()
-        break
-
-      case 'ArrowLeft':
-        if (!isSubMenu) return
-        setIsMenuOpen(false)
-        focusParentContent()
-        break
-    }
-  })
+  // ensure there is no highlighted element when content closes
+  watch(isMenuOpen, (val) => val || setHighlighted(-1))
 
   useDropdownAria(TriggerEl, ContentEl, {
     ariaExpanded: isMenuOpen,
@@ -282,8 +244,6 @@ const MenuContentImpl = (p: MenuContentProps, { slots, attrs }: SetupContext) =>
     strategy: 'absolute',
     offset: isSubMenu ? -1 : undefined,
   })
-
-  watch(isMenuOpen, (val) => val || setHighlighted(-1))
 
   // re-provide context so it won't conflict with a submenu context
   provide(MENU_CONTENT_CTX, {
@@ -314,6 +274,36 @@ const MenuContentImpl = (p: MenuContentProps, { slots, attrs }: SetupContext) =>
                *  because highlighted is always set to -1 when its menu content closes.
                */
               highlighted() < 0 && setHighlighted(0)
+            }}
+            onPointerenter={function highlightOwnTrigger() {
+              /**
+               * submenus have few unique interactions to top level menus:
+               *
+               * - when a user hovers a submenu, its trigger (a menuitem) should be highlighted.
+               * - when highlight is on a submenu trigger and the user presses `ArrowRight` key the submenu should open.
+               * - when a user presses the `ArrowLeft` key the submenu should close and focus should be restored to parent menu-content.
+               */
+              throw 'not implemented'
+              if (isSubMenu) {
+              }
+            }}
+            onKeydown={function onKeydown(e: KeyboardEvent) {
+              if (!['ArrowLeft', 'ArrowRight'].includes(e.key)) return
+              e.preventDefault()
+              e.stopPropagation()
+
+              switch (e.key) {
+                case 'ArrowRight':
+                  const item = getItems()[highlighted()]
+                  item?.click()
+                  break
+
+                case 'ArrowLeft':
+                  if (!isSubMenu) return
+                  setIsMenuOpen(false)
+                  focusParentContent()
+                  break
+              }
             }}
           >
             {slots.default?.()}
@@ -415,13 +405,13 @@ const Content = MenuContent
 const Item = MenuItem
 
 export {
-  Root,
-  Trigger,
   Content,
   Item,
   //
   Menu,
-  MenuTrigger,
   MenuContent,
   MenuItem,
+  MenuTrigger,
+  Root,
+  Trigger,
 }
