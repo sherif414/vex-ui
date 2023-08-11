@@ -17,7 +17,15 @@ import type { TemplateRef } from '@/composables/template-ref'
 import type { ComputedGet, ComputedSet, Fn, Setter, Signal } from '@/types'
 import type { Placement } from '@floating-ui/vue'
 import { useEventListener } from '@vueuse/core'
-import type { ExtractPropTypes, InjectionKey, PropType, SetupContext, Prop } from 'vue'
+import type {
+  ExtractPropTypes,
+  InjectionKey,
+  PropType,
+  SetupContext,
+  Prop,
+  Ref,
+  IntrinsicElementAttributes,
+} from 'vue'
 import {
   Teleport,
   Transition,
@@ -28,9 +36,11 @@ import {
   onMounted,
   provide,
   shallowReactive,
+  toRef,
   watch,
 } from 'vue'
 import { ChevronRightIcon, CheckIcon } from '@heroicons/vue/20/solid'
+import { createCollection, type CollectionContext } from '@/composables/collection'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 Menu
@@ -41,14 +51,13 @@ type Selected = Value | Value[] | undefined
 
 const MENU_CTX = Symbol() as InjectionKey<{
   highlighted: Signal<number>
-  selected: [ComputedGet<Selected>, Setter<Value>]
+  isMenuOpen: Signal<boolean>
   TriggerEl: TemplateRef
   ContentEl: TemplateRef
-  isMenuOpen: Signal<boolean>
-  items: Set<HTMLElement>
+  TRIGGER_ID: string
   CONTENT_ID: string
+  selected: [ComputedGet<Selected>, Setter<Value>]
   focusParentContent: Fn
-  highlightOwnTrigger: Fn
   isSubMenu: boolean
 }>
 
@@ -66,7 +75,7 @@ type MenuEmits = ['update:modelValue']
 
 //----------------------------------------------------------------------------------------------------
 
-const MenuImpl = (p: MenuProps, { slots, emit }: SetupContext<MenuEmits>) => {
+const MenuImpl = (p: MenuProps, { slots, expose }: SetupContext<MenuEmits>) => {
   const TRIGGER_ID = useID()
   const CONTENT_ID = useID()
 
@@ -84,16 +93,6 @@ const MenuImpl = (p: MenuProps, { slots, emit }: SetupContext<MenuEmits>) => {
     }
   )
 
-  const items = shallowReactive(new Set<HTMLElement>())
-
-  useDropdownAria(TriggerEl, ContentEl, {
-    ariaExpanded: isMenuOpen,
-    dropdownID: CONTENT_ID,
-    targetElID: TRIGGER_ID,
-    role: 'menu',
-    ariaActiveDescendant: () => `${CONTENT_ID}-${highlighted()}`,
-  })
-
   const ctx = inject(MENU_CTX, null)
   const isSubMenu = !!ctx
 
@@ -103,11 +102,21 @@ const MenuImpl = (p: MenuProps, { slots, emit }: SetupContext<MenuEmits>) => {
     isMenuOpen: [isMenuOpen, setIsMenuOpen],
     TriggerEl: [TriggerEl, setTriggerEl],
     ContentEl: [ContentEl, setContentEl],
-    items,
+    TRIGGER_ID,
     CONTENT_ID,
-    focusParentContent: () => ctx?.ContentEl[0]()?.focus(),
-    highlightOwnTrigger: () => ctx?.highlighted[1]([...ctx.items].indexOf(TriggerEl()!)),
     isSubMenu,
+
+    focusParentContent() {
+      const el = ctx?.ContentEl[0]()
+      el?.focus()
+    },
+  })
+
+  expose({
+    open: toRef(isMenuOpen),
+    selected: toRef(() => p.modelValue),
+    multiselect: toRef(() => p.multiselect),
+    deselection: toRef(() => p.deselection),
   })
 
   return () => slots.default?.()
@@ -147,11 +156,6 @@ const MenuTriggerImpl = (p: MenuTriggerProps, { slots, attrs }: SetupContext) =>
     isSubMenu,
   } = useMenuCtx('MenuTrigger')
 
-  /*
-   for now: 
-   top level menus does not support hover open.
-   submenus does not support ArrowKey open. 
-  */
   isSubMenu
     ? usePointerOpen(TriggerEl, ContentEl, setIsMenuOpen)
     : useKeyboardOpen(TriggerEl, ContentEl, setIsMenuOpen)
@@ -198,9 +202,9 @@ export type MenuTrigger = InstanceType<typeof MenuTrigger>
 const MENU_CONTENT_CTX = Symbol() as InjectionKey<{
   highlighted: Signal<number>
   selected: [ComputedGet<Selected>, Setter<Value>]
-  items: Set<HTMLElement>
   isMenuOpen: ComputedGet<boolean>
   CONTENT_ID: string
+  useMenuCollection: () => CollectionContext
 }>
 
 function useMenuContentCxt(component: string) {
@@ -222,14 +226,15 @@ const MenuContentImpl = (p: MenuContentProps, { slots, attrs }: SetupContext) =>
     selected,
     TriggerEl: [TriggerEl],
     ContentEl: [ContentEl, setContentEl],
+    TRIGGER_ID,
     CONTENT_ID,
-    items,
+
     focusParentContent,
-    highlightOwnTrigger,
     isSubMenu,
   } = useMenuCtx('MenuContent')
 
-  useListHighlight(ContentEl, [highlighted, setHighlighted], items)
+  const [getItems, useMenuCollection] = createCollection(ContentEl)
+  useListHighlight(ContentEl, [highlighted, setHighlighted], getItems)
 
   /**
    * submenus have few unique interactions to top level menus:
@@ -239,16 +244,19 @@ const MenuContentImpl = (p: MenuContentProps, { slots, attrs }: SetupContext) =>
    * - when a user presses the `ArrowLeft` key the submenu should close and focus should be restored to parent menu-content.
    */
   if (isSubMenu) {
-    useEventListener(ContentEl, 'pointerenter', highlightOwnTrigger)
+    useEventListener(ContentEl, 'pointerenter', function highlightOwnTrigger() {
+      // TODO: implement
+      throw 'not implemented'
+    })
   }
-  useEventListener(ContentEl, 'keydown', (e: KeyboardEvent) => {
+  useEventListener(ContentEl, 'keydown', function onKeydown(e: KeyboardEvent) {
     if (!['ArrowLeft', 'ArrowRight'].includes(e.key)) return
     e.preventDefault()
     e.stopPropagation()
 
     switch (e.key) {
       case 'ArrowRight':
-        const item = [...items][highlighted()]
+        const item = getItems()[highlighted()]
         item?.click()
         break
 
@@ -258,6 +266,14 @@ const MenuContentImpl = (p: MenuContentProps, { slots, attrs }: SetupContext) =>
         focusParentContent()
         break
     }
+  })
+
+  useDropdownAria(TriggerEl, ContentEl, {
+    ariaExpanded: isMenuOpen,
+    dropdownID: CONTENT_ID,
+    targetElID: TRIGGER_ID,
+    role: 'menu',
+    ariaActiveDescendant: () => `${CONTENT_ID}-${highlighted()}`,
   })
 
   const { floatingStyles } = useFloating(TriggerEl, ContentEl, isMenuOpen, {
@@ -274,8 +290,8 @@ const MenuContentImpl = (p: MenuContentProps, { slots, attrs }: SetupContext) =>
     highlighted: [highlighted, setHighlighted],
     isMenuOpen,
     selected,
-    items,
     CONTENT_ID,
+    useMenuCollection,
   })
 
   return () => (
@@ -288,16 +304,15 @@ const MenuContentImpl = (p: MenuContentProps, { slots, attrs }: SetupContext) =>
             style={floatingStyles.value}
             ref={setContentEl}
             class={['vex-menu-content', !p.noAutoMinWidth && '--auto-min-width']}
-            onFocus={() => {
+            onFocus={function onFocus() {
               /**
-               * a menu/submenu content will gain focus from two interactions:
+               * a menu/submenu content may gain focus from two interactions:
                * - when it opens, in this case we want to default to highlighting the first non-disabled item.
                * - when a submenu-content is closed focus is restored to the parent menu/submenu content,
                *  in this case we want to preserve the highlight of the closing submenu trigger,
                *  we can achieve that by checking if there is an already highlighted item which means we are in case 2
                *  because highlighted is always set to -1 when its menu content closes.
                */
-
               highlighted() < 0 && setHighlighted(0)
             }}
           >
@@ -334,24 +349,25 @@ const MenuItemImpl = (p: MenuItemProps, { slots, attrs }: SetupContext) => {
   const {
     highlighted: [_, setHighlighted],
     selected: [selected, setSelected],
-    items,
     CONTENT_ID,
+    useMenuCollection,
   } = useMenuContentCxt('MenuItem')
+
+  const { getItems, register, unregister } = useMenuCollection()
   const isTrigger = !!useMenuTriggerCtx()
-  const [getItemEl, setItemEl] = useTemplateRef('MenuItem')
+  const [ItemEl, setItemEl] = useTemplateRef('MenuItem')
 
-  onMounted(() => {
-    watch(
-      () => p.disabled,
-      (disabled) => {
-        disabled ? items.delete(getItemEl()!) : items.add(getItemEl()!)
-      },
-      { immediate: true }
-    )
-  })
-  onBeforeUnmount(() => items.delete(getItemEl()!))
+  onMounted(() => p.disabled || register(ItemEl()!))
+  onBeforeUnmount(() => unregister(ItemEl()!))
 
-  const index = useComputed(() => [...items].indexOf(getItemEl()!))
+  watch(
+    () => p.disabled,
+    (disabled) => {
+      disabled ? unregister(ItemEl()!) : register(ItemEl()!)
+    }
+  )
+
+  const index = useComputed(() => getItems().indexOf(ItemEl()!))
   const isSelected = useComputed(() => {
     const _selected = selected()
     return Array.isArray(_selected) ? _selected.includes(p.value) : _selected === p.value

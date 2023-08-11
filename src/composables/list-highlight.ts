@@ -5,14 +5,14 @@ import { watch } from 'vue'
 export function useListHighlight(
   list: Getter<HTMLElement | null>,
   highlight: Signal<number>,
-  items: Set<HTMLElement>
+  getItems: Getter<HTMLElement[]>
 ) {
   const [highlighted, setHighlighted] = highlight
 
   watch(highlighted, setHighlightClass, { flush: 'sync' })
 
   function setHighlightClass(curr: number, prev: number) {
-    const _items = [...items]
+    const _items = getItems()
     _items[prev]?.classList.remove('--highlighted')
     _items[curr]?.classList.add('--highlighted')
   }
@@ -22,7 +22,7 @@ export function useListHighlight(
   function highlightOnKeydown(e: KeyboardEvent) {
     if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) return
 
-    const last = items.size - 1
+    const last = getItems().length - 1
     e.preventDefault()
     e.stopPropagation()
 
