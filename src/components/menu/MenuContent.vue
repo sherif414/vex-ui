@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { createCollection, useDropdownAria, useFloating, useRovingFocus } from '@/composables'
+import {
+  createCollection,
+  useDropdownAria,
+  useFloating,
+  useRovingFocus,
+  useSignal,
+} from '@/composables'
 import { type Placement } from '@floating-ui/vue'
 import { provide } from 'vue'
 import { MENU_CONTENT_CTX, useMenuCtx } from './context'
@@ -23,7 +29,7 @@ const p = withDefaults(
 //----------------------------------------------------------------------------------------------------
 
 const {
-  isMenuOpen: [isMenuOpen, setIsMenuOpen],
+  isMenuOpen: [isMenuOpen],
   TriggerEl: [TriggerEl],
   ContentEl: [ContentEl, setContentEl],
   TRIGGER_ID,
@@ -32,11 +38,10 @@ const {
   orientation,
 } = useMenuCtx('MenuContent')
 
-const [getItems, useMenuCollection] = createCollection(ContentEl)
+//----------------------------------------------------------------------------------------------------
 
-//----------------------------------------------------------------------------------------------------
-// 📌
-//----------------------------------------------------------------------------------------------------
+const [activeItemId, setActiveItemId] = useSignal(-1)
+const [getItems, useMenuCollection] = createCollection(ContentEl)
 
 useRovingFocus(ContentEl, getItems, {
   orientation,
@@ -47,7 +52,7 @@ useDropdownAria(TriggerEl, ContentEl, {
   dropdownID: CONTENT_ID,
   targetElID: TRIGGER_ID,
   role: 'menu',
-  ariaActiveDescendant: () => `${CONTENT_ID}-${'TODO-not-implemented'}`,
+  ariaActiveDescendant: () => `${CONTENT_ID}-${activeItemId()}`,
 })
 
 const { floatingStyles } = useFloating(TriggerEl, ContentEl, isMenuOpen, {
@@ -57,11 +62,14 @@ const { floatingStyles } = useFloating(TriggerEl, ContentEl, isMenuOpen, {
   offset: isSubMenu ? -1 : undefined,
 })
 
-// re-provide menu context so it won't conflict with a submenu context
+//----------------------------------------------------------------------------------------------------
+
+// scope menuitems context to their parent menu-content
 provide(MENU_CONTENT_CTX, {
   isMenuOpen,
   CONTENT_ID,
   useMenuCollection,
+  activeItemId: [activeItemId, setActiveItemId],
 })
 </script>
 

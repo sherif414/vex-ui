@@ -34,6 +34,7 @@ export const MENU_CONTENT_CTX = Symbol() as InjectionKey<{
   isMenuOpen: ComputableGetter<boolean>
   CONTENT_ID: string
   useMenuCollection: () => CollectionContext
+  activeItemId: Signal<number>
 }>
 
 export function useMenuContentCxt(component: string) {

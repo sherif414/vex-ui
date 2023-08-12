@@ -19,7 +19,11 @@ const p = withDefaults(
 
 //----------------------------------------------------------------------------------------------------
 
-const { CONTENT_ID, useMenuCollection } = useMenuContentCxt('MenuItem')
+const {
+  CONTENT_ID,
+  useMenuCollection,
+  activeItemId: [, setActiveItemId],
+} = useMenuContentCxt('MenuItem')
 
 const groupCtx = useGroupContext()
 const isWithinGroup = !!groupCtx
@@ -70,6 +74,7 @@ function onClick() {
     :class="['vex-menu-item', isTrigger && '--is-trigger']"
     @click="onClick"
     @pointerenter="ItemEl()?.focus({ preventScroll: true })"
+    @focus="setActiveItemId(index)"
   >
     <div class="vex-menu-item-check">
       <CheckIcon v-if="isSelected" />
