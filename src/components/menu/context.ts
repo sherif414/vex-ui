@@ -58,7 +58,8 @@ export function useMenuTriggerCtx() {
 //----------------------------------------------------------------------------------------------------
 
 export const MENU_GROUP = Symbol() as InjectionKey<{
-  selectSignal: [ComputableGetter<Selected>, Setter<Value>]
+  selection: [ComputableGetter<Selected>, Setter<Value>]
+  itemType: Getter<'menuitemcheckbox' | 'menuitemradio'>
 }>
 
 export function useGroupContext() {

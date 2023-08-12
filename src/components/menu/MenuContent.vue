@@ -74,6 +74,7 @@ provide(MENU_CONTENT_CTX, {
 </script>
 
 <template>
+  <!-- TODO: screen reader needs teleport to be active on all menus -->
   <Teleport :disabled="isSubMenu" to="body">
     <Transition name="vex-t-menu">
       <div

@@ -19,13 +19,17 @@ export function useDropdownAria(
 ) {
   const { ariaActiveDescendant, dropdownID, targetElID, role, ariaExpanded } = options
 
-  watch(TargetEl, (el) => {
-    if (!el) return
-    el.setAttribute('aria-expanded', `${ariaExpanded()}`)
-    el.setAttribute('aria-controls', `${dropdownID}`)
-    el.setAttribute('aria-haspopup', `${role}`)
-    el.setAttribute('id', `${targetElID}`)
-  })
+  watch(
+    TargetEl,
+    (el) => {
+      if (!el) return
+      el.setAttribute('aria-expanded', `${ariaExpanded()}`)
+      el.setAttribute('aria-controls', `${dropdownID}`)
+      el.setAttribute('aria-haspopup', `${role}`)
+      el.setAttribute('id', `${targetElID}`)
+    },
+    { immediate: true }
+  )
 
   watch(Dropdown, (el) => {
     if (!el) return

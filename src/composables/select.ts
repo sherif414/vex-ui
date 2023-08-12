@@ -14,6 +14,7 @@ export const useSelect = <T>(
   options: UseSelectOptions = {}
 ): [ComputableGetter<T | T[] | undefined>, Setter<T>] => {
   const [_getter, _setter] = signal
+  const { multiselect = () => false, deselection = () => false } = options
 
   const setter = (value: T) => {
     const prev = _getter()
@@ -31,16 +32,18 @@ export const useSelect = <T>(
     }
 
     // deselect
-    if (options.deselection?.()) {
+    if (deselection()) {
       _setter(undefined)
     }
   }
 
-  if (options.multiselect) {
-    watch(options.multiselect, (val) => {
-      _setter(val ? [] : undefined)
-    })
-  }
+  watch(
+    multiselect,
+    (multi) => {
+      _setter(multi ? [] : undefined)
+    },
+    { immediate: true }
+  )
 
   return [_getter, setter]
 }

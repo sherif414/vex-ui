@@ -1,30 +1,32 @@
 <script setup lang="ts">
 import { useSelect, useVModel } from '@/composables'
-import type { Selected } from './context'
+import { MENU_GROUP, type Selected } from './context'
 import { provide } from 'vue'
 
 const p = withDefaults(
   defineProps<{
     modelValue?: Selected
-    deselection?: boolean
-    multiselect?: boolean
+    type?: 'radio' | 'checkbox'
   }>(),
-  {}
-)
-
-const selection = useSelect(
-  useVModel(() => p.modelValue),
   {
-    multiselect: () => p.multiselect,
-    deselection: () => p.deselection,
+    type: 'checkbox',
   }
 )
 
-provide('', {
+const selection = useSelect(
+  useVModel<Selected>(() => p.modelValue),
+  {
+    multiselect: () => p.type === 'checkbox',
+    deselection: () => p.type === 'checkbox',
+  }
+)
+
+provide(MENU_GROUP, {
   selection,
+  itemType: () => (p.type === 'checkbox' ? 'menuitemcheckbox' : 'menuitemradio'),
 })
 </script>
 
 <template>
-  <div></div>
+  <slot />
 </template>

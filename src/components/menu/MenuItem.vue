@@ -42,7 +42,8 @@ onBeforeUnmount(() => unregister(ItemEl()!))
 // 📌 selection
 //----------------------------------------------------------------------------------------------------
 
-const [selected, setSelected] = groupCtx?.selectSignal ?? []
+const [selected, setSelected] = groupCtx?.selection ?? []
+const itemType = groupCtx?.itemType ?? (() => 'menuitem')
 const isTrigger = !!useMenuTriggerCtx()
 
 const index = useComputed(() => getItems().indexOf(ItemEl()!))
@@ -51,7 +52,7 @@ const isSelected = selected
       const _selected = selected()
       return Array.isArray(_selected) ? _selected.includes(p.value) : _selected === p.value
     })
-  : false
+  : useComputed(() => undefined)
 
 //----------------------------------------------------------------------------------------------------
 
@@ -59,7 +60,7 @@ function onClick() {
   // safari doesn't always focus when buttons are clicked so we manually focus
   ItemEl()?.focus({ preventScroll: true })
 
-  if (!setSelected || !isTrigger) return
+  if (!setSelected || isTrigger) return
   setSelected(p.value)
 }
 </script>
@@ -70,7 +71,8 @@ function onClick() {
     :ref="setItemEl"
     :id="`${CONTENT_ID}-${index}`"
     :disabled="p.disabled"
-    role="menuitem"
+    :role="itemType()"
+    :aria-checked="isSelected"
     :class="['vex-menu-item', isTrigger && '--is-trigger']"
     @click="onClick"
     @pointerenter="ItemEl()?.focus({ preventScroll: true })"
