@@ -1,22 +1,30 @@
-import type { ComputedSet, Getter, Signal } from '@/types'
+import type { ComputableSetter, Getter, Signal } from '@/types'
 import { useEventListener } from '@vueuse/core'
 import { nextTick } from 'vue'
 import { useClickOutside, useDelayedOpen } from '.'
+import { getKeyIntent } from './helpers'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 click open
 //----------------------------------------------------------------------------------------------------
 
+interface UseClickOpenOptions {
+  toggle?: Getter<boolean>
+}
+
 export function useClickOpen(
   trigger: Getter<HTMLElement | null>,
   content: Getter<HTMLElement | null>,
-  visibility: Signal<boolean>
+  open: Signal<boolean>,
+  options: UseClickOpenOptions = {}
 ) {
-  const [isOpen, setOpen] = visibility
+  const { toggle = () => true } = options
+  const [isOpen, setOpen] = open
 
-  useEventListener(trigger, 'click', () => {
-    setOpen((v) => !v)
+  useEventListener(trigger, 'click', (e) => {
+    setOpen(toggle() ? (v) => !v : true)
     if (!isOpen()) return
+    e.preventDefault()
     nextTick(() => content()?.focus())
   })
 
@@ -27,29 +35,67 @@ export function useClickOpen(
 // 📌 keyboard open
 //----------------------------------------------------------------------------------------------------
 
+const NAVIGATION_KEYS = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'End', 'Home'] as const
+
+type Orientation = 'vertical' | 'horizontal'
+type NavigationKeys = 'ArrowDown' | 'ArrowUp' | 'ArrowLeft' | 'ArrowRight' | 'Home' | 'End'
+
+interface UseKeyboardOpenOptions {
+  isMainTrigger?: boolean
+  orientation?: Getter<Orientation>
+}
+
 export function useKeyboardOpen(
   trigger: Getter<HTMLElement | null>,
   content: Getter<HTMLElement | null>,
-  setOpen: ComputedSet<boolean>
+  setOpen: ComputableSetter<boolean>,
+  options: UseKeyboardOpenOptions = {}
 ) {
+  const { isMainTrigger, orientation = () => 'vertical' } = options
+
   useEventListener(trigger, 'keydown', (e: KeyboardEvent) => {
-    if (['ArrowUp', 'ArrowDown', ' ', 'Enter'].includes(e.key)) {
+    const orient = orientation()
+
+    if (isMainTrigger) {
+      if (orient === 'vertical' && e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
+      if (orient === 'horizontal' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+
       e.preventDefault()
+      e.stopPropagation()
       setOpen(true)
       nextTick(() => content()?.focus())
+      return
     }
-  })
 
-  useEventListener(content, 'keydown', (e: KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      e.preventDefault()
-      setOpen(false)
-    }
+    const key = e.key as NavigationKeys
+    if (!NAVIGATION_KEYS.includes(key)) return
+
+    const intent = getKeyIntent(key, orient)
+    if (intent !== 'show') return
+
+    e.preventDefault()
+    e.stopPropagation()
+    setOpen(true)
+    nextTick(() => content()?.focus())
   })
 
   // firefox bug
   useEventListener(trigger, 'keyup', (e: KeyboardEvent) => {
     if (e.key === ' ') e.preventDefault()
+  })
+
+  useEventListener(content, 'keydown', (e: KeyboardEvent) => {
+    const key = e.key as NavigationKeys
+    if (!NAVIGATION_KEYS.includes(key)) return
+
+    const intent = getKeyIntent(key, orientation())
+
+    if (intent === 'hide') {
+      e.preventDefault()
+      e.stopPropagation()
+      setOpen(false)
+      nextTick(() => trigger()?.focus())
+    }
   })
 }
 
@@ -65,10 +111,10 @@ interface UsePointerOpenOptions {
 export function usePointerOpen(
   trigger: Getter<HTMLElement | null>,
   content: Getter<HTMLElement | null>,
-  setOpen: ComputedSet<boolean>,
+  setOpen: ComputableSetter<boolean>,
   options: UsePointerOpenOptions = {}
 ) {
-  const { showDelay = () => 100, hideDelay = () => 100 } = options
+  const { showDelay = () => 150, hideDelay = () => 150 } = options
 
   const { show, hide } = useDelayedOpen(
     () => setOpen(true),
@@ -81,6 +127,12 @@ export function usePointerOpen(
 
   useEventListener(trigger, 'pointerenter', () => show())
   useEventListener(trigger, 'pointerleave', () => hide())
-  useEventListener(content, 'pointerenter', () => show())
-  useEventListener(content, 'pointerleave', () => hide())
+  useEventListener(content, 'pointerenter', () => {
+    trigger()?.classList.add('--focused')
+    show()
+  })
+  useEventListener(content, 'pointerleave', () => {
+    trigger()?.classList.remove('--focused')
+    hide()
+  })
 }

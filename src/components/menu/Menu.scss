@@ -32,7 +32,8 @@
     padding-inline-end: var(--vex-spacing-7);
   }
 
-  &.--highlighted {
+  &:focus,
+  &.--focused {
     background-color: var(--vex-c-neutral-200);
   }
 
@@ -46,7 +47,6 @@
     height: 100%;
     position: absolute;
     inset-block-start: 0;
-    // outline: 1px solid hotpink;
     flex: none;
     display: inline-flex;
     justify-content: center;

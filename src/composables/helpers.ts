@@ -1,4 +1,5 @@
 import { EXPOSED_EL } from '@/config'
+import { useTextDirection } from '@vueuse/core'
 import type { ComponentPublicInstance } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
@@ -43,8 +44,74 @@ export function getElementFromRef(
   throw new Error(`[vex] <${component}> has a non Element root child`)
 }
 
+export function getDirectionAwareKey(key: NavigationKeys) {
+  if (dir.value !== 'rtl') return key
+  return key === 'ArrowLeft' ? 'ArrowRight' : key === 'ArrowRight' ? 'ArrowLeft' : key
+}
+
+export function getKeyIntent(
+  key: NavigationKeys,
+  orientation: Orientation = 'vertical'
+): KeyIntent {
+  switch (getDirectionAwareKey(key)) {
+    case 'ArrowDown':
+      if (orientation === 'vertical') return 'next'
+      return 'show'
+
+    case 'ArrowUp':
+      if (orientation === 'vertical') return 'prev'
+      return 'hide'
+
+    case 'ArrowRight':
+      if (orientation === 'vertical') return 'show'
+      return 'next'
+
+    case 'ArrowLeft':
+      if (orientation === 'vertical') return 'hide'
+      return 'prev'
+
+    case 'Enter':
+      return 'show'
+
+    case ' ':
+      return 'show'
+
+    case 'Escape':
+      return 'hide'
+
+    case 'End':
+      return 'last'
+
+    case 'Home':
+      return 'first'
+  }
+}
+
 //----------------------------------------------------------------------------------------------------
 // 📌 specials
 //----------------------------------------------------------------------------------------------------
 
 export const noop = () => {}
+
+/**
+ * Wraps an array around itself at a given start index
+ * Example: `wrapArray(['a', 'b', 'c', 'd'], 2) === ['c', 'd', 'a', 'b']`
+ */
+export function wrapArray<T>(array: T[], startIndex: number) {
+  return array.map((_, index) => array[(startIndex + index) % array.length])
+}
+
+const dir = useTextDirection()
+
+type Orientation = 'vertical' | 'horizontal'
+type NavigationKeys =
+  | 'ArrowDown'
+  | 'ArrowUp'
+  | 'ArrowLeft'
+  | 'ArrowRight'
+  | 'Home'
+  | 'End'
+  | 'Enter'
+  | ' '
+  | 'Escape'
+type KeyIntent = 'next' | 'prev' | 'last' | 'first' | 'show' | 'hide'

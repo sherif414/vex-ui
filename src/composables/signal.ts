@@ -5,12 +5,11 @@ import { isFunction } from './helpers'
 export function useSignal<T>(initial: T): Signal<T> {
   const r = shallowRef(initial)
 
-  // make sure to use named function so they show up in devtools
   return [
-    function getter(fn) {
+    function getter<U>(fn?: (v: T) => U): T | U {
       return isFunction(fn) ? fn(r.value) : r.value
     },
-    function setter(fn) {
+    function setter(fn: ((v: T) => T) | T): void {
       r.value = isFunction(fn) ? fn(r.value) : fn
     },
   ]

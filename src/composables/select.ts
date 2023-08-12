@@ -1,4 +1,4 @@
-import type { Getter, ComputedGet, Signal, Setter } from '@/types'
+import type { Getter, ComputableGetter, Signal, Setter } from '@/types'
 import { watch } from 'vue'
 
 interface UseSelectOptions {
@@ -12,7 +12,7 @@ interface UseSelectOptions {
 export const useSelect = <T>(
   signal: Signal<T | T[] | undefined>,
   options: UseSelectOptions = {}
-): [ComputedGet<T | T[] | undefined>, Setter<T>] => {
+): [ComputableGetter<T | T[] | undefined>, Setter<T>] => {
   const [_getter, _setter] = signal
 
   const setter = (value: T) => {

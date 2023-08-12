@@ -1,4 +1,4 @@
-import type { ComputedGet } from '@/types'
+import type { ComputableGetter } from '@/types'
 import { isIOS, noop } from './helpers'
 import { useEventListener } from '@vueuse/core'
 
@@ -6,7 +6,7 @@ export interface useClickOutsideOptions {
   /**
    * List of elements that should not trigger the event.
    */
-  ignore?: ComputedGet<HTMLElement | null>[]
+  ignore?: ComputableGetter<HTMLElement | null>[]
   /**
    * Use capturing phase for internal event listener.
    * @default true
@@ -22,7 +22,7 @@ let _iOSWorkaround = false
  * @see https://vueuse.org/onClickOutside
  */
 export function useClickOutside(
-  target: ComputedGet<HTMLElement | null>,
+  target: ComputableGetter<HTMLElement | null>,
   handler: (evt: PointerEvent | MouseEvent) => void,
   options: useClickOutsideOptions = {}
 ) {

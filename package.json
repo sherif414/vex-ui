@@ -18,7 +18,7 @@
   "types": "./dist/index.d.ts",
   "typings": "./dist/index.d.ts",
   "scripts": {
-    "dev": "vite --port 3000 --host localhost",
+    "dev": "vite --port 3000",
     "build": "vite build && vue-tsc --declaration --emitDeclarationOnly",
     "types": "vue-tsc --declaration --emitDeclarationOnly",
     "preview": "vite preview",

@@ -15,7 +15,7 @@ import {
 } from '@/composables'
 import { createCollection, type CollectionContext } from '@/composables/collection'
 import type { TemplateRef } from '@/composables/template-ref'
-import type { ComputedGet, Fn, Setter, Signal } from '@/types'
+import type { ComputableGetter, Fn, Setter, Signal } from '@/types'
 import type { Placement } from '@floating-ui/vue'
 import { CheckIcon, ChevronRightIcon } from '@heroicons/vue/20/solid'
 import { useEventListener } from '@vueuse/core'
@@ -33,6 +33,8 @@ import {
   watch,
 } from 'vue'
 
+const ARROW_KEYS = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'] as const
+
 //----------------------------------------------------------------------------------------------------
 // 📌 Menu
 //----------------------------------------------------------------------------------------------------
@@ -47,12 +49,12 @@ const MENU_CTX = Symbol() as InjectionKey<{
   ContentEl: TemplateRef
   TRIGGER_ID: string
   CONTENT_ID: string
-  selected: [ComputedGet<Selected>, Setter<Value>]
+  selected: [ComputableGetter<Selected>, Setter<Value>]
   focusParentContent: Fn
   isSubMenu: boolean
 }>
 
-function useMenuCtx(component: string) {
+export function useMenuCtx(component: string) {
   return useContext(MENU_CTX, 'Menu', component)
 }
 
@@ -192,8 +194,8 @@ export type MenuTrigger = InstanceType<typeof MenuTrigger>
 
 const MENU_CONTENT_CTX = Symbol() as InjectionKey<{
   highlighted: Signal<number>
-  selected: [ComputedGet<Selected>, Setter<Value>]
-  isMenuOpen: ComputedGet<boolean>
+  selected: [ComputableGetter<Selected>, Setter<Value>]
+  isMenuOpen: ComputableGetter<boolean>
   CONTENT_ID: string
   useMenuCollection: () => CollectionContext
 }>
@@ -264,16 +266,8 @@ const MenuContentImpl = (p: MenuContentProps, { slots, attrs }: SetupContext) =>
             style={floatingStyles.value}
             ref={setContentEl}
             class={['vex-menu-content', !p.noAutoMinWidth && '--auto-min-width']}
-            onFocus={function onFocus() {
-              /**
-               * a menu/submenu content may gain focus from two interactions:
-               * - when it opens, in this case we want to default to highlighting the first non-disabled item.
-               * - when a submenu-content is closed focus is restored to the parent menu/submenu content,
-               *  in this case we want to preserve the highlight of the closing submenu trigger,
-               *  we can achieve that by checking if there is an already highlighted item which means we are in case 2
-               *  because highlighted is always set to -1 when its menu content closes.
-               */
-              highlighted() < 0 && setHighlighted(0)
+            onFocus={function onEntryFocus() {
+              focusFirst(getItems())
             }}
             onPointerenter={function highlightOwnTrigger() {
               /**
@@ -283,27 +277,35 @@ const MenuContentImpl = (p: MenuContentProps, { slots, attrs }: SetupContext) =>
                * - when highlight is on a submenu trigger and the user presses `ArrowRight` key the submenu should open.
                * - when a user presses the `ArrowLeft` key the submenu should close and focus should be restored to parent menu-content.
                */
-              throw 'not implemented'
-              if (isSubMenu) {
-              }
+              // TODO: implement
+              // focusFirst(getItems())
             }}
             onKeydown={function onKeydown(e: KeyboardEvent) {
-              if (!['ArrowLeft', 'ArrowRight'].includes(e.key)) return
+              const key = e.key as ArrowKeys
+              if (!ARROW_KEYS.includes(key)) return
+
               e.preventDefault()
               e.stopPropagation()
+              let items = getItems().filter((item) => !(item as HTMLButtonElement).disabled)
+              const intent = getKeyIntent(key)
 
-              switch (e.key) {
-                case 'ArrowRight':
-                  const item = getItems()[highlighted()]
-                  item?.click()
-                  break
-
-                case 'ArrowLeft':
-                  if (!isSubMenu) return
-                  setIsMenuOpen(false)
-                  focusParentContent()
-                  break
+              if (intent === 'next') {
+                const currFocusedItemIdx = items.indexOf(e.target as HTMLElement)
+                items = wrapArray(items, currFocusedItemIdx + 1)
               }
+
+              if (intent === 'prev') {
+                items.reverse()
+                const currFocusedItemIdx = items.indexOf(e.target as HTMLElement)
+                items = wrapArray(items, currFocusedItemIdx + 1)
+              }
+
+              if (intent === 'hide') {
+              }
+              if (intent === 'show') {
+              }
+
+              focusFirst(items)
             }}
           >
             {slots.default?.()}
@@ -372,9 +374,12 @@ const MenuItemImpl = (p: MenuItemProps, { slots, attrs }: SetupContext) => {
       disabled={p.disabled}
       role="menuitem"
       class={['vex-menu-item', isTrigger && '--is-trigger']}
-      onClick={() => !isTrigger && setSelected(p.value)}
-      onPointerenter={() => setHighlighted(index.value)}
-      onPointerleave={() => setHighlighted(-1)}
+      onClick={(e) => {
+        !isTrigger && setSelected(p.value)
+        // safari doesn't always focus when buttons are clicked so we manually focus
+        ItemEl()?.focus({ preventScroll: true })
+      }}
+      onPointerenter={() => ItemEl()?.focus({ preventScroll: true })}
     >
       <div class="vex-menu-item-check">{isSelected.value && <CheckIcon />}</div>
       {slots.default?.()}
@@ -414,4 +419,47 @@ export {
   MenuTrigger,
   Root,
   Trigger,
+}
+
+type ArrowKeys = 'ArrowDown' | 'ArrowUp' | 'ArrowLeft' | 'ArrowRight'
+
+function getDirectionAwareKey(key: ArrowKeys, dir?: 'ltr' | 'rtl') {
+  // TODO: implement direction
+  if (dir !== 'rtl') return key
+  return key === 'ArrowLeft' ? 'ArrowRight' : key === 'ArrowRight' ? 'ArrowLeft' : key
+}
+
+type KeyIntent = 'next' | 'prev' | 'show' | 'hide'
+
+function getKeyIntent(key: ArrowKeys): KeyIntent {
+  switch (getDirectionAwareKey(key)) {
+    case 'ArrowDown':
+      return 'next'
+
+    case 'ArrowUp':
+      return 'prev'
+
+    case 'ArrowLeft':
+      return 'hide'
+
+    case 'ArrowRight':
+      return 'show'
+  }
+}
+
+function focusFirst(items: HTMLElement[]) {
+  for (const item of items) {
+    const prevFocusedItem = document.activeElement
+    if (item === prevFocusedItem) return
+    item.focus()
+    if (document.activeElement !== prevFocusedItem) return
+  }
+}
+
+/**
+ * Wraps an array around itself at a given start index
+ * Example: `wrapArray(['a', 'b', 'c', 'd'], 2) === ['c', 'd', 'a', 'b']`
+ */
+function wrapArray<T>(array: T[], startIndex: number) {
+  return array.map((_, index) => array[(startIndex + index) % array.length])
 }
