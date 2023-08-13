@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useComputed, useTemplateRef } from '@/composables'
-import { onBeforeUnmount, onMounted, watch } from 'vue'
+import { useCollection, useComputed, useID, useTemplateRef } from '@/composables'
+import { onBeforeUnmount, onMounted } from 'vue'
 import { useGroupContext, useMenuContentCxt, useMenuTriggerCtx } from './context'
 import { CheckIcon, ChevronRightIcon } from '@heroicons/vue/20/solid'
 
@@ -21,7 +21,6 @@ const p = withDefaults(
 
 const {
   CONTENT_ID,
-  useMenuCollection,
   activeItemId: [, setActiveItemId],
 } = useMenuContentCxt('MenuItem')
 
@@ -29,14 +28,12 @@ const groupCtx = useGroupContext()
 const isWithinGroup = !!groupCtx
 
 //----------------------------------------------------------------------------------------------------
-// 📌 registration
+// 📌 collection
 //----------------------------------------------------------------------------------------------------
 
-const { getItems, register, unregister } = useMenuCollection()
 const [ItemEl, setItemEl] = useTemplateRef('MenuItem')
-
-onMounted(() => register(ItemEl()!))
-onBeforeUnmount(() => unregister(ItemEl()!))
+const itemData = { id: useID(), ref: ItemEl, disabled: () => p.disabled }
+const { getItems } = useCollection(itemData)
 
 //----------------------------------------------------------------------------------------------------
 // 📌 selection
@@ -46,23 +43,13 @@ const [selected, setSelected] = groupCtx?.selection ?? []
 const itemType = groupCtx?.itemType ?? (() => 'menuitem')
 const isTrigger = !!useMenuTriggerCtx()
 
-const index = useComputed(() => getItems().indexOf(ItemEl()!))
+const index = useComputed(() => getItems().indexOf(itemData))
 const isSelected = selected
   ? useComputed(() => {
       const _selected = selected()
       return Array.isArray(_selected) ? _selected.includes(p.value) : _selected === p.value
     })
   : useComputed(() => undefined)
-
-//----------------------------------------------------------------------------------------------------
-
-function onClick() {
-  // safari doesn't always focus when buttons are clicked so we manually focus
-  ItemEl()?.focus({ preventScroll: true })
-
-  if (!setSelected || isTrigger) return
-  setSelected(p.value)
-}
 </script>
 
 <template>
@@ -74,9 +61,17 @@ function onClick() {
     :role="itemType()"
     :aria-checked="isSelected"
     :class="['vex-menu-item', isTrigger && '--is-trigger']"
-    @click="onClick"
     @pointerenter="ItemEl()?.focus({ preventScroll: true })"
     @focus="setActiveItemId(index)"
+    @click="
+      () => {
+        // safari doesn't always focus when buttons are clicked so we manually focus
+        ItemEl()?.focus({ preventScroll: true })
+        if (setSelected && !isTrigger) {
+          setSelected(p.value)
+        }
+      }
+    "
   >
     <div class="vex-menu-item-check">
       <CheckIcon v-if="isSelected" />

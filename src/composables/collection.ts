@@ -1,36 +1,68 @@
 import type { Getter } from '@/types'
 import { provide, type InjectionKey, inject, shallowReactive } from 'vue'
+import type { getTemplateRef } from './template-ref'
+import { tryOnScopeDispose } from '@vueuse/core'
+import { useComputed } from './computed'
 
 export type CollectionContext = {
-  register(el: HTMLElement): void
-  unregister(el: HTMLElement): void
-  getItems(): HTMLElement[]
+  register: (data: ItemData) => void
+  unregister: (data: ItemData) => void
+  getItems(): ItemData[]
   CollectionEl: Getter<HTMLElement | null>
 }
 
-export function createCollection(CollectionEl: Getter<HTMLElement | null>) {
-  const items = shallowReactive(new Set<HTMLElement>())
+type ItemData = {
+  id: string
+  ref: getTemplateRef
+  disabled?: Getter<boolean>
+}
 
-  const getItems = () => {
-    return [...items]
+const COLLECTION_CTX = Symbol() as InjectionKey<CollectionContext>
+
+export function createCollection(
+  CollectionEl: Getter<HTMLElement | null>,
+  initialItemsMap?: Map<getTemplateRef, ItemData>
+) {
+  const itemsMap = shallowReactive<Map<getTemplateRef, ItemData>>(initialItemsMap ?? new Map())
+
+  function getItems() {
+    return [...itemsMap.values()]
   }
 
-  const register = (el: HTMLElement) => {
-    items.add(el)
+  const elements = useComputed(function getElements() {
+    return [...itemsMap.keys()].reduce<HTMLElement[]>((arr, ref) => {
+      const item = ref()
+      item != null && arr.push(item)
+      return arr
+    }, [])
+  })
+
+  function register(data: ItemData) {
+    itemsMap.set(data.ref, data)
   }
 
-  const unregister = (el: HTMLElement) => {
-    items.delete(el)
+  function unregister(data: ItemData) {
+    itemsMap.delete(data.ref)
   }
 
-  const useCollection = () => {
-    return {
-      getItems,
-      register,
-      unregister,
-      CollectionEl,
-    }
+  provide(COLLECTION_CTX, {
+    getItems,
+    register,
+    unregister,
+    CollectionEl,
+  })
+
+  return { itemsMap, elements }
+}
+
+export function useCollection(itemData: ItemData) {
+  const ctx = inject(COLLECTION_CTX, null)
+  if (!ctx) {
+    throw new Error('[vex] collection item needs to be contained by a collection')
   }
 
-  return [getItems, useCollection] as const
+  ctx.register(itemData)
+  tryOnScopeDispose(() => ctx.unregister(itemData))
+
+  return ctx
 }

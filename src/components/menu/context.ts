@@ -1,7 +1,6 @@
-import { useContext, type CollectionContext } from '@/composables'
+import { useContext } from '@/composables'
 import type { TemplateRef } from '@/composables/template-ref'
 import type { Signal, ComputableGetter, Setter, Fn, Getter } from '@/types'
-import { noop } from '@/composables/helpers'
 import { inject, type InjectionKey } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
@@ -33,7 +32,6 @@ export function useMenuCtx(component: string) {
 export const MENU_CONTENT_CTX = Symbol() as InjectionKey<{
   isMenuOpen: ComputableGetter<boolean>
   CONTENT_ID: string
-  useMenuCollection: () => CollectionContext
   activeItemId: Signal<number>
 }>
 

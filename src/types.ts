@@ -16,3 +16,17 @@ export type MaybeRef<T> = Ref<T> | T
 export type MaybeGetter<T> = Getter<T> | T
 export type RefOrGetter<T> = Ref<T> | Getter<T>
 export type MaybeRefOrGetter<T> = RefOrGetter<T> | T
+
+//utils
+export type Orientation = 'vertical' | 'horizontal'
+export type NavigationKeys =
+  | 'ArrowDown'
+  | 'ArrowUp'
+  | 'ArrowLeft'
+  | 'ArrowRight'
+  | 'Home'
+  | 'End'
+  | 'Enter'
+  | ' '
+  | 'Escape'
+export type KeyIntent = 'next' | 'prev' | 'last' | 'first' | 'show' | 'hide'

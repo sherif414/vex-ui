@@ -41,9 +41,9 @@ const {
 //----------------------------------------------------------------------------------------------------
 
 const [activeItemId, setActiveItemId] = useSignal(-1)
-const [getItems, useMenuCollection] = createCollection(ContentEl)
+const { elements } = createCollection(ContentEl)
 
-useRovingFocus(ContentEl, getItems, {
+useRovingFocus(ContentEl, () => elements.value, {
   orientation,
 })
 
@@ -64,11 +64,9 @@ const { floatingStyles } = useFloating(TriggerEl, ContentEl, isMenuOpen, {
 
 //----------------------------------------------------------------------------------------------------
 
-// scope menuitems context to their parent menu-content
 provide(MENU_CONTENT_CTX, {
   isMenuOpen,
   CONTENT_ID,
-  useMenuCollection,
   activeItemId: [activeItemId, setActiveItemId],
 })
 </script>
