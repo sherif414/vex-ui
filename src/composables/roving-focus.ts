@@ -9,7 +9,7 @@ type Orientation = 'vertical' | 'horizontal'
 type NavigationKeys = 'ArrowDown' | 'ArrowUp' | 'ArrowLeft' | 'ArrowRight' | 'Home' | 'End'
 
 interface RovingFocusOptions {
-  onEntryFocus?: (e: FocusEvent) => void
+  onEntryFocus?: (e: FocusEvent, focusFirst: (items: HTMLElement[]) => void) => void
   orientation?: MaybeGetter<Orientation>
 }
 
@@ -19,7 +19,7 @@ export function useRovingFocus(
   options: RovingFocusOptions = {}
 ) {
   useEventListener(group, 'focus', function onGroupFocus(e: FocusEvent) {
-    options.onEntryFocus ? options.onEntryFocus(e) : focusFirst(getItems())
+    options.onEntryFocus ? options.onEntryFocus(e, focusFirst) : focusFirst(getItems())
   })
 
   useEventListener(group, 'keydown', function onGroupKeydown(e: KeyboardEvent) {
