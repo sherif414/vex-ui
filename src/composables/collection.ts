@@ -29,13 +29,15 @@ export function createCollection(
     return [...itemsMap.values()]
   }
 
-  const elements = useComputed(function getElements() {
+  const _elements = useComputed(function getElements() {
     return [...itemsMap.keys()].reduce<HTMLElement[]>((arr, ref) => {
       const item = ref()
       item != null && arr.push(item)
       return arr
     }, [])
   })
+
+  const elements = () => _elements.value
 
   function register(data: ItemData) {
     itemsMap.set(data.ref, data)
