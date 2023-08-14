@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useID, useSelect, useSignal, useTemplateRef, useVModel } from '@/composables'
-import { inject, provide, toRef } from 'vue'
+import { inject, onUnmounted, provide, toRef } from 'vue'
 import { MENU_CTX, type Selected } from './context'
+import { useEventListener } from '@vueuse/core'
+import { noop } from '@/composables/helpers'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta

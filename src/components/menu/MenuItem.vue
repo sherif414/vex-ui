@@ -61,7 +61,6 @@ const isSelected = selected
     :role="itemType()"
     :aria-checked="isSelected"
     :class="['vex-menu-item', isTrigger && '--is-trigger']"
-    @pointerenter="ItemEl()?.focus({ preventScroll: true })"
     @focus="setActiveItemId(index)"
     @click="
       () => {

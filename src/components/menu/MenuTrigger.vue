@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { usePointerOpen, useKeyboardOpen, useClickOpen } from '@/composables'
-import { watch, provide, cloneVNode, type VNode, useAttrs } from 'vue'
+import { watch, provide, cloneVNode, type VNode, useAttrs, h } from 'vue'
 import { MENU_TRIGGER_CTX, useMenuCtx } from './context'
 
 //----------------------------------------------------------------------------------------------------
@@ -31,7 +31,7 @@ const {
   isSubMenu,
 } = useMenuCtx('MenuTrigger')
 
-isSubMenu && usePointerOpen(TriggerEl, ContentEl, setIsMenuOpen)
+// isSubMenu && usePointerOpen(TriggerEl, ContentEl, setIsMenuOpen)
 useKeyboardOpen(TriggerEl, ContentEl, setIsMenuOpen, { isMainTrigger: !isSubMenu, orientation })
 useClickOpen(TriggerEl, ContentEl, [isMenuOpen, setIsMenuOpen])
 
@@ -39,11 +39,11 @@ provide(MENU_TRIGGER_CTX, {
   isTrigger: true,
 })
 
-const Trigger = () => cloneVNode(slots.default!({})[0], { ref: setTriggerEl }, true)
+const Trigger = () => h(slots.default!({})[0])
 </script>
 
 <template>
-  <Trigger v-if="isSubMenu || p.asChild" :class="{ '--menu-open': isMenuOpen() }" />
+  <Trigger :ref="setTriggerEl" v-if="isSubMenu || p.asChild" :class="{ '--open': isMenuOpen() }" />
   <button v-else v-bind="attrs" :ref="setTriggerEl">
     <slot />
   </button>

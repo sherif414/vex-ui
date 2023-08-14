@@ -9,6 +9,7 @@ import {
 import { type Placement } from '@floating-ui/vue'
 import { provide } from 'vue'
 import { MENU_CONTENT_CTX, useMenuCtx } from './context'
+import { isUsingKeyboard } from '@/composables/is-using-keyboard'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -43,8 +44,11 @@ const {
 const [activeItemId, setActiveItemId] = useSignal(-1)
 const { elements } = createCollection(ContentEl)
 
-useRovingFocus(ContentEl, () => elements.value, {
+useRovingFocus(ContentEl, elements, {
   orientation,
+  onEntryFocus(e, focusFirst) {
+    isUsingKeyboard() && focusFirst(elements())
+  },
 })
 
 useDropdownAria(TriggerEl, ContentEl, {
@@ -72,8 +76,8 @@ provide(MENU_CONTENT_CTX, {
 </script>
 
 <template>
-  <!-- TODO: screen reader needs teleport to be active on all menus -->
-  <Teleport :disabled="isSubMenu" to="body">
+  <!-- TODO: screen reader needs teleport to be active on all menus? -->
+  <Teleport to="body">
     <Transition name="vex-t-menu">
       <div
         v-if="isMenuOpen()"

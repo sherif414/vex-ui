@@ -32,8 +32,13 @@
     padding-inline-end: var(--vex-spacing-7);
   }
 
-  &:focus,
-  &.--focused {
+  &:hover {
+    background-color: var(--vex-c-neutral-100);
+  }
+
+  &:focus-visible,
+  &.--focused,
+  &.--open.--is-trigger {
     background-color: var(--vex-c-neutral-200);
   }
 
