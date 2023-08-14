@@ -31,7 +31,6 @@ const {
   isSubMenu,
 } = useMenuCtx('MenuTrigger')
 
-// isSubMenu && usePointerOpen(TriggerEl, ContentEl, setIsMenuOpen)
 useKeyboardOpen(TriggerEl, ContentEl, setIsMenuOpen, { isMainTrigger: !isSubMenu, orientation })
 useClickOpen(TriggerEl, ContentEl, [isMenuOpen, setIsMenuOpen])
 
