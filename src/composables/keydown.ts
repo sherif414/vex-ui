@@ -8,17 +8,7 @@ type UseKeydownIntentOptions = {
   orientation?: Getter<Orientation>
 }
 
-const VALID_KEYS = [
-  'ArrowDown',
-  'ArrowUp',
-  'ArrowLeft',
-  'ArrowRight',
-  'End',
-  'Home',
-  'Enter',
-  ' ',
-  'Escape',
-] as const
+const VALID_KEYS = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'End', 'Home'] as const
 
 export function useKeydownIntent(
   target: Getter<HTMLElement | null>,

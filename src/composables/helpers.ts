@@ -10,6 +10,7 @@ export const isClient = typeof window !== 'undefined'
 export const isString = (value: unknown): value is string => typeof value === 'string'
 export const isFunction = (value: unknown): value is Function => value instanceof Function
 export const isIOS = /*#__PURE__*/ getIsIOS()
+export const dir = useTextDirection()
 
 //----------------------------------------------------------------------------------------------------
 // 📌 getters
@@ -70,15 +71,6 @@ export function getKeyIntent(
       if (orientation === 'vertical') return 'hide'
       return 'prev'
 
-    case 'Enter':
-      return 'show'
-
-    case ' ':
-      return 'show'
-
-    case 'Escape':
-      return 'hide'
-
     case 'End':
       return 'last'
 
@@ -101,17 +93,6 @@ export function wrapArray<T>(array: T[], startIndex: number) {
   return array.map((_, index) => array[(startIndex + index) % array.length])
 }
 
-const dir = useTextDirection()
-
 type Orientation = 'vertical' | 'horizontal'
-type NavigationKeys =
-  | 'ArrowDown'
-  | 'ArrowUp'
-  | 'ArrowLeft'
-  | 'ArrowRight'
-  | 'Home'
-  | 'End'
-  | 'Enter'
-  | ' '
-  | 'Escape'
+type NavigationKeys = 'ArrowDown' | 'ArrowUp' | 'ArrowLeft' | 'ArrowRight' | 'Home' | 'End'
 type KeyIntent = 'next' | 'prev' | 'last' | 'first' | 'show' | 'hide'

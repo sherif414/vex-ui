@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { useID, useSelect, useSignal, useTemplateRef, useVModel } from '@/composables'
-import { inject, onUnmounted, provide, toRef } from 'vue'
+import { useID, useSignal, useTemplateRef } from '@/composables'
+import { inject, provide, toRef } from 'vue'
 import { MENU_CTX, type Selected } from './context'
-import { useEventListener } from '@vueuse/core'
-import { noop } from '@/composables/helpers'
+import type { Getter } from '@/types'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -11,9 +10,6 @@ import { noop } from '@/composables/helpers'
 
 const p = withDefaults(
   defineProps<{
-    modelValue?: Selected
-    deselection?: boolean
-    multiselect?: boolean
     orientation?: 'vertical' | 'horizontal'
   }>(),
   {
@@ -21,8 +17,8 @@ const p = withDefaults(
   }
 )
 
-const emit = defineEmits<{
-  'update:modelValue': [value?: Selected]
+defineSlots<{
+  default: (props: { open: boolean }) => any
 }>()
 
 //----------------------------------------------------------------------------------------------------
@@ -55,14 +51,13 @@ provide(MENU_CTX, {
   },
 })
 
+const open = toRef(isMenuOpen as Getter<boolean>)
+
 defineExpose({
-  open: toRef(isMenuOpen),
-  selected: toRef(() => p.modelValue),
-  multiselect: toRef(() => p.multiselect),
-  deselection: toRef(() => p.deselection),
+  open,
 })
 </script>
 
 <template>
-  <slot />
+  <slot :open="open" />
 </template>

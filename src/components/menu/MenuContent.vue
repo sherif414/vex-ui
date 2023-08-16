@@ -3,13 +3,14 @@ import {
   createCollection,
   useDropdownAria,
   useFloating,
+  useLayer,
   useRovingFocus,
   useSignal,
+  isUsingKeyboard,
 } from '@/composables'
 import { type Placement } from '@floating-ui/vue'
 import { provide } from 'vue'
 import { MENU_CONTENT_CTX, useMenuCtx } from './context'
-import { isUsingKeyboard } from '@/composables/is-using-keyboard'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -30,7 +31,7 @@ const p = withDefaults(
 //----------------------------------------------------------------------------------------------------
 
 const {
-  isMenuOpen: [isMenuOpen],
+  isMenuOpen: [isMenuOpen, setIsMenuOpen],
   TriggerEl: [TriggerEl],
   ContentEl: [ContentEl, setContentEl],
   TRIGGER_ID,
@@ -59,6 +60,14 @@ useDropdownAria(TriggerEl, ContentEl, {
   ariaActiveDescendant: () => `${CONTENT_ID}-${activeItemId()}`,
 })
 
+const { isTopLayer } = useLayer(ContentEl, isMenuOpen, {
+  onDismiss(e) {
+    e.stopPropagation()
+    setIsMenuOpen(false)
+    isUsingKeyboard() && TriggerEl()?.focus()
+  },
+})
+
 const { floatingStyles } = useFloating(TriggerEl, ContentEl, isMenuOpen, {
   placement: () => (p.placement ?? isSubMenu ? 'right-start' : 'bottom-start'),
   autoMinWidth: () => !p.noAutoMinWidth,
@@ -83,7 +92,7 @@ provide(MENU_CONTENT_CTX, {
         v-if="isMenuOpen()"
         v-bind="$attrs"
         :aria-orientation="orientation()"
-        :style="floatingStyles"
+        :style="{ ...floatingStyles, pointerEvents: isTopLayer ? 'auto' : 'none' }"
         :ref="setContentEl"
         :class="['vex-menu-content', !p.noAutoMinWidth && '--auto-min-width']"
         tabindex="-1"

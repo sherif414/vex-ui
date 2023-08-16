@@ -19,14 +19,5 @@ export type MaybeRefOrGetter<T> = RefOrGetter<T> | T
 
 //utils
 export type Orientation = 'vertical' | 'horizontal'
-export type NavigationKeys =
-  | 'ArrowDown'
-  | 'ArrowUp'
-  | 'ArrowLeft'
-  | 'ArrowRight'
-  | 'Home'
-  | 'End'
-  | 'Enter'
-  | ' '
-  | 'Escape'
+export type NavigationKeys = 'ArrowDown' | 'ArrowUp' | 'ArrowLeft' | 'ArrowRight' | 'Home' | 'End'
 export type KeyIntent = 'next' | 'prev' | 'last' | 'first' | 'show' | 'hide'

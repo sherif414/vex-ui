@@ -1,43 +1,15 @@
-import type { ComputableSetter, Getter, Signal } from '@/types'
+import type { ComputableSetter, Getter, Orientation, Signal, MaybeGetter } from '@/types'
 import { useEventListener } from '@vueuse/core'
-import { nextTick } from 'vue'
-import { useClickOutside, useDelayedOpen } from '.'
+import { nextTick, toValue } from 'vue'
+import { useDelayedOpen } from '.'
 import { getKeyIntent } from './helpers'
 
 //----------------------------------------------------------------------------------------------------
-// 📌 click open
-//----------------------------------------------------------------------------------------------------
-
-interface UseClickOpenOptions {
-  toggle?: Getter<boolean>
-}
-
-export function useClickOpen(
-  trigger: Getter<HTMLElement | null>,
-  content: Getter<HTMLElement | null>,
-  open: Signal<boolean>,
-  options: UseClickOpenOptions = {}
-) {
-  const { toggle = () => true } = options
-  const [isOpen, setOpen] = open
-
-  useEventListener(trigger, 'click', (e) => {
-    setOpen(toggle() ? (v) => !v : true)
-    if (!isOpen()) return
-    e.preventDefault()
-    nextTick(() => content()?.focus())
-  })
-
-  useClickOutside(content, () => setOpen(false), { ignore: [trigger] })
-}
-
-//----------------------------------------------------------------------------------------------------
-// 📌 keyboard open
+// 📌 keyboard
 //----------------------------------------------------------------------------------------------------
 
 const NAVIGATION_KEYS = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'End', 'Home'] as const
 
-type Orientation = 'vertical' | 'horizontal'
 type NavigationKeys = 'ArrowDown' | 'ArrowUp' | 'ArrowLeft' | 'ArrowRight' | 'Home' | 'End'
 
 interface UseKeyboardOpenOptions {
@@ -100,19 +72,19 @@ export function useKeyboardOpen(
 }
 
 //----------------------------------------------------------------------------------------------------
-// 📌 pointer open
+// 📌 hover
 //----------------------------------------------------------------------------------------------------
 
-interface UsePointerOpenOptions {
+interface UseHoverOpenOptions {
   showDelay?: Getter<number>
   hideDelay?: Getter<number>
 }
 
-export function usePointerOpen(
+export function useHoverOpen(
   trigger: Getter<HTMLElement | null>,
   content: Getter<HTMLElement | null>,
   setOpen: ComputableSetter<boolean>,
-  options: UsePointerOpenOptions = {}
+  options: UseHoverOpenOptions = {}
 ) {
   const { showDelay = () => 150, hideDelay = () => 150 } = options
 
