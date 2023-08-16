@@ -10,7 +10,7 @@ import {
 } from '@/composables'
 import { type Placement } from '@floating-ui/vue'
 import { provide } from 'vue'
-import { MENU_CONTENT_CTX, useMenuCtx } from './context'
+import { MENU_CONTENT_CTX, injectMenuContext } from './context'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -38,7 +38,7 @@ const {
   CONTENT_ID,
   isSubMenu,
   orientation,
-} = useMenuCtx('MenuContent')
+} = injectMenuContext('MenuContent')
 
 //----------------------------------------------------------------------------------------------------
 

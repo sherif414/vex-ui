@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useCollection, useComputed, useID, useTemplateRef } from '@/composables'
 import { onBeforeUnmount, onMounted } from 'vue'
-import { useGroupContext, useMenuContentCtx, useMenuTriggerCtx } from './context'
+import { injectGroupContext, injectContentContext, injectTriggerContext } from './context'
 import { CheckIcon, ChevronRightIcon } from '@heroicons/vue/20/solid'
 
 //----------------------------------------------------------------------------------------------------
@@ -22,9 +22,9 @@ const p = withDefaults(
 const {
   CONTENT_ID,
   activeItemId: [, setActiveItemId],
-} = useMenuContentCtx('MenuItem')
+} = injectContentContext('MenuItem')
 
-const groupCtx = useGroupContext()
+const groupCtx = injectGroupContext()
 const isWithinGroup = !!groupCtx
 
 //----------------------------------------------------------------------------------------------------
@@ -41,7 +41,7 @@ const { getItems } = useCollection(itemData)
 
 const [selected, setSelected] = groupCtx?.selection ?? []
 const itemType = groupCtx?.itemType ?? (() => 'menuitem')
-const isTrigger = !!useMenuTriggerCtx()
+const isTrigger = !!injectTriggerContext()
 
 const index = useComputed(() => getItems().indexOf(itemData))
 const isSelected = selected

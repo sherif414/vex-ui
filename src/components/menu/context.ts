@@ -21,7 +21,7 @@ export const MENU_CTX = Symbol() as InjectionKey<{
   isSubMenu: boolean
 }>
 
-export function useMenuCtx(component: string) {
+export function injectMenuContext(component: string) {
   return useContext(MENU_CTX, 'Menu', component)
 }
 
@@ -34,7 +34,7 @@ export const MENU_CONTENT_CTX = Symbol() as InjectionKey<{
   activeItemId: Signal<number>
 }>
 
-export function useMenuContentCtx(component: string) {
+export function injectContentContext(component: string) {
   return useContext(MENU_CONTENT_CTX, 'MenuContent', component)
 }
 
@@ -46,7 +46,7 @@ export const MENU_TRIGGER_CTX = Symbol() as InjectionKey<{
   isTrigger: boolean
 }>
 
-export function useMenuTriggerCtx() {
+export function injectTriggerContext() {
   return inject(MENU_TRIGGER_CTX, null)
 }
 
@@ -59,6 +59,6 @@ export const MENU_GROUP = Symbol() as InjectionKey<{
   itemType: Getter<'menuitemcheckbox' | 'menuitemradio'>
 }>
 
-export function useGroupContext() {
+export function injectGroupContext() {
   return inject(MENU_GROUP, null)
 }

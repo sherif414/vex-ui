@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { provide, type VNode, useAttrs, h, nextTick } from 'vue'
-import { MENU_TRIGGER_CTX, useMenuCtx } from './context'
+import { MENU_TRIGGER_CTX, injectMenuContext } from './context'
 import { useEventListener } from '@vueuse/core'
 import { useKeydownIntent } from '@/composables/keydown'
 
@@ -30,7 +30,7 @@ const {
   ContentEl: [ContentEl],
   orientation,
   isSubMenu,
-} = useMenuCtx('MenuTrigger')
+} = injectMenuContext('MenuTrigger')
 
 const isMainTrigger = !isSubMenu
 
