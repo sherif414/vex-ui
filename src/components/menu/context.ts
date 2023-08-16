@@ -30,7 +30,6 @@ export function useMenuCtx(component: string) {
 //----------------------------------------------------------------------------------------------------
 
 export const MENU_CONTENT_CTX = Symbol() as InjectionKey<{
-  isMenuOpen: ComputableGetter<boolean>
   CONTENT_ID: string
   activeItemId: Signal<number>
 }>

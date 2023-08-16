@@ -78,7 +78,6 @@ const { floatingStyles } = useFloating(TriggerEl, ContentEl, isMenuOpen, {
 //----------------------------------------------------------------------------------------------------
 
 provide(MENU_CONTENT_CTX, {
-  isMenuOpen,
   CONTENT_ID,
   activeItemId: [activeItemId, setActiveItemId],
 })

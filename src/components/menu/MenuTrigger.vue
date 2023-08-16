@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { isUsingKeyboard, useLayer } from '@/composables'
 import { provide, type VNode, useAttrs, h, nextTick } from 'vue'
 import { MENU_TRIGGER_CTX, useMenuCtx } from './context'
 import { useEventListener } from '@vueuse/core'
