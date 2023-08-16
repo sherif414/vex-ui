@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useCollection, useComputed, useID, useTemplateRef } from '@/composables'
 import { onBeforeUnmount, onMounted } from 'vue'
-import { useGroupContext, useMenuContentCxt, useMenuTriggerCtx } from './context'
+import { useGroupContext, useMenuContentCtx, useMenuTriggerCtx } from './context'
 import { CheckIcon, ChevronRightIcon } from '@heroicons/vue/20/solid'
 
 //----------------------------------------------------------------------------------------------------
@@ -22,7 +22,7 @@ const p = withDefaults(
 const {
   CONTENT_ID,
   activeItemId: [, setActiveItemId],
-} = useMenuContentCxt('MenuItem')
+} = useMenuContentCtx('MenuItem')
 
 const groupCtx = useGroupContext()
 const isWithinGroup = !!groupCtx

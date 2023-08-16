@@ -34,7 +34,7 @@ export const MENU_CONTENT_CTX = Symbol() as InjectionKey<{
   activeItemId: Signal<number>
 }>
 
-export function useMenuContentCxt(component: string) {
+export function useMenuContentCtx(component: string) {
   return useContext(MENU_CONTENT_CTX, 'MenuContent', component)
 }
 
