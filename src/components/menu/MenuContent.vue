@@ -3,7 +3,6 @@ import {
   createCollection,
   useDropdownAria,
   useFloating,
-  useLayer,
   useRovingFocus,
   useSignal,
   isUsingKeyboard,
@@ -31,7 +30,7 @@ const p = withDefaults(
 //----------------------------------------------------------------------------------------------------
 
 const {
-  isMenuOpen: [isMenuOpen, setIsMenuOpen],
+  isMenuOpen: [isMenuOpen],
   TriggerEl: [TriggerEl],
   ContentEl: [ContentEl, setContentEl],
   TRIGGER_ID,
@@ -60,14 +59,6 @@ useDropdownAria(TriggerEl, ContentEl, {
   ariaActiveDescendant: () => `${CONTENT_ID}-${activeItemId()}`,
 })
 
-const { isTopLayer } = useLayer(ContentEl, isMenuOpen, {
-  onDismiss(e) {
-    e.stopPropagation()
-    setIsMenuOpen(false)
-    isUsingKeyboard() && TriggerEl()?.focus()
-  },
-})
-
 const { floatingStyles } = useFloating(TriggerEl, ContentEl, isMenuOpen, {
   placement: () => (p.placement ?? isSubMenu ? 'right-start' : 'bottom-start'),
   autoMinWidth: () => !p.noAutoMinWidth,
@@ -91,7 +82,7 @@ provide(MENU_CONTENT_CTX, {
         v-if="isMenuOpen()"
         v-bind="$attrs"
         :aria-orientation="orientation()"
-        :style="{ ...floatingStyles, pointerEvents: isTopLayer ? 'auto' : 'none' }"
+        :style="{ ...floatingStyles }"
         :ref="setContentEl"
         :class="['vex-menu-content', !p.noAutoMinWidth && '--auto-min-width']"
         tabindex="-1"

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useID, useSignal, useTemplateRef } from '@/composables'
-import { inject, provide, toRef } from 'vue'
-import { MENU_CTX, type Selected } from './context'
+import { useControllableState, useID, useTemplateRef } from '@/composables'
+import { inject, provide, shallowReactive, toRef } from 'vue'
+import { MENU_CTX } from './context'
 import type { Getter } from '@/types'
 
 //----------------------------------------------------------------------------------------------------
@@ -11,6 +11,7 @@ import type { Getter } from '@/types'
 const p = withDefaults(
   defineProps<{
     orientation?: 'vertical' | 'horizontal'
+    open?: boolean
   }>(),
   {
     orientation: 'vertical',
@@ -29,12 +30,17 @@ const CONTENT_ID = useID()
 const [TriggerEl, setTriggerEl] = useTemplateRef('MenuTrigger')
 const [ContentEl, setContentEl] = useTemplateRef('MenuContent')
 
-const [isMenuOpen, setIsMenuOpen] = useSignal(false)
+const [isMenuOpen, setIsMenuOpen] = useControllableState({
+  prop: () => p.open,
+  defaultValue: !!p.open,
+  name: 'open',
+})
 
 //----------------------------------------------------------------------------------------------------
 
 const ctx = inject(MENU_CTX, null)
 const isSubMenu = !!ctx
+isSubMenu && ctx.submenus.push(ContentEl)
 
 provide(MENU_CTX, {
   isMenuOpen: [isMenuOpen, setIsMenuOpen],
@@ -44,6 +50,7 @@ provide(MENU_CTX, {
   CONTENT_ID,
   isSubMenu,
   orientation: () => p.orientation,
+  submenus: [],
 
   focusParentContent() {
     const el = ctx?.ContentEl[0]()

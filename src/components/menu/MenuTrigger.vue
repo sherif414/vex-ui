@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { provide, type VNode, useAttrs, h, nextTick } from 'vue'
+import { provide, type VNode, useAttrs, h, nextTick, onMounted } from 'vue'
 import { MENU_TRIGGER_CTX, injectMenuContext } from './context'
 import { useEventListener } from '@vueuse/core'
 import { useKeydownIntent } from '@/composables/keydown'
+import { useClickOutside } from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -30,6 +31,7 @@ const {
   ContentEl: [ContentEl],
   orientation,
   isSubMenu,
+  submenus,
 } = injectMenuContext('MenuTrigger')
 
 const isMainTrigger = !isSubMenu
@@ -68,6 +70,23 @@ useKeydownIntent(ContentEl, (e, intent) => {
     TriggerEl()?.focus()
   }
 })
+
+useEventListener(ContentEl, 'keydown', (e: KeyboardEvent) => {
+  if (e.key === 'Escape') {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsMenuOpen(false)
+    TriggerEl()?.focus()
+  }
+})
+
+useClickOutside(
+  ContentEl,
+  () => {
+    setIsMenuOpen(false)
+  },
+  { ignore: () => [TriggerEl, ...submenus] }
+)
 
 // firefox bug
 useEventListener(TriggerEl, 'keyup', (e: KeyboardEvent) => {

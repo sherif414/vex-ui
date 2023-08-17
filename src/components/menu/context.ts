@@ -1,5 +1,5 @@
 import { useContext } from '@/composables'
-import type { TemplateRef } from '@/composables/template-ref'
+import type { TemplateRef, getTemplateRef } from '@/composables/template-ref'
 import type { Signal, ComputableGetter, Setter, Fn, Getter } from '@/types'
 import { inject, type InjectionKey } from 'vue'
 
@@ -19,6 +19,7 @@ export const MENU_CTX = Symbol() as InjectionKey<{
   orientation: Getter<'vertical' | 'horizontal'>
   focusParentContent: Fn
   isSubMenu: boolean
+  submenus: getTemplateRef[]
 }>
 
 export function injectMenuContext(component: string) {
