@@ -79,6 +79,17 @@ export function getKeyIntent(
   }
 }
 
+export function getKebabCase(str = '') {
+  if (getKebabCase.cache.has(str)) return getKebabCase.cache.get(str)!
+  const kebab = str
+    .replace(/[^a-z]/gi, '-')
+    .replace(/\B([A-Z])/g, '-$1')
+    .toLowerCase()
+  getKebabCase.cache.set(str, kebab)
+  return kebab
+}
+getKebabCase.cache = new Map<string, string>()
+
 //----------------------------------------------------------------------------------------------------
 // 📌 specials
 //----------------------------------------------------------------------------------------------------
