@@ -1,4 +1,4 @@
-import type { ComputableGetter } from '@/types'
+import type { Getter } from '@/types'
 import { isIOS, noop } from './helpers'
 import { useEventListener } from '@vueuse/core'
 
@@ -6,7 +6,7 @@ export interface useClickOutsideOptions {
   /**
    * List of elements that should not trigger the event.
    */
-  ignore?: ComputableGetter<HTMLElement | null>[]
+  ignore?: Getter<Getter<HTMLElement | null>[]>
   /**
    * Use capturing phase for internal event listener.
    * @default true
@@ -22,11 +22,11 @@ let _iOSWorkaround = false
  * @see https://vueuse.org/onClickOutside
  */
 export function useClickOutside(
-  target: ComputableGetter<HTMLElement | null>,
+  target: Getter<HTMLElement | null>,
   handler: (evt: PointerEvent | MouseEvent) => void,
   options: useClickOutsideOptions = {}
 ) {
-  const { ignore = [], capture = true } = options
+  const { ignore = () => [], capture = true } = options
 
   if (!window) return
 
@@ -40,35 +40,28 @@ export function useClickOutside(
   let shouldListen = true
 
   const shouldIgnore = (event: PointerEvent | MouseEvent) => {
-    return ignore.some((target) => {
+    return ignore().some((target) => {
       const el = target()
       return el && (event.target === el || event.composedPath().includes(el))
     })
   }
 
-  const listener = (event: PointerEvent | MouseEvent) => {
+  function onClick(e: PointerEvent | MouseEvent) {
     const el = target()
-    if (!el || el === event.target || event.composedPath().includes(el)) return
-    if (event.detail === 0) shouldListen = !shouldIgnore(event)
+    if (!el || el === e.target || e.composedPath().includes(el)) return
 
-    if (!shouldListen) {
-      shouldListen = true
-      return
-    }
+    shouldListen = e.detail === 0 ? !shouldIgnore(e) : shouldListen
+    shouldListen && handler(e)
+  }
 
-    handler(event)
+  function onPointerdown(e: PointerEvent) {
+    const el = target()
+    if (el) shouldListen = !e.composedPath().includes(el) && !shouldIgnore(e)
   }
 
   const cleanup = [
-    useEventListener('click', listener, { passive: true, capture }),
-    useEventListener(
-      'pointerdown',
-      (e) => {
-        const el = target()
-        if (el) shouldListen = !e.composedPath().includes(el) && !shouldIgnore(e)
-      },
-      { passive: true }
-    ),
+    useEventListener('click', onClick, { passive: true, capture }),
+    useEventListener('pointerdown', onPointerdown, { passive: true }),
   ]
 
   const stop = () => cleanup.forEach((fn) => fn())
