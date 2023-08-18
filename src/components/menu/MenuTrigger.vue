@@ -110,12 +110,11 @@ const Trigger = () => h(slots.default!({})[0])
 </script>
 
 <template>
-  <Trigger
-    v-if="!isMainTrigger || p.asChild"
+  <Component
+    :is="!isMainTrigger || p.asChild ? Trigger : 'button'"
     :ref="setTriggerEl"
-    :class="{ '--open': isMenuOpen() }"
-  />
-  <button v-else v-bind="attrs" :ref="setTriggerEl" :class="{ '--open': isMenuOpen() }">
+    :class="['--is-trigger', { '--open': isMenuOpen() }]"
+  >
     <slot />
-  </button>
+  </Component>
 </template>

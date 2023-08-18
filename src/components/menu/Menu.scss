@@ -8,12 +8,21 @@
   flex-direction: column;
   align-items: stretch;
   outline: none;
+  gap: var(--vex-spacing-2px);
 }
 
 @layer base {
   .vex-menu-content.--auto-min-width {
     min-width: var(--vex-auto-min-width);
   }
+}
+
+.vex-menu-group {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: start;
+  gap: var(--vex-spacing-2px);
 }
 
 .vex-menu-item {

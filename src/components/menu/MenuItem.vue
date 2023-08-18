@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useCollection, useComputed, useID, useTemplateRef } from '@/composables'
-import { onBeforeUnmount, onMounted } from 'vue'
 import { injectGroupContext, injectContentContext, injectTriggerContext } from './context'
 import { CheckIcon, ChevronRightIcon } from '@heroicons/vue/20/solid'
 
@@ -12,10 +11,16 @@ const p = withDefaults(
   defineProps<{
     disabled?: boolean
     closeOnClick?: boolean
-    value: string
+    value?: string
   }>(),
   {}
 )
+
+defineSlots<{
+  icon: (props: {}) => any
+  suffix: (props: {}) => any
+  default: (props: {}) => any
+}>()
 
 //----------------------------------------------------------------------------------------------------
 
@@ -26,10 +31,6 @@ const {
 
 const groupCtx = injectGroupContext()
 const isWithinGroup = !!groupCtx
-
-//----------------------------------------------------------------------------------------------------
-// 📌 collection
-//----------------------------------------------------------------------------------------------------
 
 const [ItemEl, setItemEl] = useTemplateRef('MenuItem')
 const itemData = { id: useID(), ref: ItemEl, disabled: () => p.disabled }
@@ -46,6 +47,7 @@ const isTrigger = !!injectTriggerContext()
 const index = useComputed(() => getItems().indexOf(itemData))
 const isSelected = selected
   ? useComputed(() => {
+      if (!p.value) return false
       const _selected = selected()
       return Array.isArray(_selected) ? _selected.includes(p.value) : _selected === p.value
     })
@@ -60,26 +62,30 @@ const isSelected = selected
     :disabled="p.disabled"
     :role="itemType()"
     :aria-checked="isSelected"
-    :class="['vex-menu-item', isTrigger && '--is-trigger']"
+    :class="['vex-menu-item', { '--checked': isSelected }]"
     @focus="setActiveItemId(index)"
     @click="
       () => {
         // safari doesn't always focus when buttons are clicked so we manually focus
         ItemEl()?.focus({ preventScroll: true })
-        if (setSelected && !isTrigger) {
+        if (setSelected && !isTrigger && p.value) {
           setSelected(p.value)
         }
       }
     "
   >
     <div class="vex-menu-item-check">
-      <CheckIcon v-if="isSelected" />
+      <slot name="icon">
+        <CheckIcon v-if="isSelected" />
+      </slot>
     </div>
 
     <slot />
 
     <div v-if="isTrigger" class="vex-menu-item-chevron">
-      <ChevronRightIcon />
+      <slot name="suffix">
+        <ChevronRightIcon />
+      </slot>
     </div>
   </button>
 </template>

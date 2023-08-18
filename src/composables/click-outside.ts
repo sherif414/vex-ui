@@ -1,4 +1,4 @@
-import type { Getter } from '@/types'
+import type { Fn, Getter } from '@/types'
 import { isIOS, noop } from './helpers'
 import { useEventListener } from '@vueuse/core'
 
@@ -18,17 +18,15 @@ let _iOSWorkaround = false
 
 /**
  * Listen for clicks outside of an element.
- *
- * @see https://vueuse.org/onClickOutside
  */
 export function useClickOutside(
   target: Getter<HTMLElement | null>,
   handler: (evt: PointerEvent | MouseEvent) => void,
   options: useClickOutsideOptions = {}
-) {
+): Fn {
   const { ignore = () => [], capture = true } = options
 
-  if (!window) return
+  if (!window) return noop
 
   // Fixes: https://github.com/vueuse/vueuse/issues/1520
   // How it works: https://stackoverflow.com/a/39712411
@@ -46,25 +44,17 @@ export function useClickOutside(
     })
   }
 
-  function onClick(e: PointerEvent | MouseEvent) {
-    const el = target()
-    if (!el || el === e.target || e.composedPath().includes(el)) return
+  const stop = useEventListener(
+    'pointerdown',
+    function onPointerdown(e: PointerEvent) {
+      const el = target()
+      if (!el || el === e.target || e.composedPath().includes(el)) return
 
-    shouldListen = e.detail === 0 ? !shouldIgnore(e) : shouldListen
-    shouldListen && handler(e)
-  }
-
-  function onPointerdown(e: PointerEvent) {
-    const el = target()
-    if (el) shouldListen = !e.composedPath().includes(el) && !shouldIgnore(e)
-  }
-
-  const cleanup = [
-    useEventListener('click', onClick, { passive: true, capture }),
-    useEventListener('pointerdown', onPointerdown, { passive: true }),
-  ]
-
-  const stop = () => cleanup.forEach((fn) => fn())
+      shouldListen = e.detail === 0 ? !shouldIgnore(e) : shouldListen
+      shouldListen && handler(e)
+    },
+    { passive: true, capture }
+  )
 
   return stop
 }

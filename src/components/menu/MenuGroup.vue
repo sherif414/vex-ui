@@ -28,5 +28,7 @@ provide(MENU_GROUP, {
 </script>
 
 <template>
-  <slot />
+  <div role="group" class="vex-menu-group">
+    <slot />
+  </div>
 </template>
