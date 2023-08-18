@@ -3,6 +3,10 @@ import { useSelect, useVModel } from '@/composables'
 import { MENU_GROUP, type Selected } from './context'
 import { provide } from 'vue'
 
+//----------------------------------------------------------------------------------------------------
+// 📌 component meta
+//----------------------------------------------------------------------------------------------------
+
 const p = withDefaults(
   defineProps<{
     modelValue?: Selected
@@ -12,6 +16,8 @@ const p = withDefaults(
     type: 'checkbox',
   }
 )
+
+//----------------------------------------------------------------------------------------------------
 
 const selection = useSelect(
   useVModel<Selected>(() => p.modelValue),
