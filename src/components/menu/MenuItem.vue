@@ -30,7 +30,6 @@ const {
 } = injectContentContext('MenuItem')
 
 const groupCtx = injectGroupContext()
-const isWithinGroup = !!groupCtx
 
 const [ItemEl, setItemEl] = useTemplateRef('MenuItem')
 const itemData = { id: useID(), ref: ItemEl, disabled: () => p.disabled }
@@ -74,17 +73,19 @@ const isSelected = selected
       }
     "
   >
-    <div class="vex-menu-item-check">
+    <div class="vex-menu-item-icon">
       <slot name="icon">
-        <CheckIcon v-if="isSelected" />
+        <CheckIcon style="width: 12px; height: 12px" v-if="isSelected" />
       </slot>
     </div>
 
-    <slot />
+    <div class="vex-menu-item-content">
+      <slot />
+    </div>
 
-    <div v-if="isTrigger" class="vex-menu-item-chevron">
+    <div class="vex-menu-item-suffix">
       <slot name="suffix">
-        <ChevronRightIcon />
+        <ChevronRightIcon style="width: 12px; height: 12px" v-if="isTrigger" />
       </slot>
     </div>
   </button>
