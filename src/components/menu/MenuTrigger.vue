@@ -3,7 +3,7 @@ import { provide, type VNode, useAttrs, h, nextTick, onMounted } from 'vue'
 import { MENU_TRIGGER_CTX, injectMenuContext } from './context'
 import { useEventListener } from '@vueuse/core'
 import { useKeydownIntent } from '@/composables/keydown'
-import { useClickOutside } from '@/composables'
+import { useClickOutside, useHoverOpen } from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -93,12 +93,16 @@ useEventListener(TriggerEl, 'keyup', (e: KeyboardEvent) => {
   if (e.key === ' ') e.preventDefault()
 })
 
-useEventListener(TriggerEl, 'click', (e) => {
-  setIsMenuOpen((v) => !v)
-  if (!isMenuOpen()) return
-  e.preventDefault()
-  nextTick(() => ContentEl()?.focus())
-})
+if (isMainTrigger) {
+  useEventListener(TriggerEl, 'click', (e) => {
+    setIsMenuOpen((v) => !v)
+    if (!isMenuOpen()) return
+    e.preventDefault()
+    nextTick(() => ContentEl()?.focus())
+  })
+} else {
+  useHoverOpen(TriggerEl, ContentEl, setIsMenuOpen)
+}
 
 //----------------------------------------------------------------------------------------------------
 
