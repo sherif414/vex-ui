@@ -9,10 +9,10 @@ interface UseSelectOptions {
 /**
  * handles multi and single select for a list of items.
  */
-export const useSelect = <T>(
+export function useSelect<T>(
   signal: Signal<T | T[] | undefined>,
   options: UseSelectOptions = {}
-): [ComputableGetter<T | T[] | undefined>, Setter<T>] => {
+): [ComputableGetter<T | T[] | undefined>, Setter<T>] {
   const [_getter, _setter] = signal
   const { multiselect = () => false, deselection = () => false } = options
 
@@ -37,13 +37,16 @@ export const useSelect = <T>(
     }
   }
 
-  watch(
-    multiselect,
-    (multi) => {
-      _setter(multi ? [] : undefined)
-    },
-    { immediate: true }
-  )
+  // validate the initial value and correct it if needed
+  if (multiselect()) {
+    !Array.isArray(_getter()) && _setter([])
+  } else {
+    Array.isArray(_getter()) && _setter(undefined)
+  }
+
+  watch(multiselect, (multi) => {
+    _setter(multi ? [] : undefined)
+  })
 
   return [_getter, setter]
 }
