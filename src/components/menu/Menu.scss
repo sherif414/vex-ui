@@ -28,20 +28,15 @@
 .vex-menu-item {
   position: relative;
   height: var(--vex-spacing-6);
-  padding-inline: var(--vex-spacing-7) var(--vex-spacing-2);
+  // padding-inline: var(--vex-spacing-2);
   font-size: var(--vex-font-size-xs);
   border-radius: inherit;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--vex-spacing-4);
+  align-items: stretch;
+  justify-content: start;
   outline: none;
 
-  &.--is-trigger {
-    padding-inline-end: var(--vex-spacing-7);
-  }
-
-  &:hover {
+  &:enabled:hover {
     background-color: var(--vex-c-neutral-100);
   }
 
@@ -55,30 +50,29 @@
     opacity: 50%;
   }
 
-  &-check,
-  &-chevron {
+  &-content {
+    flex-grow: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--vex-spacing-4);
+  }
+
+  &-icon,
+  &-suffix {
     aspect-ratio: 1/1;
     height: 100%;
-    position: absolute;
-    inset-block-start: 0;
     flex: none;
     display: inline-flex;
     justify-content: center;
     align-items: center;
-
-    & > svg {
-      width: var(--vex-spacing-3);
-      height: var(--vex-spacing-3);
-    }
   }
 
-  &-check {
-    inset-inline-start: 0;
+  &-icon {
     color: var(--vex-c-neutral-400);
   }
 
-  &-chevron {
-    inset-inline-end: 0;
+  &-suffix {
     color: var(--vex-c-neutral-900);
   }
 }
