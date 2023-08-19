@@ -10,7 +10,6 @@ import { CheckIcon, ChevronRightIcon } from '@heroicons/vue/20/solid'
 const p = withDefaults(
   defineProps<{
     disabled?: boolean
-    closeOnClick?: boolean | undefined
     value?: string
   }>(),
   {}
@@ -54,13 +53,12 @@ const isSelected = selected
   : () => undefined
 
 function onClick() {
-  if (setSelected && !isTrigger) {
+  if (isTrigger) return
+
+  if (setSelected) {
     p.value && setSelected(p.value)
   } else {
-    if (isTrigger) return
-    if (p.closeOnClick === true || role() === 'menuitem') {
-      closeAllMenus()
-    }
+    role() === 'menuitem' && closeAllMenus()
   }
 }
 </script>
