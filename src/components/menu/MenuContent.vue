@@ -41,7 +41,7 @@ const {
 
 //----------------------------------------------------------------------------------------------------
 
-const [activeItemId, setActiveItemId] = useSignal(-1)
+const [activeItemId, setActiveItemId] = useSignal('')
 const { elements } = createCollection(ContentEl)
 
 useRovingFocus(ContentEl, elements, {
@@ -56,7 +56,7 @@ useDropdownAria(TriggerEl, ContentEl, {
   dropdownID: CONTENT_ID,
   targetElID: TRIGGER_ID,
   role: 'menu',
-  ariaActiveDescendant: () => `${CONTENT_ID}-${activeItemId()}`,
+  ariaActiveDescendant: activeItemId,
 })
 
 const { floatingStyles } = useFloating(TriggerEl, ContentEl, isMenuOpen, {

@@ -26,7 +26,7 @@ defineSlots<{
 
 const {
   CONTENT_ID,
-  activeItemId: [, setActiveItemIndex],
+  activeItemId: [, setActiveItemId],
 } = injectContentContext('MenuItem')
 
 const groupCtx = injectGroupContext()
@@ -62,7 +62,7 @@ const isSelected = selected
     :role="itemType()"
     :aria-checked="isSelected()"
     :class="['vex-menu-item', { '--checked': isSelected() }]"
-    @focus="setActiveItemIndex(index())"
+    @focus="setActiveItemId(`${CONTENT_ID}-${index()}`)"
     @click="
       () => {
         if (setSelected && !isTrigger && p.value) {

@@ -34,7 +34,7 @@ export function injectMenuContext(component: string) {
 
 export const MENU_CONTENT_CTX = Symbol() as InjectionKey<{
   CONTENT_ID: string
-  activeItemId: Signal<number>
+  activeItemId: Signal<string>
 }>
 
 export function injectContentContext(component: string) {
