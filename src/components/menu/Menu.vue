@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useControllableState, useID, useTemplateRef } from '@/composables'
-import { inject, provide, shallowReactive, toRef } from 'vue'
-import { MENU_CTX } from './context'
+import { inject, onUnmounted, provide, shallowReactive, toRef } from 'vue'
+import { MENU_CTX, type MenuContext } from './context'
 import type { Getter } from '@/types'
 
 //----------------------------------------------------------------------------------------------------
@@ -27,39 +27,48 @@ defineSlots<{
 const TRIGGER_ID = useID()
 const CONTENT_ID = useID()
 
-const [TriggerEl, setTriggerEl] = useTemplateRef('MenuTrigger')
-const [ContentEl, setContentEl] = useTemplateRef('MenuContent')
+const TriggerEl = useTemplateRef('MenuTrigger')
+const ContentEl = useTemplateRef('MenuContent')
 
-const [isMenuOpen, setIsMenuOpen] = useControllableState({
+const isMenuOpen = useControllableState({
   prop: () => p.open,
   defaultValue: !!p.open,
   name: 'open',
 })
 
-//----------------------------------------------------------------------------------------------------
+const parentMenu = inject(MENU_CTX, null)
+const isSubMenu = !!parentMenu
 
-const ctx = inject(MENU_CTX, null)
-const isSubMenu = !!ctx
-isSubMenu && ctx.submenus.push(ContentEl)
-
-provide(MENU_CTX, {
-  isMenuOpen: [isMenuOpen, setIsMenuOpen],
-  TriggerEl: [TriggerEl, setTriggerEl],
-  ContentEl: [ContentEl, setContentEl],
+const menu: MenuContext = {
+  isMenuOpen,
+  TriggerEl,
+  ContentEl,
   TRIGGER_ID,
   CONTENT_ID,
   isSubMenu,
   orientation: () => p.orientation,
-  submenus: [],
+  submenus: shallowReactive([]),
 
   focusParentContent() {
-    const el = ctx?.ContentEl[0]()
+    const el = parentMenu?.ContentEl[0]()
     el?.focus()
   },
+}
+
+//----------------------------------------------------------------------------------------------------
+
+isSubMenu && parentMenu.submenus.push(menu)
+onUnmounted(() => {
+  const array = parentMenu?.submenus
+  if (!array) return
+
+  const index = array.indexOf(menu)
+  index !== -1 && array.splice(index, 1)
 })
 
-const open = toRef(isMenuOpen as Getter<boolean>)
+provide(MENU_CTX, menu)
 
+const open = toRef(isMenuOpen[0] as Getter<boolean>)
 defineExpose({
   open,
 })
