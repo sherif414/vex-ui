@@ -4,6 +4,7 @@ import type { ComputableGetter, Fn, Getter, Signal } from '@/types'
 import type {
   ComputedGetter,
   ComputedRef,
+  Ref,
   WatchOptions,
   WatchSource,
   WritableComputedOptions,
@@ -11,6 +12,7 @@ import type {
 } from 'vue'
 import { computed, customRef, ref, watch } from 'vue'
 import { isFunction } from './helpers'
+import { toSignal } from './signal'
 
 export function useComputed<T>(
   fn: ComputedGetter<T>,
@@ -45,7 +47,7 @@ export function useComputed<T>(
     }
 
     const _computed = computed<T>(fn)
-    return [() => _computed.value, (v: T) => (_computed.value = v)]
+    return toSignal(_computed)
   }
 
   let v: T = undefined!
@@ -86,12 +88,5 @@ export function useComputed<T>(
     return () => _computed.value as Getter<T>
   }
 
-  return [
-    function getter<U>(fn?: (v: T) => U): T | U {
-      return isFunction(fn) ? fn(_computed.value) : _computed.value
-    },
-    function setter(fn: ((v: T) => T) | T): void {
-      _computed.value = isFunction(fn) ? fn(_computed.value) : fn
-    },
-  ] as Signal<T>
+  return toSignal(_computed)
 }
