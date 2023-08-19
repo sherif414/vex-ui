@@ -1,5 +1,5 @@
 import { useContext } from '@/composables'
-import type { TemplateRef, getTemplateRef } from '@/composables/template-ref'
+import type { TemplateRef } from '@/composables/template-ref'
 import type { Signal, ComputableGetter, Setter, Fn, Getter } from '@/types'
 import { inject, type InjectionKey } from 'vue'
 
@@ -10,7 +10,7 @@ import { inject, type InjectionKey } from 'vue'
 export type Value = string
 export type Selected = Value | Value[] | undefined
 
-export const MENU_CTX = Symbol() as InjectionKey<{
+export type MenuContext = {
   isMenuOpen: Signal<boolean>
   TriggerEl: TemplateRef
   ContentEl: TemplateRef
@@ -19,8 +19,10 @@ export const MENU_CTX = Symbol() as InjectionKey<{
   orientation: Getter<'vertical' | 'horizontal'>
   focusParentContent: Fn
   isSubMenu: boolean
-  submenus: getTemplateRef[]
-}>
+  submenus: MenuContext[]
+}
+
+export const MENU_CTX = Symbol() as InjectionKey<MenuContext>
 
 export function injectMenuContext(component: string) {
   return useContext(MENU_CTX, 'Menu', component)
