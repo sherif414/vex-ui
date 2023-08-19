@@ -29,7 +29,7 @@
   position: relative;
   height: var(--vex-spacing-6);
   font-size: var(--vex-font-size-xs);
-  border-radius: inherit;
+  border-radius: var(--vex-border-radius-sm);
   display: flex;
   align-items: stretch;
   justify-content: start;
@@ -57,7 +57,7 @@
     gap: var(--vex-spacing-4);
   }
 
-  &-icon,
+  &-prefix,
   &-suffix {
     aspect-ratio: 1/1;
     height: 100%;
@@ -67,12 +67,14 @@
     align-items: center;
   }
 
-  &-icon {
-    color: var(--vex-c-neutral-400);
+  &-suffix-chevron,
+  &-prefix-check {
+    width: var(--vex-spacing-3);
+    height: var(--vex-spacing-3);
   }
 
-  &-suffix {
-    color: var(--vex-c-neutral-900);
+  &-prefix-check {
+    color: var(--vex-c-neutral-400);
   }
 }
 

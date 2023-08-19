@@ -17,7 +17,7 @@ const p = withDefaults(
 )
 
 defineSlots<{
-  icon: (props: {}) => any
+  prefix: (props: {}) => any
   suffix: (props: {}) => any
   default: (props: {}) => any
 }>()
@@ -26,7 +26,7 @@ defineSlots<{
 
 const {
   CONTENT_ID,
-  activeItemId: [, setActiveItemId],
+  activeItemId: [, setActiveItemIndex],
 } = injectContentContext('MenuItem')
 
 const groupCtx = injectGroupContext()
@@ -62,20 +62,18 @@ const isSelected = selected
     :role="itemType()"
     :aria-checked="isSelected"
     :class="['vex-menu-item', { '--checked': isSelected }]"
-    @focus="setActiveItemId(index)"
+    @focus="setActiveItemIndex(index)"
     @click="
       () => {
-        // safari doesn't always focus when buttons are clicked so we manually focus
-        ItemEl()?.focus({ preventScroll: true })
         if (setSelected && !isTrigger && p.value) {
           setSelected(p.value)
         }
       }
     "
   >
-    <div class="vex-menu-item-icon">
-      <slot name="icon">
-        <CheckIcon style="width: 12px; height: 12px" v-if="isSelected" />
+    <div class="vex-menu-item-prefix">
+      <slot name="prefix">
+        <CheckIcon v-if="isSelected" class="vex-menu-item-prefix-check" />
       </slot>
     </div>
 
@@ -85,7 +83,7 @@ const isSelected = selected
 
     <div class="vex-menu-item-suffix">
       <slot name="suffix">
-        <ChevronRightIcon style="width: 12px; height: 12px" v-if="isTrigger" />
+        <ChevronRightIcon v-if="isTrigger" class="vex-menu-item-suffix-chevron" />
       </slot>
     </div>
   </button>
