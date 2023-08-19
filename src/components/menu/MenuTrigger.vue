@@ -41,19 +41,20 @@ const isMainTrigger = !isSubMenu
 useKeydownIntent(
   TriggerEl,
   (e, intent) => {
-    if (isMainTrigger && (intent === 'next' || intent === 'prev')) {
+    /**
+     * main triggers should open with arrow up/down and sub triggers should open with left/right
+     * when orientation is vertical.
+     * TODO: in the current implementation, when orientation is horizontal the open keys are swapped
+     * which is maybe non standard. check the spec !
+     */
+    if (
+      (isMainTrigger && (intent === 'next' || intent === 'prev')) ||
+      (!isMainTrigger && intent === 'show')
+    ) {
       e.preventDefault()
       e.stopPropagation()
       setIsMenuOpen(true)
-      nextTick(() => ContentEl()?.focus())
-      return
-    }
-
-    if (!isMainTrigger && intent === 'show') {
-      e.preventDefault()
-      e.stopPropagation()
-      setIsMenuOpen(true)
-      nextTick(() => ContentEl()?.focus())
+      nextTick(() => ContentEl()?.focus({ preventScroll: true }))
       return
     }
   },
