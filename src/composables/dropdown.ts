@@ -31,12 +31,16 @@ export function useDropdownAria(
     { immediate: true }
   )
 
-  watch(Dropdown, (el) => {
-    if (!el) return
-    el.setAttribute('aria-labelledby', `${targetElID}`)
-    el.setAttribute('role', `${role}`)
-    el.setAttribute('id', `${dropdownID}`)
-  })
+  watch(
+    Dropdown,
+    (el) => {
+      if (!el) return
+      el.setAttribute('aria-labelledby', `${targetElID}`)
+      el.setAttribute('role', `${role}`)
+      el.setAttribute('id', `${dropdownID}`)
+    },
+    { immediate: true }
+  )
 
   watch(ariaExpanded, (isExpanded) => {
     TargetEl()?.setAttribute('aria-expanded', `${isExpanded}`)
