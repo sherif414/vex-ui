@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { provide, type VNode, useAttrs, h, nextTick } from 'vue'
+import { provide, type VNode, h, nextTick } from 'vue'
 import { MENU_TRIGGER_CTX, injectMenuContext } from './context'
 import { useEventListener } from '@vueuse/core'
 import { useKeydownIntent } from '@/composables/keydown'
@@ -83,7 +83,7 @@ useClickOutside(
   () => {
     setIsMenuOpen(false)
   },
-  { ignore: () => [TriggerEl, ...submenus] }
+  { ignore: () => [TriggerEl, ...submenus.map((v) => v.ContentEl[0])] }
 )
 
 // firefox bug
