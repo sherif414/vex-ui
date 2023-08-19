@@ -46,9 +46,8 @@ const isTrigger = !!injectTriggerContext()
 const index = useMemo(() => getItems().indexOf(itemData))
 const isSelected = selected
   ? useMemo(() => {
-      if (!p.value) return false
-      const _selected = selected()
-      return Array.isArray(_selected) ? _selected.includes(p.value) : _selected === p.value
+      if (p.value === undefined) return false
+      return selected((v) => (Array.isArray(v) ? v.includes(p.value!) : v === p.value))
     })
   : () => undefined
 
