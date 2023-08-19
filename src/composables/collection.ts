@@ -2,7 +2,7 @@ import type { Getter } from '@/types'
 import { provide, type InjectionKey, inject, shallowReactive } from 'vue'
 import type { getTemplateRef } from './template-ref'
 import { tryOnScopeDispose } from '@vueuse/core'
-import { useComputed } from './computed'
+import { useMemo } from './memo'
 
 export type CollectionContext = {
   register: (data: ItemData) => void
@@ -29,7 +29,7 @@ export function createCollection(
     return [...itemsMap.values()]
   }
 
-  const elements = useComputed(function getElements() {
+  const elements = useMemo(function getElements() {
     return [...itemsMap.keys()].reduce<HTMLElement[]>((arr, ref) => {
       const item = ref()
       item != null && arr.push(item)

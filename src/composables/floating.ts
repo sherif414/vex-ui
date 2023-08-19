@@ -10,7 +10,7 @@ import type {
 import { arrow, autoUpdate, computePosition, flip, offset, shift, size } from '@floating-ui/vue'
 import { tryOnScopeDispose } from '@vueuse/core'
 import { ref, shallowReadonly, shallowRef, toRef, toValue, watch, type StyleValue } from 'vue'
-import { useComputed } from '.'
+import { useMemo } from '.'
 
 export interface FloatingStyles {
   position: Strategy
@@ -85,7 +85,7 @@ export function useFloating(
   // TODO: maybe default middleware could be abstracted into a separate module?
   //----------------------------------------------------------------------------------------------------
 
-  const _middleware = useComputed(() => {
+  const _middleware = useMemo(() => {
     const mw = [offset(toValue(options.offset) || 4), flip(), shift({ padding: 8 })]
 
     // size middleware needs to be towards the start according to the docs
@@ -113,7 +113,7 @@ export function useFloating(
   // 📌 floating styles
   //----------------------------------------------------------------------------------------------------
 
-  const floatingStyles = useComputed(getFloatingStyles, [x, y], {
+  const floatingStyles = useMemo(getFloatingStyles, [x, y], {
     flush: 'pre',
   })
 
@@ -240,7 +240,7 @@ export function useArrow(
   const _placement = toRef(placement)
   const _middlewareData = toRef(middlewareData)
 
-  const styles = useComputed<StyleValue>(() => {
+  const styles = useMemo<StyleValue>(() => {
     const x = _middlewareData.value.arrow?.x ?? null
     const y = _middlewareData.value.arrow?.y ?? null
 

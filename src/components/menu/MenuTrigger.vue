@@ -3,7 +3,7 @@ import { provide, type VNode, h, nextTick } from 'vue'
 import { MENU_TRIGGER_CTX, injectMenuContext } from './context'
 import { useEventListener } from '@vueuse/core'
 import { useKeydownIntent } from '@/composables/keydown'
-import { useClickOutside, useComputed, useHoverOpen } from '@/composables'
+import { useClickOutside, useHoverOpen, useMemo } from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -83,7 +83,13 @@ useClickOutside(
   () => {
     setIsMenuOpen(false)
   },
-  { ignore: useComputed(() => [TriggerEl, ...submenus.map((v) => v.ContentEl[0])]) }
+  {
+    ignore: useMemo(() => {
+      console.log('computed submenus')
+
+      return [TriggerEl, ...submenus.map((v) => v.ContentEl[0])]
+    }),
+  }
 )
 
 // firefox bug
