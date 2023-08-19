@@ -49,7 +49,7 @@ useKeydownIntent(
       return
     }
 
-    if (intent === 'show') {
+    if (!isMainTrigger && intent === 'show') {
       e.preventDefault()
       e.stopPropagation()
       setIsMenuOpen(true)
