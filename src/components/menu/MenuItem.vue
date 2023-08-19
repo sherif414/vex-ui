@@ -73,7 +73,18 @@ const isSelected = selected
   >
     <div class="vex-menu-item-prefix">
       <slot name="prefix">
-        <CheckIcon v-if="isSelected" class="vex-menu-item-prefix-check" />
+        <CheckIcon
+          v-if="isSelected && itemType() === 'menuitemcheckbox'"
+          class="vex-menu-item-prefix-check"
+        />
+        <svg
+          v-else-if="isSelected && itemType() === 'menuitemradio'"
+          class="vex-menu-item-prefix-check"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <circle cx="50%" cy="50%" r="6" />
+        </svg>
       </slot>
     </div>
 
