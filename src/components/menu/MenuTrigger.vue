@@ -118,7 +118,7 @@ const Trigger = () => h(slots.default!({})[0])
   <Component
     :is="!isMainTrigger || p.asChild ? Trigger : 'button'"
     :ref="setTriggerEl"
-    class="--is-trigger"
+    :class="['--is-trigger', { '--open': isMenuOpen() }]"
   >
     <slot />
   </Component>
