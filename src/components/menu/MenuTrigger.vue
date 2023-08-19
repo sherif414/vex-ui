@@ -84,11 +84,7 @@ useClickOutside(
     setIsMenuOpen(false)
   },
   {
-    ignore: useMemo(() => {
-      console.log('computed submenus')
-
-      return [TriggerEl, ...submenus.map((v) => v.ContentEl[0])]
-    }),
+    ignore: useMemo(() => [TriggerEl, ...submenus.map((v) => v.ContentEl[0])]),
   }
 )
 
