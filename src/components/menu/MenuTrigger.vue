@@ -88,7 +88,7 @@ useClickOutside(
   }
 )
 
-// firefox bug
+// firefox space keyup triggers a click unless default is prevented
 useEventListener(TriggerEl, 'keyup', (e: KeyboardEvent) => {
   if (e.key === ' ') e.preventDefault()
 })
