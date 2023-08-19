@@ -1,6 +1,6 @@
 // ported from @vueuse/core - computedWithControl
 
-import type { Fn } from '@/types'
+import type { ComputableGetter, Fn, Getter, Signal } from '@/types'
 import type {
   ComputedGetter,
   ComputedRef,
@@ -10,18 +10,19 @@ import type {
   WritableComputedRef,
 } from 'vue'
 import { computed, customRef, ref, watch } from 'vue'
+import { isFunction } from './helpers'
 
 export function useComputed<T>(
   fn: ComputedGetter<T>,
   source?: WatchSource | WatchSource[],
   options?: WatchOptions
-): ComputedRef<T>
+): Getter<T>
 
 export function useComputed<T>(
   fn: WritableComputedOptions<T>,
   source?: WatchSource | WatchSource[],
   options?: WatchOptions
-): WritableComputedRef<T>
+): Signal<T>
 
 /**
  * You may explicitly define the deps of computed.
@@ -38,7 +39,13 @@ export function useComputed<T>(
   }
 ) {
   if (!source) {
-    return computed(fn as any)
+    if (isFunction(fn)) {
+      const _computed = computed<T>(fn)
+      return () => _computed.value
+    }
+
+    const _computed = computed<T>(fn)
+    return [() => _computed.value, (v: T) => (_computed.value = v)]
   }
 
   let v: T = undefined!
@@ -53,10 +60,10 @@ export function useComputed<T>(
 
   watch(source, update, options)
 
-  const getter = typeof fn !== 'function' ? fn.get : fn
-  const setter = typeof fn !== 'function' ? fn.set : undefined
+  const getter = !isFunction(fn) ? fn.get : fn
+  const setter = !isFunction(fn) ? fn.set : undefined
 
-  return customRef<T>((_track, _trigger) => {
+  const _computed = customRef<T>((_track, _trigger) => {
     track = _track
     trigger = _trigger
 
@@ -73,5 +80,18 @@ export function useComputed<T>(
         setter?.(v)
       },
     }
-  }) as ComputedRef<T>
+  }) as WritableComputedRef<T>
+
+  if (!isFunction(setter)) {
+    return () => _computed.value as Getter<T>
+  }
+
+  return [
+    function getter<U>(fn?: (v: T) => U): T | U {
+      return isFunction(fn) ? fn(_computed.value) : _computed.value
+    },
+    function setter(fn: ((v: T) => T) | T): void {
+      _computed.value = isFunction(fn) ? fn(_computed.value) : fn
+    },
+  ] as Signal<T>
 }

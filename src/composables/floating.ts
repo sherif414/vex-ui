@@ -148,7 +148,7 @@ export function useFloating(
     if (!isFloatingElVisible.value || !FloatingEl.value || !ReferenceEl.value) return
 
     computePosition(ReferenceEl.value, FloatingEl.value, {
-      middleware: _middleware.value,
+      middleware: _middleware(),
       placement: placement.value || 'bottom-start',
       strategy: strategy.value || 'absolute',
     }).then((position) => {

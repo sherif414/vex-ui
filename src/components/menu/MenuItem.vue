@@ -57,12 +57,12 @@ const isSelected = selected
   <button
     tabindex="-1"
     :ref="setItemEl"
-    :id="`${CONTENT_ID}-${index}`"
+    :id="`${CONTENT_ID}-${index()}`"
     :disabled="p.disabled"
     :role="itemType()"
-    :aria-checked="isSelected"
-    :class="['vex-menu-item', { '--checked': isSelected }]"
-    @focus="setActiveItemIndex(index)"
+    :aria-checked="isSelected()"
+    :class="['vex-menu-item', { '--checked': isSelected() }]"
+    @focus="setActiveItemIndex(index())"
     @click="
       () => {
         if (setSelected && !isTrigger && p.value) {
@@ -74,11 +74,11 @@ const isSelected = selected
     <div class="vex-menu-item-prefix">
       <slot name="prefix">
         <CheckIcon
-          v-if="isSelected && itemType() === 'menuitemcheckbox'"
+          v-if="isSelected() && itemType() === 'menuitemcheckbox'"
           class="vex-menu-item-prefix-check"
         />
         <svg
-          v-else-if="isSelected && itemType() === 'menuitemradio'"
+          v-else-if="isSelected() && itemType() === 'menuitemradio'"
           class="vex-menu-item-prefix-check"
           viewBox="0 0 24 24"
           fill="currentColor"

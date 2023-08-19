@@ -82,7 +82,7 @@ provide(MENU_CONTENT_CTX, {
         v-if="isMenuOpen()"
         v-bind="$attrs"
         :aria-orientation="orientation()"
-        :style="{ ...floatingStyles }"
+        :style="floatingStyles()"
         :ref="setContentEl"
         :class="['vex-menu-content', !p.noAutoMinWidth && '--auto-min-width']"
         tabindex="-1"
