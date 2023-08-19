@@ -40,7 +40,7 @@ const { getItems } = useCollection(itemData)
 //----------------------------------------------------------------------------------------------------
 
 const [selected, setSelected] = groupCtx?.selection ?? []
-const itemType = groupCtx?.itemType ?? (() => 'menuitem')
+const role = () => groupCtx?.itemType() ?? 'menuitem'
 const isTrigger = !!injectTriggerContext()
 
 const index = useMemo(() => getItems().indexOf(itemData))
@@ -59,7 +59,7 @@ const isSelected = selected
     :ref="setItemEl"
     :id="`${CONTENT_ID}-${index()}`"
     :disabled="p.disabled"
-    :role="itemType()"
+    :role="role()"
     :aria-checked="isSelected()"
     :class="['vex-menu-item', { '--checked': isSelected() }]"
     @focus="setActiveItemId(`${CONTENT_ID}-${index()}`)"
@@ -74,11 +74,11 @@ const isSelected = selected
     <div class="vex-menu-item-prefix">
       <slot name="prefix">
         <CheckIcon
-          v-if="isSelected() && itemType() === 'menuitemcheckbox'"
+          v-if="isSelected() && role() === 'menuitemcheckbox'"
           class="vex-menu-item-prefix-check"
         />
         <svg
-          v-else-if="isSelected() && itemType() === 'menuitemradio'"
+          v-else-if="isSelected() && role() === 'menuitemradio'"
           class="vex-menu-item-prefix-check"
           viewBox="0 0 24 24"
           fill="currentColor"
