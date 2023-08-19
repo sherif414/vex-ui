@@ -10,7 +10,7 @@ import { CheckIcon, ChevronRightIcon } from '@heroicons/vue/20/solid'
 const p = withDefaults(
   defineProps<{
     disabled?: boolean
-    closeOnClick?: boolean
+    closeOnClick?: boolean | undefined
     value?: string
   }>(),
   {}
@@ -27,6 +27,7 @@ defineSlots<{
 const {
   CONTENT_ID,
   activeItemId: [, setActiveItemId],
+  closeAllMenus,
 } = injectContentContext('MenuItem')
 
 const groupCtx = injectGroupContext()
@@ -51,6 +52,17 @@ const isSelected = selected
       return Array.isArray(_selected) ? _selected.includes(p.value) : _selected === p.value
     })
   : () => undefined
+
+function onClick() {
+  if (setSelected && !isTrigger) {
+    p.value && setSelected(p.value)
+  } else {
+    if (isTrigger) return
+    if (p.closeOnClick === true || role() === 'menuitem') {
+      closeAllMenus()
+    }
+  }
+}
 </script>
 
 <template>
@@ -63,13 +75,7 @@ const isSelected = selected
     :aria-checked="isSelected()"
     :class="['vex-menu-item', { '--checked': isSelected() }]"
     @focus="setActiveItemId(`${CONTENT_ID}-${index()}`)"
-    @click="
-      () => {
-        if (setSelected && !isTrigger && p.value) {
-          setSelected(p.value)
-        }
-      }
-    "
+    @click="onClick"
   >
     <div class="vex-menu-item-prefix">
       <slot name="prefix">

@@ -48,11 +48,7 @@ const menu: MenuContext = {
   isSubMenu,
   orientation: () => p.orientation,
   submenus: shallowReactive([]),
-
-  focusParentContent() {
-    const el = parentMenu?.ContentEl[0]()
-    el?.focus()
-  },
+  parentMenu,
 }
 
 //----------------------------------------------------------------------------------------------------

@@ -22,7 +22,7 @@ defineOptions({
 const p = withDefaults(
   defineProps<{
     placement?: Placement
-    noAutoMinWidth?: boolean
+    autoMinWidth?: boolean
   }>(),
   {}
 )
@@ -30,12 +30,14 @@ const p = withDefaults(
 //----------------------------------------------------------------------------------------------------
 
 const {
-  isMenuOpen: [isMenuOpen],
+  isMenuOpen: [isMenuOpen, setIsMenuOpen],
   TriggerEl: [TriggerEl],
   ContentEl: [ContentEl, setContentEl],
   TRIGGER_ID,
   CONTENT_ID,
   isSubMenu,
+  parentMenu,
+
   orientation,
 } = injectMenuContext('MenuContent')
 
@@ -61,7 +63,7 @@ useDropdownAria(TriggerEl, ContentEl, {
 
 const { floatingStyles } = useFloating(TriggerEl, ContentEl, isMenuOpen, {
   placement: () => (p.placement ?? isSubMenu ? 'right-start' : 'bottom-start'),
-  autoMinWidth: () => !p.noAutoMinWidth,
+  autoMinWidth: () => p.autoMinWidth,
   strategy: 'absolute',
   offset: isSubMenu ? -1 : undefined,
 })
@@ -71,6 +73,19 @@ const { floatingStyles } = useFloating(TriggerEl, ContentEl, isMenuOpen, {
 provide(MENU_CONTENT_CTX, {
   CONTENT_ID,
   activeItemId: [activeItemId, setActiveItemId],
+
+  closeAllMenus() {
+    if (!parentMenu) {
+      setIsMenuOpen(false)
+      return
+    }
+
+    let mainMenu = parentMenu
+    while (mainMenu.parentMenu) {
+      mainMenu = mainMenu.parentMenu
+    }
+    mainMenu.isMenuOpen[1](false)
+  },
 })
 </script>
 
@@ -84,7 +99,7 @@ provide(MENU_CONTENT_CTX, {
         :aria-orientation="orientation()"
         :style="floatingStyles()"
         :ref="setContentEl"
-        :class="['vex-menu-content', !p.noAutoMinWidth && '--auto-min-width']"
+        :class="['vex-menu-content', p.autoMinWidth && '--auto-min-width']"
         tabindex="-1"
       >
         <slot />

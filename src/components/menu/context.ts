@@ -17,9 +17,9 @@ export type MenuContext = {
   TRIGGER_ID: string
   CONTENT_ID: string
   orientation: Getter<'vertical' | 'horizontal'>
-  focusParentContent: Fn
   isSubMenu: boolean
   submenus: MenuContext[]
+  parentMenu: MenuContext | null
 }
 
 export const MENU_CTX = Symbol() as InjectionKey<MenuContext>
@@ -35,6 +35,7 @@ export function injectMenuContext(component: string) {
 export const MENU_CONTENT_CTX = Symbol() as InjectionKey<{
   CONTENT_ID: string
   activeItemId: Signal<string>
+  closeAllMenus: Fn
 }>
 
 export function injectContentContext(component: string) {
