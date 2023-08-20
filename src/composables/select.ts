@@ -6,17 +6,19 @@ interface UseSelectOptions {
   deselection?: Getter<boolean>
 }
 
+export type Selected<T> = T | T[] | undefined
+
 /**
  * handles multi and single select for a list of items.
  */
 export function useSelect<T>(
-  signal: Signal<T | T[] | undefined>,
+  signal: Signal<Selected<T>>,
   options: UseSelectOptions = {}
-): [ComputableGetter<T | T[] | undefined>, Setter<T>] {
+): [ComputableGetter<Selected<T>>, Setter<T>] {
   const [_getter, _setter] = signal
   const { multiselect = () => false, deselection = () => false } = options
 
-  const setter = (value: T) => {
+  const setter: Setter<T> = (value) => {
     const prev = _getter()
 
     // multi-select
