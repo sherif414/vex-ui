@@ -1,16 +1,11 @@
-import type { MaybeGetter, Getter } from '@/types'
+import type { Getter, Orientation } from '@/types'
 import { useEventListener } from '@vueuse/core'
-import { toValue } from 'vue'
-import { getKeyIntent, wrapArray } from './helpers'
-
-const NAVIGATION_KEYS = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'End', 'Home'] as const
-
-type Orientation = 'vertical' | 'horizontal'
-type NavigationKeys = 'ArrowDown' | 'ArrowUp' | 'ArrowLeft' | 'ArrowRight' | 'Home' | 'End'
+import { wrapArray } from './helpers'
+import { useKeydownIntent } from './keydown'
 
 interface RovingFocusOptions {
   onEntryFocus?: (e: FocusEvent, focusFirst: (items: HTMLElement[]) => void) => void
-  orientation?: MaybeGetter<Orientation>
+  orientation?: Getter<Orientation>
 }
 
 export function useRovingFocus(
@@ -18,47 +13,49 @@ export function useRovingFocus(
   getItems: Getter<HTMLElement[]>,
   options: RovingFocusOptions = {}
 ) {
+  const { orientation, onEntryFocus } = options
+
   useEventListener(group, 'focus', function onGroupFocus(e: FocusEvent) {
-    options.onEntryFocus ? options.onEntryFocus(e, focusFirst) : focusFirst(getItems())
+    onEntryFocus ? onEntryFocus(e, focusFirst) : focusFirst(getItems())
   })
 
-  useEventListener(group, 'keydown', function onGroupKeydown(e: KeyboardEvent) {
-    const key = e.key as NavigationKeys
-    if (!NAVIGATION_KEYS.includes(key)) return
+  useKeydownIntent(
+    group,
+    function onGroupKeydown(e, intent) {
+      e.preventDefault()
+      e.stopPropagation()
 
-    e.preventDefault()
-    e.stopPropagation()
+      let items = getItems().filter((item) => !(item as HTMLButtonElement).disabled)
 
-    let items = getItems().filter((item) => !(item as HTMLButtonElement).disabled)
-    const intent = getKeyIntent(key, toValue(options.orientation))
+      switch (intent) {
+        case 'next': {
+          const currFocusedItemIdx = items.indexOf(e.target as HTMLElement)
+          items = wrapArray(items, currFocusedItemIdx + 1)
+          focusFirst(items)
+          break
+        }
 
-    switch (intent) {
-      case 'next': {
-        const currFocusedItemIdx = items.indexOf(e.target as HTMLElement)
-        items = wrapArray(items, currFocusedItemIdx + 1)
-        focusFirst(items)
-        break
+        case 'prev': {
+          items.reverse()
+          const currFocusedItemIdx = items.indexOf(e.target as HTMLElement)
+          items = wrapArray(items, currFocusedItemIdx + 1)
+          focusFirst(items)
+          break
+        }
+
+        case 'first': {
+          focusFirst(items)
+          break
+        }
+
+        case 'last': {
+          focusFirst(items.reverse())
+          break
+        }
       }
-
-      case 'prev': {
-        items.reverse()
-        const currFocusedItemIdx = items.indexOf(e.target as HTMLElement)
-        items = wrapArray(items, currFocusedItemIdx + 1)
-        focusFirst(items)
-        break
-      }
-
-      case 'first': {
-        focusFirst(items)
-        break
-      }
-
-      case 'last': {
-        focusFirst(items.reverse())
-        break
-      }
-    }
-  })
+    },
+    { orientation }
+  )
 }
 
 function focusFirst(items: HTMLElement[]) {
