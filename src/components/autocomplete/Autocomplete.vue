@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { Input, Dropdown, Loader, Floating } from '@/components'
-import { computed, nextTick, ref, watch } from 'vue'
+import { Input, Loader } from '@/components'
+import { computed, ref, watch } from 'vue'
 import { useEventListener, watchDebounced } from '@vueuse/core'
 import { IconChevronUpDown } from '@/icons'
 import {
-  useComputed,
+  useMemo,
   useFloating,
+  useVModel,
   useID,
-  useListNavigation,
-  useListSelection,
+  useRovingFocus,
+  useSelect,
   useRef,
 } from '@/composables'
 
@@ -93,18 +94,13 @@ const LISTBOX_ID = useID()
 const isListboxVisible = ref(false)
 const suggestions = ref<string[]>(p.options?.slice(0, p.maxDisplayedOptions) || [])
 
-//----------------------------------------------------------------------------------------------------
-// 📌 selection
-//----------------------------------------------------------------------------------------------------
-
-const selected = useComputed({
-  get: () => p.modelValue,
-  set: (val) => {
-    if (val !== p.modelValue) {
-      emit('update:modelValue', val)
-    }
-  },
-})
+const [getSelected, setSelected] = useSelect<string>(
+  useVModel(() => p.modelValue),
+  {
+    deselection: () => false,
+    multiselect: () => false,
+  }
+)
 
 //----------------------------------------------------------------------------------------------------
 // 📌 keyboard interactions
@@ -224,8 +220,8 @@ function onInputBlur() {
   inputValue.lay(p.modelValue)
 }
 
-watch(selected, (selected) => {
-  inputValue.lay(selected)
+watch(getSelected, () => {
+  inputValue.lay(getSelected() as string)
 })
 
 //----------------------------------------------------------------------------------------------------
@@ -242,12 +238,10 @@ watch(FormEl, (form, _, onCleanup) => {
 
 //----------------------------------------------------------------------------------------------------
 
-const { floatingStyles: listboxStyles } = useFloating(TriggerEl, ListboxEl, isListboxVisible, {
+const { floatingStyles } = useFloating(TriggerEl, ListboxEl, isListboxVisible, {
   placement: 'bottom-start',
-  toggleAction: 'click',
   offset: 4,
   autoMinWidth: true,
-  hideOnClick: true,
 })
 </script>
 
@@ -278,7 +272,7 @@ const { floatingStyles: listboxStyles } = useFloating(TriggerEl, ListboxEl, isLi
   <Teleport to="body">
     <ul
       v-if="isListboxVisible"
-      :style="listboxStyles"
+      :style="floatingStyles()"
       :aria-describedby="TRIGGER_ID"
       :id="LISTBOX_ID"
       ref="ListboxEl"
@@ -296,8 +290,8 @@ const { floatingStyles: listboxStyles } = useFloating(TriggerEl, ListboxEl, isLi
           :key="item"
           :id="`${LISTBOX_ID}-${idx}`"
           :data-highlighted="highlighted === idx"
-          :data-selected="selected === item"
-          @click="selected = item"
+          :data-selected="getSelected() === item"
+          @click="setSelected(item)"
           ref="ListboxItemsElements"
           class="vex-autocomplete-listbox-item"
         >
