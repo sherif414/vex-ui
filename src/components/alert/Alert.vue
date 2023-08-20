@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { Button } from '@/components'
 import { IconDangerSign, IconWarn, IconCheckCircle, IconBell, IconXMark } from '@/icons'
-import { computed } from 'vue'
 import { useID } from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
@@ -40,34 +38,24 @@ const slots = defineSlots<{
   icon?: (props: {}) => any
 }>()
 
+//----------------------------------------------------------------------------------------------------
+
 const HEADER_ID = useID()
 const CONTENT_ID = useID()
 
-//----------------------------------------------------------------------------------------------------
-// 📌 icon
-//----------------------------------------------------------------------------------------------------
-
-const IconComponent = computed(() => {
-  return {
-    danger: IconDangerSign,
-    success: IconCheckCircle,
-    accent: IconBell,
-    primary: IconBell,
-    warning: IconWarn,
-  }[p.variant]
-})
-
-//----------------------------------------------------------------------------------------------------
-// 📌 classes
-//----------------------------------------------------------------------------------------------------
-
-const modifierClasses = computed(() => ['vex-alert', `--variant-${p.variant}`])
+const icons = {
+  danger: IconDangerSign,
+  success: IconCheckCircle,
+  accent: IconBell,
+  primary: IconBell,
+  warning: IconWarn,
+}
 </script>
 
 <template>
   <div
     role="alert"
-    :class="modifierClasses"
+    :class="['vex-alert', `--variant-${p.variant}`]"
     :aria-labelledby="HEADER_ID"
     :aria-describedby="CONTENT_ID"
   >
@@ -75,7 +63,7 @@ const modifierClasses = computed(() => ['vex-alert', `--variant-${p.variant}`])
 
     <span class="vex-alert-icon">
       <slot name="icon">
-        <Component :is="IconComponent" width="20" height="20" />
+        <Component :is="icons[p.variant]" width="20" height="20" />
       </slot>
     </span>
 
