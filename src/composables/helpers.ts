@@ -1,4 +1,5 @@
 import { EXPOSED_EL } from '@/config'
+import type { NavigationKey, Orientation, KeyIntent } from '@/types'
 import { useTextDirection } from '@vueuse/core'
 import type { ComponentPublicInstance } from 'vue'
 
@@ -11,6 +12,8 @@ export const isString = (value: unknown): value is string => typeof value === 's
 export const isFunction = (value: unknown): value is Function => value instanceof Function
 export const isIOS = /*#__PURE__*/ getIsIOS()
 export const dir = useTextDirection()
+export const isNavigationKey = (v: string): v is NavigationKey =>
+  ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(v)
 
 //----------------------------------------------------------------------------------------------------
 // 📌 getters
@@ -45,15 +48,12 @@ export function getElementFromRef(
   throw new Error(`[vex] <${component}> has a non Element root child`)
 }
 
-export function getDirectionAwareKey(key: NavigationKeys) {
+export function getDirectionAwareKey(key: NavigationKey) {
   if (dir.value !== 'rtl') return key
   return key === 'ArrowLeft' ? 'ArrowRight' : key === 'ArrowRight' ? 'ArrowLeft' : key
 }
 
-export function getKeyIntent(
-  key: NavigationKeys,
-  orientation: Orientation = 'vertical'
-): KeyIntent {
+export function getKeyIntent(key: NavigationKey, orientation: Orientation = 'vertical'): KeyIntent {
   switch (getDirectionAwareKey(key)) {
     case 'ArrowDown':
       if (orientation === 'vertical') return 'next'
@@ -103,7 +103,3 @@ export const noop = () => {}
 export function wrapArray<T>(array: T[], startIndex: number) {
   return array.map((_, index) => array[(startIndex + index) % array.length])
 }
-
-type Orientation = 'vertical' | 'horizontal'
-type NavigationKeys = 'ArrowDown' | 'ArrowUp' | 'ArrowLeft' | 'ArrowRight' | 'Home' | 'End'
-type KeyIntent = 'next' | 'prev' | 'last' | 'first' | 'show' | 'hide'
