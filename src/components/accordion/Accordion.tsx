@@ -1,8 +1,19 @@
-import { useContext, useID, useListNavigation, useListSelection } from '@/composables'
-import { IAdd } from 'iconsax-vue/linear'
+import {
+  createCollection,
+  useCollection,
+  useContext,
+  useID,
+  useMemo,
+  useRovingFocus,
+  useSelect,
+  useSignal,
+  useTemplateRef,
+} from '@/composables'
 import { TransitionExpand } from '@/transitions'
-import type { ExtractPropTypes, InjectionKey, PropType, Ref, SetupContext } from 'vue'
-import { computed, defineComponent, provide, ref } from 'vue'
+import type { ComputableGetter, Getter, Orientation, Setter } from '@/types'
+import { PlusIcon } from '@heroicons/vue/20/solid'
+import type { ExtractPropTypes, InjectionKey, PropType, SetupContext } from 'vue'
+import { defineComponent, provide } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 Accordion
@@ -21,39 +32,47 @@ const AccordionProps = {
     type: String as PropType<'outline' | 'ladder' | 'default' | 'light'>,
     default: 'default',
   },
+  /**
+   * sets the accordion orientation, mainly used for keyboard navigation.
+   */
+  orientation: {
+    type: String as PropType<Orientation>,
+    default: 'vertical',
+  },
 }
 
 type AccordionProps = ExtractPropTypes<typeof AccordionProps>
 type ExpandedItems = string | string[] | undefined
 
 const ACCORDION_CTX = Symbol() as InjectionKey<{
-  setExpanded: (val: string) => void
-  expandedItems: Ref<ExpandedItems>
-  getIndex: () => string
+  expanded: [ComputableGetter<ExpandedItems>, Setter<string>]
 }>
 
-const useAccordionCtx = (component: string) => useContext(ACCORDION_CTX, 'Accordion', component)
+function useAccordionCtx(component: string) {
+  return useContext(ACCORDION_CTX, 'Accordion', component)
+}
 
 //----------------------------------------------------------------------------------------------------
 
 const AccordionImpl = (p: AccordionProps, { slots }: SetupContext) => {
-  const CHILDREN_SELECTOR = '.vex-accordion-item-trigger-button:enabled'
-  const { onKeydown } = useListNavigation(CHILDREN_SELECTOR, true)
+  const [getAccordionEl, setAccordionEl] = useTemplateRef('Accordion')
+  const { elements } = createCollection(getAccordionEl)
 
-  const expandedItems = ref<ExpandedItems>()
-  const { setSelected: setExpanded } = useListSelection(expandedItems, () => p.multiple, {
-    DeSelectOnReSelect: true,
+  useRovingFocus(getAccordionEl, elements, {
+    orientation: () => p.orientation,
   })
 
-  let count = 0
+  const expanded = useSelect(useSignal<ExpandedItems>(undefined), {
+    multiselect: () => p.multiple,
+    deselection: () => true,
+  })
+
   provide(ACCORDION_CTX, {
-    setExpanded,
-    expandedItems,
-    getIndex: () => `accordion-item:${count++}`,
+    expanded,
   })
 
   return () => (
-    <div class={['vex-accordion', `--variant-${p.variant}`]} onKeydown={onKeydown}>
+    <div ref={setAccordionEl} class={['vex-accordion', `--variant-${p.variant}`]}>
       {slots.default?.()}
     </div>
   )
@@ -77,37 +96,38 @@ type AccordionItemProps = ExtractPropTypes<typeof AccordionItemProps>
 const ACCORDION_ITEM_CTX = Symbol() as InjectionKey<{
   contentID: string
   triggerID: string
-  isExpanded: Ref<boolean>
-  setExpanded: (val: string) => void
-  index: string
+  isExpanded: Getter<boolean>
+  setExpanded: Setter<string>
 }>
 
-const useAccordionItemCtx = (component: string) =>
-  useContext(ACCORDION_ITEM_CTX, 'AccordionItem', component)
+function useAccordionItemCtx(component: string) {
+  return useContext(ACCORDION_ITEM_CTX, 'AccordionItem', component)
+}
 
 //----------------------------------------------------------------------------------------------------
 
 const AccordionItemImpl = (p: AccordionItemProps, { slots }: SetupContext) => {
-  const { expandedItems, getIndex, setExpanded } = useAccordionCtx('AccordionItem')
+  const {
+    expanded: [getExpanded, setExpanded],
+  } = useAccordionCtx('AccordionItem')
 
-  const index = getIndex()
-  const isExpanded = computed<boolean>(() => {
+  const contentID = useID()
+  const triggerID = useID()
+
+  const isExpanded = useMemo<boolean>(() => {
     if (p.alwaysExpanded) return true
-    return Array.isArray(expandedItems.value)
-      ? expandedItems.value.includes(index)
-      : expandedItems.value === index
+    return getExpanded((v) => (Array.isArray(v) ? v.includes(triggerID) : v === triggerID))
   })
 
   provide(ACCORDION_ITEM_CTX, {
-    contentID: useID(),
-    triggerID: useID(),
-    index,
+    contentID,
+    triggerID,
     setExpanded,
     isExpanded,
   })
 
   return () => (
-    <div class={['vex-accordion-item', isExpanded.value && '--expanded']}>{slots.default?.()}</div>
+    <div class={['vex-accordion-item', { '--expanded': isExpanded() }]}>{slots.default?.()}</div>
   )
 }
 
@@ -132,21 +152,24 @@ type AccordionTriggerProps = ExtractPropTypes<typeof AccordionTriggerProps>
 //----------------------------------------------------------------------------------------------------
 
 const AccordionTriggerImpl = (p: AccordionTriggerProps, { slots }: SetupContext) => {
-  const { setExpanded, contentID, isExpanded, triggerID, index } =
-    useAccordionItemCtx('AccordionTrigger')
+  const { setExpanded, contentID, isExpanded, triggerID } = useAccordionItemCtx('AccordionTrigger')
+
+  const [getTriggerEl, setTriggerEl] = useTemplateRef('AccordionItem')
+  useCollection({ id: triggerID, disabled: () => p.disabled, ref: getTriggerEl })
 
   return () => (
-    <h3 class="vex-accordion-item-trigger">
+    <h3 class="vex-accordion-trigger">
       <button
-        class="vex-accordion-item-trigger-button"
-        onClick={() => setExpanded(index)}
-        aria-expanded={isExpanded.value}
+        ref={setTriggerEl}
+        class="vex-accordion-trigger-button"
+        onClick={() => setExpanded(triggerID)}
+        aria-expanded={isExpanded()}
         aria-controls={contentID}
         disabled={p.disabled}
         id={triggerID}
       >
         {slots.default?.()}
-        <IAdd class="vex-accordion-item-trigger-button-chevron" />
+        <PlusIcon class="vex-accordion-trigger-button-chevron" />
       </button>
     </h3>
   )
@@ -162,20 +185,15 @@ export type AccordionTrigger = InstanceType<typeof AccordionTrigger>
 // 📌 Accordion Content
 //----------------------------------------------------------------------------------------------------
 
-const AccordionContentProps = {}
-type AccordionContentProps = ExtractPropTypes<typeof AccordionContentProps>
-
-//----------------------------------------------------------------------------------------------------
-
-const AccordionContentImpl = (_: AccordionContentProps, { slots, attrs }: SetupContext) => {
+const AccordionContentImpl = (_: any, { slots, attrs }: SetupContext) => {
   const { contentID, isExpanded, triggerID } = useAccordionItemCtx('AccordionContent')
 
   return () => (
     <TransitionExpand>
-      {isExpanded.value && (
+      {isExpanded() && (
         <div
           {...attrs}
-          class="vex-accordion-item-content"
+          class="vex-accordion-content"
           aria-labelledby={triggerID}
           role="region"
           id={contentID}
@@ -189,7 +207,6 @@ const AccordionContentImpl = (_: AccordionContentProps, { slots, attrs }: SetupC
 
 export const AccordionContent = defineComponent({
   setup: AccordionContentImpl,
-  props: AccordionContentProps,
   inheritAttrs: false,
   name: 'AccordionContent',
 })

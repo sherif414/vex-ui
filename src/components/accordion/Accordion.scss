@@ -73,7 +73,7 @@
 
 //------ trigger ------//
 
-.vex-accordion-item-trigger {
+.vex-accordion-trigger {
   font-size: var(--vex-font-size-sm);
   border-radius: var(--vex-border-radius-sm);
   display: flex;
@@ -89,7 +89,7 @@
 
     &:disabled {
       cursor: not-allowed;
-      color: var(--vex-clr-on-disabled);
+      opacity: 50%;
     }
 
     &:focus-visible {
@@ -112,7 +112,7 @@
 
 //------ content ------//
 
-.vex-accordion-item-content {
+.vex-accordion-content {
   will-change: height;
   font-size: var(--vex-font-size-sm);
 
