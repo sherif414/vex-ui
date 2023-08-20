@@ -184,7 +184,7 @@ export type AccordionTrigger = InstanceType<typeof AccordionTrigger>
 //----------------------------------------------------------------------------------------------------
 
 export const AccordionContent = defineComponent({
-  setup(_, { slots, attrs }) {
+  setup(p, { slots, attrs }) {
     const { contentID, isExpanded, triggerID } = useAccordionItemCtx('AccordionContent')
 
     return () => (
