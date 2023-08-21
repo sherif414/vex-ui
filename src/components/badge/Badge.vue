@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { useMemo } from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -61,18 +61,10 @@ const p = withDefaults(
 )
 
 //----------------------------------------------------------------------------------------------------
-// 📌 visibility
-//----------------------------------------------------------------------------------------------------
 
-const isVisible = computed(() => {
-  return (p.dot || p.value) && !p.hidden
-})
+const isVisible = useMemo(() => (p.dot || p.value) && !p.hidden)
 
-//----------------------------------------------------------------------------------------------------
-// 📌 classes & styles
-//----------------------------------------------------------------------------------------------------
-
-const modifierClasses = computed(() => [
+const modifierClasses = useMemo(() => [
   'vex-badge',
   `--color-${p.color}`,
   `--size-${p.size}`,
@@ -81,7 +73,7 @@ const modifierClasses = computed(() => [
   },
 ])
 
-const positionStyles = computed(() => {
+const positionStyles = useMemo(() => {
   const [y, x] = p.placement.split('-')
   return {
     top: y === 'top' ? `calc(0% - ${p.offset})` : `calc(100% + ${p.offset})`,
@@ -92,7 +84,7 @@ const positionStyles = computed(() => {
 
 <template>
   <div style="position: relative">
-    <div v-bind="$attrs" v-show="isVisible" :class="modifierClasses" :style="positionStyles">
+    <div v-bind="$attrs" v-show="isVisible()" :class="modifierClasses()" :style="positionStyles()">
       <span v-if="!p.dot">
         {{ p.value }}
       </span>
