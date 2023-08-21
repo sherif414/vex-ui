@@ -53,6 +53,7 @@ const expanded = useSelect(useSignal<ExpandedItems>(undefined), {
 
 provide(ACCORDION_CTX, {
   expanded,
+  orientation: () => p.orientation,
 })
 </script>
 
