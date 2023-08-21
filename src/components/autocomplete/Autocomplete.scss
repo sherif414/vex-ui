@@ -9,9 +9,10 @@
   place-items: center;
 }
 
-.vex-autocomplete-listbox {
+.vex-autocomplete-content {
   z-index: 100;
   width: max-content;
+  min-width: var(--vex-auto-min-width);
   max-height: 14rem;
   overflow-y: auto;
   margin: 0;
@@ -26,7 +27,7 @@
   filter: var(--vex-drop-shadow-sm);
 }
 
-.vex-autocomplete-listbox-item {
+.vex-autocomplete-content-item {
   min-width: max-content;
   display: flex;
   cursor: pointer;
@@ -49,8 +50,9 @@
     cursor: not-allowed;
   }
 
-  &[data-highlighted='true'] {
+  &:focus {
     background-color: var(--vex-c-neutral-100);
     color: var(--vex-c-primary-500);
+    outline: none;
   }
 }

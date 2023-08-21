@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Input, Loader } from '@/components'
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useEventListener, watchDebounced } from '@vueuse/core'
 import { IconChevronUpDown } from '@/icons'
 import {
@@ -11,11 +11,14 @@ import {
   useRovingFocus,
   useSelect,
   useRef,
+  useTemplateRef,
+  useSignal,
 } from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
 //----------------------------------------------------------------------------------------------------
+
 const p = withDefaults(
   defineProps<{
     /**
@@ -83,106 +86,56 @@ const emit = defineEmits<{
 
 //----------------------------------------------------------------------------------------------------
 
-const TriggerEl = ref<HTMLInputElement | null>(null)
-const ListboxEl = ref<HTMLElement | null>(null)
-const ListboxItemsElements = ref<HTMLElement[]>([])
-const FormEl = computed(() => TriggerEl.value?.form)
+const [getTriggerEl, setTriggerEl] = useTemplateRef('Autocomplete')
+const [getContentEl, setContentEl] = useTemplateRef('Autocomplete')
+const getFormEl = () => (getTriggerEl() as HTMLInputElement)?.form
+
+const ContentItemsEl = ref<(HTMLElement | null)[]>([])
+const getContentItemsEl = useMemo(() => ContentItemsEl.value.filter(Boolean) as HTMLElement[])
 
 const TRIGGER_ID = useID()
-const LISTBOX_ID = useID()
+const CONTENT_ID = useID()
 
-const isListboxVisible = ref(false)
+const [isContentOpen, setIsContentOpen] = useSignal(false)
 const suggestions = ref<string[]>(p.options?.slice(0, p.maxDisplayedOptions) || [])
 
-const [getSelected, setSelected] = useSelect<string>(
-  useVModel(() => p.modelValue),
-  {
-    deselection: () => false,
-    multiselect: () => false,
-  }
-)
+const [getSelected, setSelected] = useVModel(() => p.modelValue)
 
 //----------------------------------------------------------------------------------------------------
 // 📌 keyboard interactions
 //----------------------------------------------------------------------------------------------------
 
-useEventListener(TriggerEl, 'keydown', (e: KeyboardEvent) => {
-  if (!isListboxVisible.value) {
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      e.preventDefault()
-      isListboxVisible.value = true
-    }
+useRovingFocus(getContentEl, getContentItemsEl, {
+  orientation: () => 'vertical',
+})
+
+useEventListener(getTriggerEl, 'keydown', function onKeydown(e: KeyboardEvent) {
+  if (['ArrowDown', 'ArrowUp'].includes(e.key)) {
+    e.preventDefault()
+    setIsContentOpen(true)
+    nextTick(() => getContentItemsEl()[0].focus())
+  }
+})
+
+useEventListener(getContentEl, 'keydown', function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') {
+    e.preventDefault()
+    setIsContentOpen(false)
+    getTriggerEl()?.focus()
     return
   }
 
-  if (e.key === 'ArrowDown') {
-    setHighlighted(highlighted.value + 1)
-    //
-  } else if (e.key === 'ArrowUp') {
-    setHighlighted(highlighted.value - 1)
-    //
-  } else if (e.key === 'End') {
-    setHighlighted(Infinity)
-    //
-  } else if (e.key === 'Home') {
-    setHighlighted(0)
-    //
-  } else if (e.key === 'Enter') {
-    ListboxItemsElements.value?.[highlighted.value]?.click()
-    isListboxVisible.value = false
-    //
-  } else if (e.key === 'Escape') {
-    isListboxVisible.value = false
-    e.stopPropagation()
-    //
-  } else return
-
-  e.preventDefault()
-})
-
-//----------------------------------------------------------------------------------------------------
-// 📌 highlighting
-//----------------------------------------------------------------------------------------------------
-
-const highlighted = ref(-1)
-
-function setHighlighted(index: number): void {
-  const itemsLength = ListboxItemsElements.value.length
-  if (!itemsLength) return
-
-  if (index >= itemsLength) {
-    highlighted.value = 0
-    //
-  } else if (index < 0) {
-    highlighted.value = itemsLength - 1
-    //
-  } else highlighted.value = index
-}
-
-watch(highlighted, (highlighted) => {
-  if (highlighted < 0) return
-  ListboxItemsElements.value[highlighted]?.scrollIntoView({ block: 'center' })
-  TriggerEl.value?.setAttribute('aria-activedescendant', `${LISTBOX_ID}-${highlighted}`)
-})
-
-watch(isListboxVisible, (visible) => {
-  if (visible) return
-  highlighted.value = -1
-  TriggerEl.value?.removeAttribute('aria-activedescendant')
-})
-
-watch(suggestions, (suggestions) => {
-  if (!suggestions.length) return
-  highlighted.value = -1
-  TriggerEl.value?.removeAttribute('aria-activedescendant')
-  ListboxEl.value?.scrollTo({ top: 4 })
+  if ([' ', 'Enter'].includes(e.key)) {
+    e.preventDefault()
+    ;(e.target as HTMLElement).click()
+  }
 })
 
 //----------------------------------------------------------------------------------------------------
 // 📌 filter
 //----------------------------------------------------------------------------------------------------
 
-const isLoading = ref(false)
+const [isLoading, setIsLoading] = useSignal(false)
 const inputValue = useRef(p.modelValue)
 
 watchDebounced(
@@ -191,15 +144,15 @@ watchDebounced(
     if (!query) return
 
     suggestions.value = []
-    isListboxVisible.value = true
+    setIsContentOpen(true)
 
     if (p.getOptions) {
-      isLoading.value = true
+      setIsLoading(true)
 
       p.getOptionsCleanup && onCleanup(p.getOptionsCleanup)
       suggestions.value = await p.getOptions(query)
 
-      isLoading.value = false
+      setIsLoading(false)
     }
 
     suggestions.value = p.filter
@@ -221,24 +174,18 @@ function onInputBlur() {
 }
 
 watch(getSelected, () => {
-  inputValue.lay(getSelected() as string)
+  inputValue.lay(getSelected())
 })
 
 //----------------------------------------------------------------------------------------------------
 // 📌 form
 //----------------------------------------------------------------------------------------------------
 
-watch(FormEl, (form, _, onCleanup) => {
-  if (!form) return
-
-  const reset = () => emit('update:modelValue', undefined)
-  form.addEventListener('reset', reset)
-  onCleanup(() => form?.removeEventListener('reset', reset))
-})
+useEventListener(getFormEl, 'reset', () => setSelected(undefined))
 
 //----------------------------------------------------------------------------------------------------
 
-const { floatingStyles } = useFloating(TriggerEl, ListboxEl, isListboxVisible, {
+const { floatingStyles } = useFloating(getTriggerEl, getContentEl, isContentOpen, {
   placement: 'bottom-start',
   offset: 4,
   autoMinWidth: true,
@@ -250,9 +197,9 @@ const { floatingStyles } = useFloating(TriggerEl, ListboxEl, isListboxVisible, {
     v-model="inputValue"
     v-bind="$attrs"
     @blur="onInputBlur"
-    :ref="(vm)=> TriggerEl = (vm as InstanceType<typeof Input>)?.InputEl ?? null"
-    :aria-expanded="isListboxVisible"
-    :aria-controls="LISTBOX_ID"
+    :ref="setTriggerEl"
+    :aria-expanded="isContentOpen()"
+    :aria-controls="CONTENT_ID"
     :id="TRIGGER_ID"
     :compact="p.compact"
     aria-haspopup="listbox"
@@ -271,16 +218,16 @@ const { floatingStyles } = useFloating(TriggerEl, ListboxEl, isListboxVisible, {
 
   <Teleport to="body">
     <ul
-      v-if="isListboxVisible"
+      v-if="isContentOpen()"
       :style="floatingStyles()"
       :aria-describedby="TRIGGER_ID"
-      :id="LISTBOX_ID"
-      ref="ListboxEl"
+      :id="CONTENT_ID"
+      :ref="setContentEl"
       tabindex="-1"
-      class="vex-autocomplete-listbox"
+      class="vex-autocomplete-content"
     >
       <div v-if="!suggestions.length" class="vex-autocomplete-placeholder">
-        <Loader v-if="isLoading" />
+        <Loader v-if="isLoading()" />
         <span v-else>no data</span>
       </div>
 
@@ -288,12 +235,11 @@ const { floatingStyles } = useFloating(TriggerEl, ListboxEl, isListboxVisible, {
         <li
           v-for="(item, idx) in suggestions"
           :key="item"
-          :id="`${LISTBOX_ID}-${idx}`"
-          :data-highlighted="highlighted === idx"
-          :data-selected="getSelected() === item"
+          :id="`${CONTENT_ID}-${idx}`"
+          :class="['vex-autocomplete-content-item', { '--selected': getSelected() === item }]"
           @click="setSelected(item)"
-          ref="ListboxItemsElements"
-          class="vex-autocomplete-listbox-item"
+          ref="ContentItemsEl"
+          tabindex="-1"
         >
           <slot :item="item">
             {{ item }}

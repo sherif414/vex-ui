@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { Loader } from '@/components'
+import { EXPOSED_EL } from '@/config'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -98,6 +99,7 @@ const modifierClasses = computed(() => [
 defineExpose({
   InputEl,
   InputWrapperEl,
+  [EXPOSED_EL]: InputEl,
 })
 </script>
 
