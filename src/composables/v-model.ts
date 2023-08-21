@@ -5,11 +5,11 @@ import { isFunction } from './helpers'
 export function useVModel<T>(prop: Getter<T>, event: string = 'update:modelValue'): Signal<T> {
   const vm = getCurrentInstance()
 
-  const getter = <U>(fn: (v: T) => U) => {
-    return isFunction(fn) ? fn(prop()) : prop()
+  const getter = <U>(compute?: (v: T) => U) => {
+    return compute ? compute(prop()) : prop()
   }
-  const setter = (val: T | ((v: T) => T)) => {
-    vm?.emit(event, isFunction(val) ? val(prop()) : val)
+  const setter = (compute: T | ((v: T) => T)) => {
+    vm?.emit(event, isFunction(compute) ? compute(prop()) : compute)
   }
 
   return [getter as ComputableGetter<T>, setter as ComputableSetter<T>]
