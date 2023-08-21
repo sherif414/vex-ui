@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { useSignal } from '@/composables'
 import { onMounted, ref, watch } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
 //----------------------------------------------------------------------------------------------------
+
+type LoadStatus = 'loading' | 'error' | 'idle' | 'loaded'
 
 defineOptions({
   inheritAttrs: false,
@@ -14,29 +17,37 @@ const p = withDefaults(
     src?: string
     class?: any
     style?: any
+    size?: 'sm' | 'md' | 'lg'
+    radius?: 'sm' | 'md' | 'lg' | 'full' | 'none'
+    ring?: boolean
+    ringColor?: 'primary' | 'accent' | 'danger' | 'warning' | 'success' | 'black' | 'white'
   }>(),
-  {}
+  {
+    size: 'md',
+    radius: 'full',
+    ringColor: 'accent',
+  }
 )
 
 defineSlots<{
-  default: (props: { loadStatus: 'loading' | 'error' | 'idle' }) => any
+  default: (props: { loadStatus: () => LoadStatus }) => any
 }>()
 
 //----------------------------------------------------------------------------------------------------
 // 📌 image loading status
 //----------------------------------------------------------------------------------------------------
 
-const loadStatus = ref<'loading' | 'loaded' | 'error' | 'idle'>('idle')
+const [getLoadStatus, setLoadStatus] = useSignal<LoadStatus>('idle')
 
 onMounted(() => {
   watch(
     () => p.src,
     () => {
       if (!p.src) {
-        loadStatus.value = 'error'
+        setLoadStatus('error')
         return
       }
-      loadStatus.value = 'loading'
+      setLoadStatus('loading')
       const img = new Image()
       img.onload = onLoad
       img.onerror = onError
@@ -49,19 +60,28 @@ onMounted(() => {
 function onLoad(e: Event) {
   const img = e.target as HTMLImageElement
   if (img.complete && img.naturalHeight > 0) {
-    loadStatus.value = 'loaded'
+    setLoadStatus('loaded')
   }
 }
 
 function onError() {
-  loadStatus.value = 'error'
+  setLoadStatus('error')
 }
 </script>
 
 <template>
-  <div :class="[p.class, 'vex-avatar --size-sm --rounded-full']" :style="p.style">
-    <slot v-if="loadStatus !== 'loaded'" :load-status="loadStatus" />
+  <div
+    :class="[
+      p.class,
+      'vex-avatar',
+      `--size-${p.size}`,
+      ` --rounded-${p.radius}`,
+      p.ring && `--ring-${p.ringColor}`,
+    ]"
+    :style="p.style"
+  >
+    <slot v-if="getLoadStatus() !== 'loaded'" :load-status="getLoadStatus" />
 
-    <img v-else v-bind="$attrs" :src="p.src" />
+    <img class="vex-avatar-img" v-else v-bind="$attrs" :src="p.src" />
   </div>
 </template>

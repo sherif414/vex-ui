@@ -6,24 +6,13 @@
   overflow: hidden;
   user-select: none;
   vertical-align: middle;
-}
-
-//------ fallback ------//
-
-.vex-avatar-fallback {
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
   background-color: var(--vex-c-accent-100);
   color: var(--vex-c-accent-500);
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 //------ img ------//
 
-.vex-avatar > img {
+.vex-avatar-img {
   width: 100%;
   height: 100%;
   border-radius: inherit;
@@ -32,37 +21,22 @@
   aspect-ratio: 1/1;
 }
 
-//------ error ------//
-
-.vex-avatar-error {
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  background-color: var(--vex-c-danger-100);
-  color: var(--vex-c-danger-500);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  & > svg {
-    width: 50%;
-    height: 50%;
-  }
-}
-
 //------ size ------//
 
 .vex-avatar.--size-sm {
   height: 2rem;
   width: 2rem;
+  font-size: var(--vex-font-size-xs);
 }
 .vex-avatar.--size-md {
   height: 3rem;
   width: 3rem;
+  font-size: var(--vex-font-size-sm);
 }
 .vex-avatar.--size-lg {
   height: 4rem;
   width: 4rem;
+  font-size: var(--vex-font-size-md);
 }
 
 //------ ring ------//
