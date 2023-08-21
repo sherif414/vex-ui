@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onBeforeUpdate, onMounted, onUpdated, ref } from 'vue'
+import { useTemplateRef } from '@/composables'
+import { onBeforeUpdate, onMounted, onUpdated } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -10,7 +11,7 @@ const p = withDefaults(
     /**
      * whether to automatically add `aria-current="page"`
      * to the last `a` link in the breadcrumb,
-     * some routing libraries - like vue-router -
+     * some routing libraries (like vue-router)
      * already take care of this.
      */
     autoAriaCurrent?: boolean
@@ -22,25 +23,25 @@ const p = withDefaults(
 // 📌 aria-current
 //----------------------------------------------------------------------------------------------------
 
-const BreadcrumbEl = ref<HTMLElement | null>(null)
+const [getBreadcrumbEl, setBreadcrumbEl] = useTemplateRef('Breadcrumb')
 
 if (p.autoAriaCurrent) {
   onBeforeUpdate(() => {
-    BreadcrumbEl.value?.querySelector('a:last-of-type')?.removeAttribute('aria-current')
+    getBreadcrumbEl()?.querySelector('a:last-of-type')?.removeAttribute('aria-current')
   })
 
   onUpdated(() => {
-    BreadcrumbEl.value?.querySelector('a:last-of-type')?.setAttribute('aria-current', 'page')
+    getBreadcrumbEl()?.querySelector('a:last-of-type')?.setAttribute('aria-current', 'page')
   })
 
   onMounted(() => {
-    BreadcrumbEl.value?.querySelector('a:last-of-type')?.setAttribute('aria-current', 'page')
+    getBreadcrumbEl()?.querySelector('a:last-of-type')?.setAttribute('aria-current', 'page')
   })
 }
 </script>
 
 <template>
-  <div ref="BreadcrumbEl" role="navigation" aria-label="breadcrumb" class="vex-breadcrumb">
+  <div :ref="setBreadcrumbEl" role="navigation" aria-label="breadcrumb" class="vex-breadcrumb">
     <slot></slot>
   </div>
 </template>
