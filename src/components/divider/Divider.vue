@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
+//
+//  TODO: functional component candidate
 //----------------------------------------------------------------------------------------------------
 
 const p = withDefaults(
@@ -14,19 +14,17 @@ const p = withDefaults(
     orientation: 'horizontal',
   }
 )
-
-const modifierClasses = computed(() => [
-  'vex-divider',
-  {
-    '--vertical': p.orientation === 'vertical',
-  },
-])
 </script>
 
 <template>
   <div
-    :class="modifierClasses"
-    :role="p.decorative ? 'none' : 'separator'"
+    :class="[
+      'vex-divider',
+      {
+        '--vertical': p.orientation === 'vertical',
+      },
+    ]"
+    :role="p.decorative ? undefined : 'separator'"
     :aria-orientation="p.decorative ? undefined : p.orientation"
   >
     <span class="vex-divider-content">
