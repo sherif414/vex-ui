@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Loader } from '@/components'
-import { computed } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -53,17 +52,6 @@ const emit = defineEmits<{
 
 //----------------------------------------------------------------------------------------------------
 
-const modifierClasses = computed(() => [
-  'vex-button',
-  `--variant-${p.variant}`,
-  {
-    '--icon-only': p.iconOnly,
-    '--compact': p.compact,
-    '--loading': p.loading,
-    '--destructive': p.destructive,
-  },
-])
-
 function onClick(e: Event) {
   if (p.disabled || p.loading) {
     e.preventDefault()
@@ -81,7 +69,16 @@ function onClick(e: Event) {
     @click="onClick"
     :disabled="p.disabled"
     :aria-disabled="p.disabled || p.loading || undefined"
-    :class="modifierClasses"
+    :class="[
+      'vex-button',
+      `--variant-${p.variant}`,
+      {
+        '--icon-only': p.iconOnly,
+        '--compact': p.compact,
+        '--loading': p.loading,
+        '--destructive': p.destructive,
+      },
+    ]"
   >
     <Loader
       role="progressbar"

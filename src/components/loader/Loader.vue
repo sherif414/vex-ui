@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
 //
@@ -11,19 +9,19 @@ const p = withDefaults(
   defineProps<{
     /**
      * specifies the loader color,
-     * @default 'currentColor'
+     * @defaultValue 'currentColor'
      */
     color?: 'primary' | 'currentColor' | 'success' | 'warning' | 'error'
 
     /**
      * specifies the loader size
-     * @default 'sm'
+     * @defaultValue 'sm'
      */
     size?: 'sm' | 'md' | 'lg'
 
     /**
      * specifies the loader aria-label
-     * @default 'loading'
+     * @defaultValue 'loading'
      */
     ariaLabel?: string
   }>(),
@@ -33,12 +31,12 @@ const p = withDefaults(
     ariaLabel: 'Loading',
   }
 )
-
-//----------------------------------------------------------------------------------------------------
-
-const modifierClasses = computed(() => ['vex-loader', `--size-${p.size}`, `--color-${p.color}`])
 </script>
 
 <template>
-  <div role="status" :aria-label="ariaLabel" :class="modifierClasses" />
+  <div
+    role="status"
+    :aria-label="ariaLabel"
+    :class="['vex-loader', `--size-${p.size}`, `--color-${p.color}`]"
+  />
 </template>
