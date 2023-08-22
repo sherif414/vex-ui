@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { useMemo, useTemplateRef } from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -36,24 +36,24 @@ const emit = defineEmits<{
 
 //----------------------------------------------------------------------------------------------------
 
-const modifierClasses = computed(() => [
+const modifierClasses = useMemo(() => [
   'vex-checkbox',
   p.class,
   `--size-${p.size}`,
   { '--checked': p.modelValue },
 ])
-const inputEl = ref<HTMLInputElement | null>(null)
+const [getInputEl, setInputEl] = useTemplateRef('Checkbox')
 
 defineExpose({
-  inputEl,
+  getInputEl,
 })
 </script>
 
 <template>
-  <div :class="modifierClasses" :style="p.style">
+  <div :class="modifierClasses()" :style="p.style">
     <input
       v-bind="$attrs"
-      ref="inputEl"
+      :ref="setInputEl"
       type="checkbox"
       class="vex-checkbox-input"
       :checked="p.modelValue"
