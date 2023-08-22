@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { provide, watch } from 'vue'
-import { type selected, CHIP_GROUP_CTX } from '.'
-import { useID } from '@/composables'
+import { provide } from 'vue'
+import { type Selected, CHIP_GROUP_CTX } from './context'
+import { useRovingFocus, useSelect, useTemplateRef, useVModel } from '@/composables'
+import type { Orientation } from '@/types'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -11,76 +12,72 @@ const p = withDefaults(
   defineProps<{
     /**
      * whether to allow multiple chips to be checked at the same time
-     * @defaultValue false
      */
-    multiple?: boolean
-
-    /**
-     * specifies the `name` attr for descendent `Chip` components
-     * @defaultValue auto generated random string
-     */
-    name?: string
+    multiselect?: boolean
 
     /**
      * specifies the currently checked chips, this should be a string array if
-     * `multiple` prop is set to true, and a string otherwise.
+     * `multiselect` prop is set to true, and a string otherwise.
      */
-    modelValue?: selected
+    modelValue?: Selected
+
+    /**
+     * whether to allow deselecting chips when `multiselect` is false
+     */
+    deselection?: boolean
+
+    /**
+     * mainly used for keyboard navigation
+     */
+    orientation?: Orientation
   }>(),
   {
-    multiple: false,
-    name: () => useID(),
+    orientation: 'horizontal',
   }
 )
 
-const emit = defineEmits<{
-  (event: 'update:modelValue', value?: selected): void
+defineEmits<{
+  (event: 'update:modelValue', value?: Selected): void
 }>()
 
-const slots = defineSlots<{
+defineSlots<{
   default: (props: {}) => any
 }>()
 
 //----------------------------------------------------------------------------------------------------
-// 📌 context provider
-//----------------------------------------------------------------------------------------------------
 
-provide(CHIP_GROUP_CTX, {
-  groupName: () => p.name,
-  multiple: () => p.multiple,
-  onEmit,
-  selected: () => p.modelValue,
-})
+const [getGroupEl, setGroupEl] = useTemplateRef('ChipGroup')
 
-function onEmit(value: string) {
-  if (!p.modelValue) {
-    emit('update:modelValue', p.multiple ? [value] : value)
-    return
-  }
-
-  if (!Array.isArray(p.modelValue)) {
-    emit('update:modelValue', value)
-    return
-  }
-
-  p.modelValue.includes(value)
-    ? emit(
-        'update:modelValue',
-        p.modelValue.filter((v) => v !== value)
-      )
-    : emit('update:modelValue', [...p.modelValue, value])
-}
-
-watch(
-  () => p.multiple,
-  (val) => {
-    emit('update:modelValue', val ? [] : undefined)
+const selected = useSelect(
+  useVModel(() => p.modelValue),
+  {
+    deselection: () => p.deselection,
+    multiselect: () => p.multiselect,
   }
 )
+
+useRovingFocus(
+  getGroupEl,
+  () => Array.from(getGroupEl()?.querySelectorAll<HTMLElement>('.vex-chip') ?? []),
+  {
+    orientation: () => p.orientation,
+  }
+)
+
+provide(CHIP_GROUP_CTX, {
+  selected,
+})
+
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault()
+    ;(e.target as HTMLElement)?.click()
+  }
+}
 </script>
 
 <template>
-  <div class="vex-chip-group">
-    <slot></slot>
+  <div :ref="setGroupEl" @keydown="onKeydown" tabindex="0" class="vex-chip-group">
+    <slot />
   </div>
 </template>

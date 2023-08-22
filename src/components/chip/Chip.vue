@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { computed, inject, toRef } from 'vue'
 import { IconCheck } from '@/icons'
-import { CHIP_GROUP_CTX } from '.'
 import { TransitionExpand } from '@/transitions'
-import { useID } from '@/composables'
+import { useMemo } from '@/composables'
+import { useChipGroupCtx } from './context'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -16,101 +15,49 @@ defineOptions({
 const p = withDefaults(
   defineProps<{
     /**
-     * specifies the chip's value,
-     * note that this must be ***unique*** from other sibling chips
-     * @required when used within `ChipGroup`
+     * specifies the chip's unique value.
      */
-    value?: string
-
-    /**
-     * whether the chip is checked/unchecked
-     */
-    modelValue?: boolean
+    value: string
   }>(),
   {}
 )
 
-const emit = defineEmits<{
+defineEmits<{
   'update:modelValue': [value: boolean]
 }>()
 
-const slots = defineSlots<{
+defineSlots<{
   default: (props: {}) => any
 }>()
 
 //----------------------------------------------------------------------------------------------------
-// 📌 context injector
-//----------------------------------------------------------------------------------------------------
 
-const ctx = inject(CHIP_GROUP_CTX, null)
-const isWithinGroup = !!ctx
+const {
+  selected: [getSelected, setSelected],
+} = useChipGroupCtx('Chip')
 
-if (isWithinGroup && !p.value) {
-  throw new Error('[vex] <Chip> has a parent <ChipGroup> but does not have a value prop')
-}
-
-const isMultiple = toRef(ctx?.multiple)
-const groupName = toRef(ctx?.groupName)
-const selected = toRef(ctx?.selected)
-
-//----------------------------------------------------------------------------------------------------
-// 📌 v-model
-//----------------------------------------------------------------------------------------------------
-
-const isChecked = computed<boolean>(() => {
-  if (!isWithinGroup) return !!p.modelValue
-
-  return Array.isArray(selected.value)
-    ? selected.value.includes(p.value!)
-    : selected.value === p.value
-})
-
-function onChange(e: Event): void {
-  isWithinGroup
-    ? ctx?.onEmit((e.target as HTMLInputElement).value)
-    : emit('update:modelValue', (e.target as HTMLInputElement).checked)
-}
-
-//----------------------------------------------------------------------------------------------------
-// 📌 attrs
-//----------------------------------------------------------------------------------------------------
-
-const INPUT_ID = useID()
-const inputType = computed<'checkbox' | 'radio'>(() =>
-  !isWithinGroup || isMultiple.value ? 'checkbox' : 'radio'
+const isChecked = useMemo<boolean>(() =>
+  getSelected((v) => (Array.isArray(v) ? v.includes(p.value) : v === p.value))
 )
-
-const modifierClasses = computed(() => [
-  'vex-chip',
-  {
-    '--checked': isChecked.value,
-  },
-])
 </script>
 
 <template>
-  <!-- input -->
-  <input
-    class="vex-sr-only"
-    @change="onChange"
-    :id="INPUT_ID"
-    :name="groupName"
-    :type="inputType"
-    :value="p.value"
-    :checked="isChecked"
-  />
-
-  <label :for="INPUT_ID" :class="modifierClasses" v-bind="$attrs">
+  <div
+    @click="setSelected(p.value)"
+    :class="['vex-chip', isChecked() && '--checked']"
+    tabindex="-1"
+    v-bind="$attrs"
+  >
     <!-- check icon -->
 
     <TransitionExpand transition-prop="width">
-      <IconCheck aria-hidden="true" class="vex-chip-icon" v-show="isChecked" />
+      <IconCheck aria-hidden="true" class="vex-chip-check" v-show="isChecked()" />
     </TransitionExpand>
 
-    <!-- label -->
+    <!-- content -->
 
     <span class="vex-chip-content">
       <slot />
     </span>
-  </label>
+  </div>
 </template>
