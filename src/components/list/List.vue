@@ -75,7 +75,7 @@ const selected = useSelect(
 useRovingFocus(getListEl, elements, {
   orientation: () => p.orientation,
   onEntryFocus(e, focusFirst) {
-    p.onEntryFocus?.(e, elements(), focusFirst)
+    p.onEntryFocus?.(e, elements(), focusFirst) ?? focusFirst(elements())
   },
 })
 
