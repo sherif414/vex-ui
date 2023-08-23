@@ -51,7 +51,7 @@ function onKeydown(e: KeyboardEvent) {
   if (e.ctrlKey || e.altKey || e.shiftKey || e.metaKey) return
 
   e.preventDefault()
-  setSelected(p.value)
+  ;(e.currentTarget as HTMLElement)?.click()
 }
 
 defineExpose({
