@@ -36,7 +36,7 @@ const {
 const id = useID('list-item')
 const [getItemEl, setItemEl] = useTemplateRef('ListItem')
 
-const {} = useCollection({
+useCollection({
   id,
   ref: getItemEl,
   disabled: () => p.disabled,
@@ -53,6 +53,15 @@ function onKeydown(e: KeyboardEvent) {
   e.preventDefault()
   setSelected(p.value)
 }
+
+defineExpose({
+  id,
+  getItemEl,
+  isSelected,
+  select() {
+    setSelected(p.value)
+  },
+})
 </script>
 
 <template>
