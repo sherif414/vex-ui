@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import {
   createCollection,
-  useListSelection,
   useRovingFocus,
   useSelect,
   useTemplateRef,
   useVModel,
 } from '@/composables'
-import { computed, provide } from 'vue'
+import { provide } from 'vue'
 import { LIST_CTX } from './context'
 import type { Orientation } from '@/types'
 
