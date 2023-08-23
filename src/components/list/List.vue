@@ -79,13 +79,27 @@ useRovingFocus(getListEl, elements, {
   },
 })
 
+function onKeydown(e: KeyboardEvent) {
+  if (e.key !== ' ' && e.key !== 'Enter') return
+  if (e.ctrlKey || e.altKey || e.shiftKey || e.metaKey) return
+
+  e.preventDefault()
+  ;(e.target as HTMLElement)?.click()
+}
+
 provide(LIST_CTX, {
   selected,
 })
 </script>
 
 <template>
-  <ul :ref="setListEl" tabindex="0" class="vex-list" :aria-multiselectable="p.multiselect">
+  <ul
+    :ref="setListEl"
+    :aria-multiselectable="p.multiselect"
+    @keydown="onKeydown"
+    tabindex="0"
+    class="vex-list"
+  >
     <slot />
   </ul>
 </template>

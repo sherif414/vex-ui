@@ -46,14 +46,6 @@ const isSelected = useMemo(() =>
   getSelected((v) => (Array.isArray(v) ? v.includes(p.value) : v === p.value))
 )
 
-function onKeydown(e: KeyboardEvent) {
-  if (e.key !== ' ' && e.key !== 'Enter') return
-  if (e.ctrlKey || e.altKey || e.shiftKey || e.metaKey) return
-
-  e.preventDefault()
-  ;(e.currentTarget as HTMLElement)?.click()
-}
-
 defineExpose({
   id,
   getItemEl,
@@ -68,7 +60,6 @@ defineExpose({
   <li
     tabindex="-1"
     @click="setSelected(p.value)"
-    @keydown="onKeydown"
     :id="id"
     :ref="setItemEl"
     :inert="p.disabled"
