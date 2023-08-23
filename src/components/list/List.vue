@@ -1,7 +1,15 @@
 <script setup lang="ts">
-import { useListNavigation, useListSelection } from '@/composables'
+import {
+  createCollection,
+  useListSelection,
+  useRovingFocus,
+  useSelect,
+  useTemplateRef,
+  useVModel,
+} from '@/composables'
 import { computed, provide } from 'vue'
-import { LIST_CTX } from '.'
+import { LIST_CTX } from './context'
+import type { Orientation } from '@/types'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -17,54 +25,67 @@ const p = withDefaults(
     /**
      * whether to allow multi-items selection
      */
-    multiple?: boolean
+    multiselect?: boolean
+
+    /**
+     * whether deselect is allowed when not using `multiselect`
+     */
+    deselection?: boolean
+
+    /**
+     * mainly used for keyboard navigation
+     * @defaultValue 'vertical'
+     */
+    orientation?: Orientation
+
+    /**
+     *  allows controlling entry focus behavior, defaults to focusing the first list element in DOM order.
+     * @param e focus event.
+     * @param items the list items.
+     * @param focusFirst focuses the first focusable element in a list (skips disabled elements).
+     */
+    onEntryFocus?: (
+      e: FocusEvent,
+      items: HTMLElement[],
+      focusFirst: (items: HTMLElement[]) => void
+    ) => void
   }>(),
-  {}
+  {
+    orientation: 'vertical',
+  }
 )
 
-const emit = defineEmits<{
+defineEmits<{
   (e: 'update:modelValue', value: typeof p.modelValue): void
 }>()
 
 //----------------------------------------------------------------------------------------------------
-// 📌 items selection
-//----------------------------------------------------------------------------------------------------
 
-const selected = computed<typeof p.modelValue>({
-  get: () => p.modelValue,
-  set: (val) => emit('update:modelValue', val),
+const [getListEl, setListEl] = useTemplateRef('List')
+const { elements } = createCollection(getListEl)
+
+const selected = useSelect(
+  useVModel(() => p.modelValue),
+  {
+    deselection: () => p.deselection,
+    multiselect: () => p.multiselect,
+  }
+)
+
+useRovingFocus(getListEl, elements, {
+  orientation: () => p.orientation,
+  onEntryFocus(e, focusFirst) {
+    p.onEntryFocus?.(e, elements(), focusFirst)
+  },
 })
 
-// reset invalid modelValues
-if (p.multiple && !Array.isArray(selected.value)) selected.value = []
-if (!p.multiple && Array.isArray(selected.value)) selected.value = undefined
-
-const { setSelected } = useListSelection(selected, () => p.multiple)
 provide(LIST_CTX, {
-  setSelected,
   selected,
 })
-
-//----------------------------------------------------------------------------------------------------
-// 📌 focus & keyboard interactions
-//----------------------------------------------------------------------------------------------------
-
-const childrenSelector = '.vex-list-item:not([inert])'
-const { onKeydown } = useListNavigation(childrenSelector, true)
-
-function onFocus(e: Event) {
-  // ;(e.currentTarget as HTMLElement).querySelector<HTMLElement>(childrenSelector)?.focus()
-}
 </script>
 
 <template>
-  <ul
-    tabindex="-1"
-    class="vex-list"
-    @keydown="onKeydown"
-    @focus="onFocus"
-    :aria-multiselectable="p.multiple"
-  >
+  <ul :ref="setListEl" tabindex="0" class="vex-list" :aria-multiselectable="p.multiselect">
     <slot />
   </ul>
 </template>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, inject, onBeforeUnmount } from 'vue'
-import { LIST_CTX } from '.'
+import { useListContext } from './context'
+import { useCollection, useID, useMemo, useTemplateRef } from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -24,44 +24,48 @@ const p = withDefaults(
 )
 
 defineSlots<{
-  default: (props: { isSelected: boolean }) => any
+  default: (props: {}) => any
 }>()
 
 //----------------------------------------------------------------------------------------------------
 
-const ctx = inject(LIST_CTX, null)
+const {
+  selected: [getSelected, setSelected],
+} = useListContext()
 
-if (!ctx) {
-  throw new Error(`[vex] <ListItem> is missing a <List> parent component.`)
-}
-const { setSelected, selected } = ctx
+const id = useID('list-item')
+const [getItemEl, setItemEl] = useTemplateRef('ListItem')
 
-//----------------------------------------------------------------------------------------------------
+const {} = useCollection({
+  id,
+  ref: getItemEl,
+  disabled: () => p.disabled,
+})
 
-const isSelected = computed<boolean>(() =>
-  Array.isArray(selected.value) ? selected.value.includes(p.value) : selected.value === p.value
+const isSelected = useMemo(() =>
+  getSelected((v) => (Array.isArray(v) ? v.includes(p.value) : v === p.value))
 )
 
 function onKeydown(e: KeyboardEvent) {
-  if (e.key === ' ' || e.key === 'Enter') return
+  if (e.key !== ' ' && e.key !== 'Enter') return
   if (e.ctrlKey || e.altKey || e.shiftKey || e.metaKey) return
 
   e.preventDefault()
   setSelected(p.value)
 }
-
-const modifierClasses = computed(() => ['vex-list-item', { '--selected': isSelected.value }])
 </script>
 
 <template>
   <li
-    tabindex="0"
+    tabindex="-1"
     @click="setSelected(p.value)"
     @keydown="onKeydown"
+    :id="id"
+    :ref="setItemEl"
     :inert="p.disabled"
-    :aria-selected="isSelected"
-    :class="modifierClasses"
+    :aria-selected="isSelected()"
+    :class="['vex-list-item', { '--selected': isSelected() }]"
   >
-    <slot :isSelected="isSelected" />
+    <slot />
   </li>
 </template>
