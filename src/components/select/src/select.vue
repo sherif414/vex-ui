@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { Input, Tag } from '@/components'
-import { useFloating, useID, useListNavigation, useListSelection } from '@/composables'
+import { useFloating, useID, useListSelection } from '@/composables'
 import { useElementSize, useEventListener } from '@vueuse/core'
 import { nextTick, reactive, ref, computed, toRef, provide } from 'vue'
 import { IconArrowDown } from '@/icons'
@@ -82,7 +82,7 @@ const { floatingStyles } = useFloating(isFloatingElVisible, InputEl, FloatingEl,
 // 📌 focus & keyboard interactions
 //----------------------------------------------------------------------------------------------------
 
-const { onKeydown } = useListNavigation(CHILDREN_SELECTOR, true)
+// const { onKeydown } = useListNavigation(CHILDREN_SELECTOR, true)
 
 useEventListener(InputEl, 'keydown', (e: KeyboardEvent) => {
   if (!['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key)) return
