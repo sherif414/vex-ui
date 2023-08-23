@@ -59,7 +59,7 @@ defineExpose({
   getItemEl,
   isSelected,
   select() {
-    setSelected(p.value)
+    !isSelected() && setSelected(p.value)
   },
 })
 </script>
