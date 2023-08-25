@@ -18,10 +18,16 @@ export interface AccordionProps {
    * @defaultValue 'vertical'
    */
   orientation?: Orientation
+
+  /**
+   * whether to show expand animation
+   */
+  noExpandAnimation?: boolean
 }
 
 export interface AccordionContext {
   orientation: Getter<Orientation>
+  noExpandAnimation: Getter<boolean>
 }
 
 export const ACCORDION_CTX = Symbol() as InjectionKey<AccordionContext>
@@ -55,6 +61,7 @@ createSelectScope(ref(p.multiple ? [] : undefined), {
 
 provide(ACCORDION_CTX, {
   orientation: () => p.orientation,
+  noExpandAnimation: () => p.noExpandAnimation,
 })
 </script>
 

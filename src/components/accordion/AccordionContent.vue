@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useAccordionCtx } from './Accordion.vue'
 import { useAccordionItemCtx } from './AccordionItem.vue'
 import { TransitionExpand } from '@/transitions'
 
@@ -6,11 +7,12 @@ defineOptions({
   inheritAttrs: false,
 })
 
+const { noExpandAnimation } = useAccordionCtx('AccordionContent')
 const { contentID, isExpanded, triggerID } = useAccordionItemCtx('AccordionContent')
 </script>
 
 <template>
-  <TransitionExpand>
+  <TransitionExpand :disabled="noExpandAnimation()">
     <div
       v-if="isExpanded"
       v-bind="$attrs"
