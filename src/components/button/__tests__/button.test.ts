@@ -24,7 +24,7 @@ describe('Button', () => {
 
   it('destructive button', () => {
     const wrapper = mount(Button, { props: { destructive: true } })
-    expect(wrapper.classes()).toContain('vex-button-destructive')
+    expect(wrapper.classes().includes('--destructive')).toBe(true)
   })
 
   it('disabled state', () => {
@@ -34,11 +34,11 @@ describe('Button', () => {
 
   it('icon-only', () => {
     const wrapper = mount(Button, { props: { iconOnly: true } })
-    expect(wrapper.classes()).toContain('vex-button-icon-only')
+    expect(wrapper.classes().includes('--icon-only')).toBe(true)
   })
 
   it('loading state', () => {
     const button = mount(Button, { props: { loading: true } })
-    expect(button.classes()).toContain('vex-button-loading')
+    expect(button.classes().includes('--loading')).toBe(true)
   })
 })
