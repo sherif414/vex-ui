@@ -43,7 +43,7 @@ export const useAccordionCtx = (component: string) => {
 </script>
 
 <script setup lang="ts">
-import { createCollection, useRovingFocus, createSelectScope, useContext } from '@/composables'
+import { createSelectScope, useContext } from '@/composables'
 import { provide, type InjectionKey, ref } from 'vue'
 
 const p = withDefaults(defineProps<AccordionProps>(), {
@@ -55,11 +55,6 @@ const p = withDefaults(defineProps<AccordionProps>(), {
 //----------------------------------------------------------------------------------------------------
 
 const AccordionEl = ref<HTMLElement | null>(null)
-const { elements } = createCollection(AccordionEl)
-
-useRovingFocus(AccordionEl, elements, {
-  orientation: () => p.orientation,
-})
 
 createSelectScope(ref(p.multiple ? [] : undefined), {
   multiselect: () => p.multiple,
