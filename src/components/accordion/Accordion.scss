@@ -11,7 +11,7 @@
 .vex-accordion.--variant-default {
   gap: var(--vex-spacing-1);
 
-  .vex-accordion-item-trigger-button:enabled:hover {
+  .vex-accordion-trigger-button:enabled:hover {
     background-color: var(--vex-c-neutral-100);
   }
   .vex-accordion-item.--expanded {
@@ -26,7 +26,7 @@
     border-bottom-color: var(--vex-c-neutral-200);
   }
 
-  .vex-accordion-item-trigger-button:enabled:hover {
+  .vex-accordion-trigger-button:enabled:hover {
     background-color: var(--vex-c-neutral-100);
   }
 }
@@ -39,7 +39,7 @@
   .vex-accordion-item ~ .vex-accordion-item {
     border-top-color: var(--vex-border-clr-base);
   }
-  .vex-accordion-item-trigger-button:enabled:hover {
+  .vex-accordion-trigger-button:enabled:hover {
     background-color: var(--vex-c-neutral-100);
   }
 }
