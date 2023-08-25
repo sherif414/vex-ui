@@ -1,4 +1,4 @@
-import { useRovingFocus } from '..'
+import { useRovingFocus } from '.'
 import { ref } from 'vue'
 import { describe, it, expect } from 'vitest'
 
