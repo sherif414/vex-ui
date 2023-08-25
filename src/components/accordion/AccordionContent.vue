@@ -2,15 +2,9 @@
 import { useAccordionItemCtx } from './AccordionItem.vue'
 import { TransitionExpand } from '@/transitions'
 
-//----------------------------------------------------------------------------------------------------
-// 📌 component meta
-//----------------------------------------------------------------------------------------------------
-
 defineOptions({
   inheritAttrs: false,
 })
-
-//----------------------------------------------------------------------------------------------------
 
 const { contentID, isExpanded, triggerID } = useAccordionItemCtx('AccordionContent')
 </script>
