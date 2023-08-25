@@ -14,7 +14,7 @@ export interface AccordionProps {
   variant?: 'outline' | 'ladder' | 'default' | 'light'
 
   /**
-   * sets the accordion orientation, mainly used for keyboard navigation.
+   * specifies the accordion orientation.
    * @defaultValue 'vertical'
    */
   orientation?: Orientation
