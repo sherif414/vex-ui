@@ -104,13 +104,13 @@
   }
 }
 
-.vex-accordion-trigger-button-chevron {
+.vex-accordion-chevron {
   flex: none;
   transition: transform 300ms var(--vex-transition-easing);
   width: 16px;
   height: 16px;
 
-  .vex-accordion-trigger-button.--chevron-end > & {
+  &.--position-end {
     margin-inline-start: auto;
   }
 

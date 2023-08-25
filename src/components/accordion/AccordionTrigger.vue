@@ -22,19 +22,16 @@ useCollection({ id: triggerID, disabled, ref: TriggerEl })
       :disabled="disabled()"
       :id="triggerID"
       @click="setExpanded(triggerID)"
-      :class="[
-        'vex-accordion-trigger-button',
-        chevronPosition() === 'start' ? '--chevron-start' : '--chevron-end',
-      ]"
+      class="vex-accordion-trigger-button"
     >
       <slot v-if="chevronPosition() === 'start'" name="chevron">
-        <PlusIcon class="vex-accordion-trigger-button-chevron" />
+        <PlusIcon class="vex-accordion-chevron --position-start" />
       </slot>
 
       <slot />
 
       <slot v-if="chevronPosition() === 'end'" name="chevron">
-        <PlusIcon class="vex-accordion-trigger-button-chevron" />
+        <PlusIcon class="vex-accordion-chevron --position-end" />
       </slot>
     </button>
   </h3>
