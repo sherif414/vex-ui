@@ -3,7 +3,9 @@ import { useCollection } from '@/composables'
 import { useAccordionItemCtx } from './AccordionItem.vue'
 import { PlusIcon } from '@heroicons/vue/20/solid'
 import { ref } from 'vue'
+import { useAccordionCtx } from './Accordion.vue'
 
+const { chevronPosition } = useAccordionCtx('AccordionTrigger')
 const { setExpanded, contentID, isExpanded, triggerID, disabled } =
   useAccordionItemCtx('AccordionTrigger')
 
@@ -22,8 +24,14 @@ useCollection({ id: triggerID, disabled, ref: TriggerEl })
       @click="setExpanded(triggerID)"
       class="vex-accordion-trigger-button"
     >
+      <slot v-if="chevronPosition() === 'start'" name="chevron">
+        <PlusIcon class="vex-accordion-trigger-button-chevron" />
+      </slot>
       <slot />
-      <PlusIcon class="vex-accordion-trigger-button-chevron" />
+
+      <slot v-if="chevronPosition() === 'end'" name="chevron">
+        <PlusIcon class="vex-accordion-trigger-button-chevron" />
+      </slot>
     </button>
   </h3>
 </template>

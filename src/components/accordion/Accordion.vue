@@ -23,11 +23,17 @@ export interface AccordionProps {
    * whether to show expand animation
    */
   noExpandAnimation?: boolean
+
+  /**
+   * specifies the accordion chevron position
+   */
+  chevronPosition?: 'start' | 'end'
 }
 
 export interface AccordionContext {
   orientation: Getter<Orientation>
   noExpandAnimation: Getter<boolean>
+  chevronPosition: Getter<'start' | 'end'>
 }
 
 export const ACCORDION_CTX = Symbol() as InjectionKey<AccordionContext>
@@ -43,6 +49,7 @@ import { provide, type InjectionKey, ref } from 'vue'
 const p = withDefaults(defineProps<AccordionProps>(), {
   variant: 'default',
   orientation: 'vertical',
+  chevronPosition: 'end',
 })
 
 //----------------------------------------------------------------------------------------------------
@@ -62,6 +69,7 @@ createSelectScope(ref(p.multiple ? [] : undefined), {
 provide(ACCORDION_CTX, {
   orientation: () => p.orientation,
   noExpandAnimation: () => p.noExpandAnimation,
+  chevronPosition: () => p.chevronPosition,
 })
 </script>
 
