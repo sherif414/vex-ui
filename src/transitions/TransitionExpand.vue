@@ -10,6 +10,7 @@ const p = withDefaults(
   defineProps<{
     duration?: number
     transitionProp?: 'width' | 'height'
+    disabled?: boolean
   }>(),
   {
     duration: 300,
@@ -72,7 +73,10 @@ function onAfterLeave(el: HTMLElement) {
 </script>
 
 <template>
+  <slot v-if="disabled" />
+
   <Transition
+    v-else
     :css="false"
     @enter="(el, done) => onEnter(el as HTMLElement, done)"
     @leave="(el, done) => onLeave(el as HTMLElement, done)"
