@@ -32,7 +32,6 @@ const meta = {
       control: 'select',
       options: ['ladder', 'default', 'light', 'outline'],
     },
-    orientation: { type: 'string', control: 'select', options: ['vertical', 'horizontal'] },
   },
 } satisfies Meta<typeof Accordion>
 
