@@ -74,7 +74,10 @@ provide(ACCORDION_CTX, {
 </script>
 
 <template>
-  <div ref="AccordionEl" :class="['vex-accordion', `--variant-${p.variant}`]">
+  <div
+    ref="AccordionEl"
+    :class="['vex-accordion', `--variant-${p.variant}`, `--orientation-${p.orientation}`]"
+  >
     <slot />
   </div>
 </template>
