@@ -2,7 +2,7 @@
 import {
   createCollection,
   useRovingFocus,
-  useSelect,
+  createSelectScope,
   useTemplateRef,
   useVModel,
 } from '@/composables'

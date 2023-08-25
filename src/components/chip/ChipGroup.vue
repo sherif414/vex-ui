@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { provide } from 'vue'
 import { type Selected, CHIP_GROUP_CTX } from './context'
-import { useRovingFocus, useSelect, useTemplateRef, useVModel } from '@/composables'
+import { useRovingFocus, createSelectScope, useTemplateRef, useVModel } from '@/composables'
 import type { Orientation } from '@/types'
 
 //----------------------------------------------------------------------------------------------------

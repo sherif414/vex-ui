@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useSelect, useVModel } from '@/composables'
+import { createSelectScope, useVModel } from '@/composables'
 import { MENU_GROUP, type Selected } from './context'
 import { provide } from 'vue'
 
