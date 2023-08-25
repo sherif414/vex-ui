@@ -14,12 +14,6 @@ export interface AccordionProps {
   variant?: 'outline' | 'ladder' | 'default' | 'light'
 
   /**
-   * specifies the accordion orientation.
-   * @defaultValue 'vertical'
-   */
-  orientation?: Orientation
-
-  /**
    * whether to show expand animation
    */
   noExpandAnimation?: boolean
@@ -31,7 +25,6 @@ export interface AccordionProps {
 }
 
 export interface AccordionContext {
-  orientation: Getter<Orientation>
   noExpandAnimation: Getter<boolean>
   chevronPosition: Getter<'start' | 'end'>
 }
@@ -48,7 +41,6 @@ import { provide, type InjectionKey, ref } from 'vue'
 
 const p = withDefaults(defineProps<AccordionProps>(), {
   variant: 'default',
-  orientation: 'vertical',
   chevronPosition: 'end',
 })
 
@@ -62,17 +54,13 @@ createSelectScope(ref(p.multiple ? [] : undefined), {
 })
 
 provide(ACCORDION_CTX, {
-  orientation: () => p.orientation,
   noExpandAnimation: () => p.noExpandAnimation,
   chevronPosition: () => p.chevronPosition,
 })
 </script>
 
 <template>
-  <div
-    ref="AccordionEl"
-    :class="['vex-accordion', `--variant-${p.variant}`, `--orientation-${p.orientation}`]"
-  >
+  <div ref="AccordionEl" :class="['vex-accordion', `--variant-${p.variant}`]">
     <slot />
   </div>
 </template>
