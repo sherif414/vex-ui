@@ -2,6 +2,7 @@ import type { Getter, Orientation } from '@/types'
 import { useEventListener } from '@vueuse/core'
 import { wrapArray } from './helpers'
 import { useKeydownIntent } from './keydown'
+import type { Ref } from 'vue'
 
 interface RovingFocusOptions {
   onEntryFocus?: (e: FocusEvent, focusFirst: (items: HTMLElement[]) => void) => void
@@ -9,47 +10,47 @@ interface RovingFocusOptions {
 }
 
 export function useRovingFocus(
-  group: Getter<HTMLElement | null>,
-  getItems: Getter<HTMLElement[]>,
+  parent: Ref<HTMLElement | null>,
+  children: Ref<HTMLElement[]>,
   options: RovingFocusOptions = {}
 ) {
   const { orientation, onEntryFocus } = options
 
-  useEventListener(group, 'focus', function onGroupFocus(e: FocusEvent) {
-    onEntryFocus ? onEntryFocus(e, focusFirst) : focusFirst(getItems())
+  useEventListener(parent, 'focus', (e: FocusEvent) => {
+    onEntryFocus ? onEntryFocus(e, focusFirst) : focusFirst(children.value)
   })
 
   useKeydownIntent(
-    group,
-    function onGroupKeydown(e, intent) {
+    parent,
+    (e, intent) => {
       e.preventDefault()
       e.stopPropagation()
 
-      let items = getItems().filter((item) => !(item as HTMLButtonElement).disabled)
+      let elements = [...children.value]
 
       switch (intent) {
         case 'next': {
-          const currFocusedItemIdx = items.indexOf(e.target as HTMLElement)
-          items = wrapArray(items, currFocusedItemIdx + 1)
-          focusFirst(items)
+          const currFocusedItemIdx = elements.indexOf(e.target as HTMLElement)
+          elements = wrapArray(elements, currFocusedItemIdx + 1)
+          focusFirst(elements)
           break
         }
 
         case 'prev': {
-          items.reverse()
-          const currFocusedItemIdx = items.indexOf(e.target as HTMLElement)
-          items = wrapArray(items, currFocusedItemIdx + 1)
-          focusFirst(items)
+          elements.reverse()
+          const currFocusedItemIdx = elements.indexOf(e.target as HTMLElement)
+          elements = wrapArray(elements, currFocusedItemIdx + 1)
+          focusFirst(elements)
           break
         }
 
         case 'first': {
-          focusFirst(items)
+          focusFirst(elements)
           break
         }
 
         case 'last': {
-          focusFirst(items.reverse())
+          focusFirst(elements.reverse())
           break
         }
       }
@@ -58,11 +59,11 @@ export function useRovingFocus(
   )
 }
 
-function focusFirst(items: HTMLElement[]) {
-  for (const item of items) {
+function focusFirst(elements: HTMLElement[]) {
+  for (const el of elements) {
     const prevFocusedItem = document.activeElement
-    if (item === prevFocusedItem) return
-    item.focus()
+    if (el === prevFocusedItem) return
+    el.focus()
     if (document.activeElement !== prevFocusedItem) return
   }
 }

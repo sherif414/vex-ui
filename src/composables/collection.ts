@@ -1,37 +1,33 @@
 import type { Getter } from '@/types'
-import { provide, type InjectionKey, inject, shallowReactive } from 'vue'
-import type { getTemplateRef } from './template-ref'
+import { provide, type InjectionKey, inject, shallowReactive, type Ref } from 'vue'
 import { tryOnScopeDispose } from '@vueuse/core'
-import { useMemo } from './memo'
+import { useComputed } from './computed'
 
 export type CollectionContext = {
   register: (data: ItemData) => void
   unregister: (data: ItemData) => void
   getItems(): ItemData[]
-  CollectionEl: Getter<HTMLElement | null>
+  CollectionEl: Ref<HTMLElement | null>
 }
 
 type ItemData = {
   id: string
-  ref: getTemplateRef
+  ref: Ref<HTMLElement | null>
   disabled?: Getter<boolean>
 }
 
 const COLLECTION_CTX = Symbol() as InjectionKey<CollectionContext>
 
-export function createCollection(
-  CollectionEl: Getter<HTMLElement | null>,
-  initialItemsMap?: Map<getTemplateRef, ItemData>
-) {
-  const itemsMap = shallowReactive<Map<getTemplateRef, ItemData>>(initialItemsMap ?? new Map())
+export function createCollection(CollectionEl: Ref<HTMLElement | null>) {
+  const itemsMap = shallowReactive<Map<Ref<HTMLElement | null>, ItemData>>(new Map())
 
   function getItems() {
     return [...itemsMap.values()]
   }
 
-  const elements = useMemo(function getElements() {
+  const elements = useComputed(function getElements() {
     return [...itemsMap.keys()].reduce<HTMLElement[]>((arr, ref) => {
-      const item = ref()
+      const item = ref.value
       item != null && arr.push(item)
       return arr
     }, [])

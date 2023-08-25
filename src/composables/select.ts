@@ -1,5 +1,12 @@
-import type { Getter, ComputableGetter, Signal, Setter } from '@/types'
-import { watch } from 'vue'
+import type { Getter, Setter } from '@/types'
+import { watch, type Ref, provide, inject, type InjectionKey } from 'vue'
+import { isArray } from './helpers'
+import { useComputed } from './computed'
+
+const SELECT_SCOPE_CTX = Symbol() as InjectionKey<{
+  selected: Ref<string | string[] | undefined>
+  setSelected: (value: string) => void
+}>
 
 interface UseSelectOptions {
   multiselect?: Getter<boolean>
@@ -9,44 +16,85 @@ interface UseSelectOptions {
 /**
  * handles multi and single select for a list of items.
  */
-export function useSelect<T>(
-  signal: Signal<T | T[] | undefined>,
+export function createSelectScope(
+  selected: Ref<string | string[] | undefined>,
   options: UseSelectOptions = {}
-): [ComputableGetter<T | T[] | undefined>, Setter<T>] {
-  const [_getter, _setter] = signal
+) {
   const { multiselect = () => false, deselection = () => false } = options
 
-  const setter: Setter<T> = (value) => {
-    const prev = _getter()
+  const setSelected = (value: string) => {
+    const prev = selected.value
 
     // multi-select
     if (Array.isArray(prev)) {
-      _setter(prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value])
+      selected.value = prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
       return
     }
 
     // single-select
     if (prev !== value) {
-      _setter(value)
+      selected.value = value
       return
     }
 
     // deselect
     if (deselection()) {
-      _setter(undefined)
+      selected.value = undefined
     }
   }
 
   // validate the initial value and correct it if needed
   if (multiselect()) {
-    !Array.isArray(_getter()) && _setter([])
+    if (!isArray(selected.value)) selected.value = []
   } else {
-    Array.isArray(_getter()) && _setter(undefined)
+    if (isArray(selected.value)) selected.value = undefined
   }
 
   watch(multiselect, (multi) => {
-    _setter(multi ? [] : undefined)
+    selected.value = multi ? [] : undefined
   })
 
-  return [_getter, setter]
+  provide(SELECT_SCOPE_CTX, {
+    selected,
+    setSelected,
+  })
+
+  return {
+    selected,
+    setSelected,
+  }
+}
+
+export function useSelectScope(): {
+  selected: Ref<string | string[] | undefined>
+  setSelected: (value: string) => void
+}
+export function useSelectScope(value: Getter<string>): {
+  selected: Ref<string | string[] | undefined>
+  setSelected: (value: string) => void
+  isSelected: Ref<boolean>
+}
+export function useSelectScope(value?: Getter<string>) {
+  const ctx = inject(SELECT_SCOPE_CTX, null)
+  if (!ctx) {
+    throw new Error(
+      '[vex] selection scope was not found, make sure this component is used within its appropriate parent.'
+    )
+  }
+
+  if (value) {
+    return {
+      selected: ctx.selected,
+      setSelected: ctx.setSelected,
+      isSelected: useComputed(() => {
+        const selectedVal = ctx.selected.value
+        return isArray(selectedVal) ? selectedVal.includes(value()) : selectedVal === value()
+      }),
+    }
+  }
+
+  return {
+    selected: ctx.selected,
+    setSelected: ctx.setSelected,
+  }
 }

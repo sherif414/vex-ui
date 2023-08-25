@@ -1,37 +1,23 @@
 <script setup lang="ts">
-import { useTemplateRef, useCollection } from '@/composables'
-import { useAccordionItemCtx } from './context'
+import { useCollection } from '@/composables'
+import { useAccordionItemCtx } from './AccordionItem.vue'
 import { PlusIcon } from '@heroicons/vue/20/solid'
+import { ref } from 'vue'
 
-//----------------------------------------------------------------------------------------------------
-// 📌 component meta
-//----------------------------------------------------------------------------------------------------
+const { setExpanded, contentID, isExpanded, triggerID, disabled } =
+  useAccordionItemCtx('AccordionTrigger')
 
-const p = withDefaults(
-  defineProps<{
-    /**
-     * prevents the item from being collapsed/expanded
-     */
-    disabled: boolean
-  }>(),
-  {}
-)
-
-//----------------------------------------------------------------------------------------------------
-
-const { setExpanded, contentID, isExpanded, triggerID } = useAccordionItemCtx('AccordionTrigger')
-
-const [getTriggerEl, setTriggerEl] = useTemplateRef('AccordionItem')
-useCollection({ id: triggerID, disabled: () => p.disabled, ref: getTriggerEl })
+const TriggerEl = ref<HTMLElement | null>(null)
+useCollection({ id: triggerID, disabled, ref: TriggerEl })
 </script>
 
 <template>
   <h3 class="vex-accordion-trigger">
     <button
-      :ref="setTriggerEl"
-      :aria-expanded="isExpanded()"
+      ref="TriggerEl"
+      :aria-expanded="isExpanded"
       :aria-controls="contentID"
-      :disabled="p.disabled"
+      :disabled="disabled()"
       :id="triggerID"
       @click="setExpanded(triggerID)"
       class="vex-accordion-trigger-button"

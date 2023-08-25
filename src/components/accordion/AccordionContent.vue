@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAccordionItemCtx } from './context'
+import { useAccordionItemCtx } from './AccordionItem.vue'
 import { TransitionExpand } from '@/transitions'
 
 //----------------------------------------------------------------------------------------------------
@@ -10,8 +10,6 @@ defineOptions({
   inheritAttrs: false,
 })
 
-const p = withDefaults(defineProps<{}>(), {})
-
 //----------------------------------------------------------------------------------------------------
 
 const { contentID, isExpanded, triggerID } = useAccordionItemCtx('AccordionContent')
@@ -20,7 +18,7 @@ const { contentID, isExpanded, triggerID } = useAccordionItemCtx('AccordionConte
 <template>
   <TransitionExpand>
     <div
-      v-if="isExpanded()"
+      v-if="isExpanded"
       v-bind="$attrs"
       :aria-labelledby="triggerID"
       :id="contentID"
