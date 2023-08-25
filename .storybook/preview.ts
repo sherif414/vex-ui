@@ -1,5 +1,6 @@
 import type { Preview } from '@storybook/vue3'
 import '../src/styles/index.scss'
+import 'uno.css'
 
 const preview: Preview = {
   parameters: {
