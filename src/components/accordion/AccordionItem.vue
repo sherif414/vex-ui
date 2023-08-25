@@ -68,10 +68,14 @@ provide(ACCORDION_ITEM_CTX, {
   isExpanded,
   disabled: () => p.disabled,
 })
+
+defineExpose({
+  isExpanded,
+})
 </script>
 
 <template>
   <div :class="['vex-accordion-item', { '--expanded': isExpanded }]">
-    <slot />
+    <slot :isExpanded="isExpanded" />
   </div>
 </template>
