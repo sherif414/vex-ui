@@ -10,6 +10,7 @@ import type { ComponentPublicInstance } from 'vue'
 export const isClient = typeof window !== 'undefined'
 export const isString = (value: unknown): value is string => typeof value === 'string'
 export const isFunction = (value: unknown): value is Function => value instanceof Function
+export const isArray = Array.isArray
 export const isIOS = /*#__PURE__*/ getIsIOS()
 export const dir = useTextDirection()
 export const isNavigationKey = (v: string): v is NavigationKey =>
