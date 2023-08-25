@@ -7,8 +7,8 @@ interface UseDelayedOpenOptions {
 }
 
 export function useDelayedOpen(show: Fn, hide: Fn, options: UseDelayedOpenOptions) {
-  let showTimeoutID: ReturnType<typeof setTimeout> = -1
-  let hideTimeoutID: ReturnType<typeof setTimeout> = -1
+  let showTimeoutID: NodeJS.Timeout = -1 as unknown as NodeJS.Timeout
+  let hideTimeoutID: NodeJS.Timeout = -1 as unknown as NodeJS.Timeout
 
   const _show = (delay?: number) => {
     clearTimeouts()
