@@ -20,9 +20,9 @@ describe('Accordion', () => {
     const content = wrapper.findComponent(AccordionContent)
 
     // Assert
-    expect(wrapper.classes()).toContain('vex-accordion')
     expect(trigger.text()).toContain('trigger')
-    expect(content.exists()).not.toBe(false)
+    expect(content.text()).not.toContain('content')
+    expect(wrapper.classes()).toContain('vex-accordion')
   })
 
   it('renders the correct number of items', () => {
