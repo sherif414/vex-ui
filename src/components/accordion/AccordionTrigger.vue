@@ -17,6 +17,7 @@ useCollection({ id: triggerID, disabled, ref: TriggerEl })
   <h3 class="vex-accordion-trigger">
     <button
       ref="TriggerEl"
+      tabindex="-1"
       :aria-expanded="isExpanded"
       :aria-controls="contentID"
       :disabled="disabled()"
