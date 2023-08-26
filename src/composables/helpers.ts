@@ -104,3 +104,10 @@ export const noop = () => {}
 export function wrapArray<T>(array: T[], startIndex: number) {
   return array.map((_, index) => array[(startIndex + index) % array.length])
 }
+
+export function remove<T>(array: T[], item: T) {
+  const index = array.indexOf(item)
+  if (index > -1) {
+    array.splice(index, 1)
+  }
+}
