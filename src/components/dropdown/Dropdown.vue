@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useComputed, useDelayedOpen, useFloating, useID, useInjectRef } from '@/composables'
+import { useDelayedOpen, useFloating, useID, useInjectRef } from '@/composables'
 import { EXPOSED_EL } from '@/config'
 import type { Placement, Strategy } from '@floating-ui/vue'
 import { onClickOutside, useEventListener } from '@vueuse/core'
@@ -107,7 +107,7 @@ const role = toRef(() => p.role)
 const DropdownEl = ref<HTMLElement | null>(null)
 
 const __isOpen = ref(false)
-const isDropdownOpen = useComputed({
+const isDropdownOpen = computed({
   get: () => __isOpen.value && !p.disabled,
   set: (val) => {
     if (val !== __isOpen.value) __isOpen.value = val
@@ -119,7 +119,7 @@ const isDropdownOpen = useComputed({
 //----------------------------------------------------------------------------------------------------
 
 const TriggerSlotEl = ref<HTMLElement | null>(null)
-const TriggerEl = useComputed(() => (slots.trigger ? TriggerSlotEl.value : p.triggerEl))
+const TriggerEl = computed(() => (slots.trigger ? TriggerSlotEl.value : p.triggerEl))
 const TriggerComponent = useInjectRef(TriggerSlotEl, () => slots.trigger?.({}), 'Dropdown')
 
 watch(TriggerEl, (el) => {

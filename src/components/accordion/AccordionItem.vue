@@ -36,8 +36,8 @@ export function useAccordionItemCtx(component: string) {
 //----------------------------------------------------------------------------------------------------
 
 <script setup lang="ts">
-import { useComputed, useID, useSelectScope } from '@/composables'
-import { provide, type Ref } from 'vue'
+import { useID, useSelectScope } from '@/composables'
+import { provide, type Ref, computed } from 'vue'
 import { useAccordionCtx } from './Accordion.vue'
 import { isArray } from '@/composables/helpers'
 
@@ -54,7 +54,7 @@ if (p.initiallyExpanded) {
   setExpanded(triggerID)
 }
 
-const isExpanded = useComputed<boolean>(() => {
+const isExpanded = computed<boolean>(() => {
   if (p.alwaysExpanded) return true
 
   const v = expanded.value

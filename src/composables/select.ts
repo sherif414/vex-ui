@@ -1,7 +1,7 @@
-import type { Getter, Setter } from '@/types'
-import { watch, type Ref, provide, inject, type InjectionKey } from 'vue'
+import type { Getter } from '@/types'
+import { watch, provide, inject, computed } from 'vue'
+import type { Ref, InjectionKey, ComputedRef } from 'vue'
 import { isArray } from './helpers'
-import { useComputed } from './computed'
 
 const SELECT_SCOPE_CTX = Symbol() as InjectionKey<{
   selected: Ref<string | string[] | undefined>
@@ -72,7 +72,7 @@ export function useSelectScope(): {
 export function useSelectScope(value: Getter<string>): {
   selected: Ref<string | string[] | undefined>
   setSelected: (value: string) => void
-  isSelected: Ref<boolean>
+  isSelected: ComputedRef<boolean>
 }
 export function useSelectScope(value?: Getter<string>) {
   const ctx = inject(SELECT_SCOPE_CTX, null)
@@ -86,7 +86,7 @@ export function useSelectScope(value?: Getter<string>) {
     return {
       selected: ctx.selected,
       setSelected: ctx.setSelected,
-      isSelected: useComputed(() => {
+      isSelected: computed(() => {
         const selectedVal = ctx.selected.value
         return isArray(selectedVal) ? selectedVal.includes(value()) : selectedVal === value()
       }),
