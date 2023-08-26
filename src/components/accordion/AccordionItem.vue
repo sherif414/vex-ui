@@ -1,7 +1,7 @@
 <script lang="ts">
 import { type InjectionKey } from 'vue'
 import { useContext } from '@/composables'
-import { isArray } from '@/composables/helpers'
+import type { Getter, Setter } from '@/types'
 
 export interface AccordionItemProps {
   /**
@@ -39,7 +39,7 @@ export function useAccordionItemCtx(component: string) {
 import { useComputed, useID, useSelectScope } from '@/composables'
 import { provide, type Ref } from 'vue'
 import { useAccordionCtx } from './Accordion.vue'
-import type { Getter, Setter } from '@/types'
+import { isArray } from '@/composables/helpers'
 
 const p = withDefaults(defineProps<AccordionItemProps>(), {})
 
