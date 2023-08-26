@@ -1,74 +1,75 @@
+<script lang="ts">
+export interface AutocompleteProps {
+  /**
+   * display a smaller field
+   */
+  compact?: boolean
+
+  /**
+   * specifies the selected option
+   */
+  modelValue?: string
+
+  /**
+   * specifies the list of all the available options, this will only be used with client mode,
+   * when using server mode use the `getOptions` prop instead.
+   */
+  options?: string[]
+
+  /**
+   * whether the field is disabled
+   */
+  disabled?: boolean
+
+  /**
+   * specifies a custom filtering function.
+   *
+   * @param query the search query.
+   * @param max maximum displayed options count.
+   */
+  filter?: (query: string, max: number) => string[]
+
+  /**
+   * used for custom search logic or server mode.
+   */
+  getOptions?: (query: string) => Promise<string[]>
+
+  /**
+   * use this prop to cleanup pending async work.
+   * - if specified, the function will be called before
+   * every call to `getOptions` except the first.
+   */
+  getOptionsCleanup?: () => void
+
+  /**
+   * maximum number of options to display.
+   * @default 10
+   */
+  maxDisplayedOptions?: number
+
+  /**
+   * the search debounce time in milliseconds.
+   * @default 300
+   */
+  debounce?: number
+}
+</script>
+
 <script setup lang="ts">
 import { Input, Loader } from '@/components'
-import { nextTick, ref, watch } from 'vue'
-import { useEventListener, watchDebounced } from '@vueuse/core'
+import { nextTick, ref, watch, computed } from 'vue'
+import { useEventListener, watchDebounced, controlledRef } from '@vueuse/core'
 import { IconChevronUpDown } from '@/icons'
-import { useFloating, useVModel, useID, useRovingFocus, useRef, useComputed } from '@/composables'
+import { useFloating, useVModel, useID, useRovingFocus } from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
 //----------------------------------------------------------------------------------------------------
 
-const p = withDefaults(
-  defineProps<{
-    /**
-     * display a smaller field
-     */
-    compact?: boolean
-
-    /**
-     * specifies the selected option
-     */
-    modelValue?: string
-
-    /**
-     * specifies the list of all the available options, this will only be used with offline mode,
-     * when using online mode use the `getOptions` prop instead.
-     */
-    options?: string[]
-
-    /**
-     * whether the field is disabled
-     */
-    disabled?: boolean
-
-    /**
-     * specifies a custom filtering function.
-     *
-     * @param query the search query.
-     * @param max maximum displayed options count.
-     */
-    filter?: (query: string, max: number) => string[]
-
-    /**
-     * used for custom search logic or online mode.
-     */
-    getOptions?: (query: string) => Promise<string[]>
-
-    /**
-     * use this prop to cleanup pending async work.
-     * - if specified, the function will be called before
-     * every call to `getOptions` except the first.
-     */
-    getOptionsCleanup?: () => void
-
-    /**
-     * maximum number of options to display.
-     * @default 10
-     */
-    maxDisplayedOptions?: number
-
-    /**
-     * the search debounce time in milliseconds.
-     * @default 300
-     */
-    debounce?: number
-  }>(),
-  {
-    debounce: 300,
-    maxDisplayedOptions: 10,
-  }
-)
+const p = withDefaults(defineProps<AutocompleteProps>(), {
+  debounce: 300,
+  maxDisplayedOptions: 10,
+})
 
 const emit = defineEmits<{
   'update:modelValue': [value?: string]
@@ -81,7 +82,7 @@ const ContentEl = ref<HTMLElement | null>(null)
 const getFormEl = () => (TriggerEl.value as HTMLInputElement)?.form
 
 const ContentItemsRefs = ref<(HTMLElement | null)[]>([])
-const ContentItemsEl = useComputed(() => ContentItemsRefs.value.filter(Boolean) as HTMLElement[])
+const ContentItemsEl = computed(() => ContentItemsRefs.value.filter(Boolean) as HTMLElement[])
 
 const TRIGGER_ID = useID()
 const CONTENT_ID = useID()
@@ -126,7 +127,7 @@ useEventListener(ContentEl, 'keydown', function onKeydown(e: KeyboardEvent) {
 //----------------------------------------------------------------------------------------------------
 
 const isLoading = ref(false)
-const inputValue = useRef(p.modelValue)
+const inputValue = controlledRef(p.modelValue)
 
 watchDebounced(
   inputValue,
@@ -147,13 +148,20 @@ watchDebounced(
 
     suggestions.value = p.filter
       ? p.filter(query, p.maxDisplayedOptions)
-      : filter(query, p.maxDisplayedOptions)
+      : filter(p.options ?? [], query, p.maxDisplayedOptions)
   },
   { debounce: p.debounce }
 )
 
-function filter(query: string, limit: number): string[] {
-  return p.options?.filter((op) => op.includes(query)).slice(0, limit) ?? []
+function filter(options: string[], query: string, limit: number): string[] {
+  const result = []
+  for (const option of options) {
+    if (option.includes(query)) result.push(option)
+    if (result.length >= limit) return result
+  }
+  return result
+
+  // return options.filter((op) => op.includes(query)).slice(0, limit) ?? []
 }
 
 // reset to the last selected value if the user
