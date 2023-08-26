@@ -44,29 +44,29 @@
   inset-inline-end: var(--vex-spacing-2);
 }
 
-//------ variants ------//
+//------ colors ------//
 
-.vex-alert.--variant-danger {
+.vex-alert.--c-danger {
   background-color: var(--vex-c-danger-100);
   color: var(--vex-c-danger-800);
 }
 
-.vex-alert.--variant-warning {
+.vex-alert.--c-warning {
   background-color: var(--vex-c-warning-100);
   color: var(--vex-c-warning-800);
 }
 
-.vex-alert.--variant-success {
+.vex-alert.--c-success {
   background-color: var(--vex-c-success-100);
   color: var(--vex-c-success-800);
 }
 
-.vex-alert.--variant-accent {
+.vex-alert.--c-accent {
   background-color: var(--vex-c-accent-100);
   color: var(--vex-c-accent-800);
 }
 
-.vex-alert.--variant-primary {
+.vex-alert.--c-primary {
   background-color: var(--vex-c-primary-100);
   color: var(--vex-c-primary-500);
 }

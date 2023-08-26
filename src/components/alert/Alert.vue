@@ -14,9 +14,9 @@ const p = withDefaults(
     header?: string
 
     /**
-     * specifies the alert variant
+     * specifies the alert color
      */
-    variant?: 'success' | 'warning' | 'danger' | 'accent' | 'primary'
+    color?: 'success' | 'warning' | 'danger' | 'accent' | 'primary'
 
     /**
      * whether to show the close button
@@ -24,12 +24,12 @@ const p = withDefaults(
     dismissible?: boolean
   }>(),
   {
-    variant: 'primary',
+    color: 'primary',
   }
 )
 
 const emit = defineEmits<{
-  (event: 'close'): void
+  (event: 'dismiss'): void
 }>()
 
 const slots = defineSlots<{
@@ -55,7 +55,7 @@ const icons = {
 <template>
   <div
     role="alert"
-    :class="['vex-alert', `--variant-${p.variant}`]"
+    :class="['vex-alert', `--c-${p.color}`]"
     :aria-labelledby="HEADER_ID"
     :aria-describedby="CONTENT_ID"
   >
@@ -63,7 +63,7 @@ const icons = {
 
     <span class="vex-alert-icon">
       <slot name="icon">
-        <Component :is="icons[p.variant]" width="20" height="20" />
+        <Component :is="icons[p.color]" width="20" height="20" />
       </slot>
     </span>
 
@@ -87,8 +87,8 @@ const icons = {
       v-if="p.dismissible"
       type="button"
       class="vex-alert-close"
-      aria-label="close"
-      @click="emit('close')"
+      aria-label="dismiss"
+      @click="emit('dismiss')"
     >
       <IconXMark aria-hidden="true" width="14" height="14" />
     </button>
