@@ -1,7 +1,6 @@
 import type { Getter } from '@/types'
-import { provide, type InjectionKey, inject, shallowReactive, type Ref } from 'vue'
-import { tryOnScopeDispose } from '@vueuse/core'
-import { useComputed } from './computed'
+import { provide, inject, shallowReactive, onScopeDispose, computed } from 'vue'
+import type { InjectionKey, Ref } from 'vue'
 
 export type CollectionContext = {
   register: (data: ItemData) => void
@@ -25,7 +24,7 @@ export function createCollection(CollectionEl: Ref<HTMLElement | null>) {
     return [...itemsMap.values()]
   }
 
-  const elements = useComputed(function getElements() {
+  const elements = computed(function getElements() {
     return [...itemsMap.keys()].reduce<HTMLElement[]>((arr, ref) => {
       const item = ref.value
       item != null && arr.push(item)
@@ -58,7 +57,7 @@ export function useCollection(itemData: ItemData) {
   }
 
   ctx.register(itemData)
-  tryOnScopeDispose(() => ctx.unregister(itemData))
+  onScopeDispose(() => ctx.unregister(itemData))
 
   return ctx
 }

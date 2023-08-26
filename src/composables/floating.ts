@@ -8,8 +8,16 @@ import type {
   Strategy,
 } from '@floating-ui/vue'
 import { arrow, autoUpdate, computePosition, flip, offset, shift, size } from '@floating-ui/vue'
-import { tryOnScopeDispose } from '@vueuse/core'
-import { ref, shallowReadonly, shallowRef, toRef, toValue, watch, type StyleValue } from 'vue'
+import {
+  ref,
+  shallowReadonly,
+  shallowRef,
+  toRef,
+  toValue,
+  watch,
+  type StyleValue,
+  onScopeDispose,
+} from 'vue'
 import { useMemo } from '.'
 
 export interface FloatingStyles {
@@ -177,7 +185,7 @@ export function useFloating(
     autoUpdateCleanup = autoUpdate(reference, floating, update)
   })
 
-  tryOnScopeDispose(() => autoUpdateCleanup?.())
+  onScopeDispose(() => autoUpdateCleanup?.())
 
   //----------------------------------------------------------------------------------------------------
 

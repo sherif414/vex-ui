@@ -1,5 +1,5 @@
 import type { Fn, Getter } from '@/types'
-import { tryOnScopeDispose } from '@vueuse/core'
+import { onScopeDispose } from 'vue'
 
 interface UseDelayedOpenOptions {
   defaultShowDelay?: Getter<number | undefined>
@@ -37,7 +37,7 @@ export function useDelayedOpen(show: Fn, hide: Fn, options: UseDelayedOpenOption
     clearTimeout(hideTimeoutID)
   }
 
-  tryOnScopeDispose(clearTimeouts)
+  onScopeDispose(clearTimeouts)
 
   return { show: _show, hide: _hide }
 }
