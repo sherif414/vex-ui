@@ -1,5 +1,4 @@
 import { EffectScope, effectScope, onScopeDispose } from 'vue'
-import { tryOnScopeDispose } from '@vueuse/core'
 
 /**
  * Make a composable function usable with multiple Vue instances.
@@ -24,7 +23,7 @@ export function createSharedComposable<Fn extends (...args: any) => any>(composa
       scope = effectScope(true)
       state = scope.run(() => composable(...args))
     }
-    tryOnScopeDispose(dispose)
+    onScopeDispose(dispose)
     return state
   })
 }
