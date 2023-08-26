@@ -1,16 +1,12 @@
-import type { ComputableGetter, ComputableSetter, Getter, Signal } from '@/types'
+import type { Getter } from '@/types'
 import { getCurrentInstance } from 'vue'
-import { isFunction } from './helpers'
+import { useComputed } from './computed'
 
-export function useVModel<T>(prop: Getter<T>, event: string = 'update:modelValue'): Signal<T> {
+export function useVModel<T>(prop: Getter<T>, eventName: string = 'update:modelValue') {
   const vm = getCurrentInstance()
 
-  const getter = <U>(compute?: (v: T) => U) => {
-    return compute ? compute(prop()) : prop()
-  }
-  const setter = (compute: T | ((v: T) => T)) => {
-    vm?.emit(event, isFunction(compute) ? compute(prop()) : compute)
-  }
-
-  return [getter as ComputableGetter<T>, setter as ComputableSetter<T>]
+  return useComputed({
+    get: prop,
+    set: (newValue) => vm?.emit(eventName, newValue),
+  })
 }

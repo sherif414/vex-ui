@@ -9,10 +9,11 @@ import {
   useVModel,
   useID,
   useRovingFocus,
-  useSelect,
+  createSelectScope,
   useRef,
   useTemplateRef,
   useSignal,
+  useComputed,
 } from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
@@ -86,42 +87,42 @@ const emit = defineEmits<{
 
 //----------------------------------------------------------------------------------------------------
 
-const [getTriggerEl, setTriggerEl] = useTemplateRef('Autocomplete')
-const [getContentEl, setContentEl] = useTemplateRef('Autocomplete')
-const getFormEl = () => (getTriggerEl() as HTMLInputElement)?.form
+const TriggerEl = ref<HTMLElement | null>(null)
+const ContentEl = ref<HTMLElement | null>(null)
+const getFormEl = () => (TriggerEl.value as HTMLInputElement)?.form
 
-const ContentItemsEl = ref<(HTMLElement | null)[]>([])
-const getContentItemsEl = useMemo(() => ContentItemsEl.value.filter(Boolean) as HTMLElement[])
+const ContentItemsRefs = ref<(HTMLElement | null)[]>([])
+const ContentItemsEl = useComputed(() => ContentItemsRefs.value.filter(Boolean) as HTMLElement[])
 
 const TRIGGER_ID = useID()
 const CONTENT_ID = useID()
 
-const [isContentOpen, setIsContentOpen] = useSignal(false)
+const isContentOpen = ref(false)
 const suggestions = ref<string[]>(p.options?.slice(0, p.maxDisplayedOptions) || [])
 
-const [getSelected, setSelected] = useVModel(() => p.modelValue)
+const selected = useVModel(() => p.modelValue)
 
 //----------------------------------------------------------------------------------------------------
 // 📌 keyboard interactions
 //----------------------------------------------------------------------------------------------------
 
-useRovingFocus(getContentEl, getContentItemsEl, {
+useRovingFocus(ContentEl, ContentItemsEl, {
   orientation: () => 'vertical',
 })
 
-useEventListener(getTriggerEl, 'keydown', function onKeydown(e: KeyboardEvent) {
+useEventListener(TriggerEl, 'keydown', function onKeydown(e: KeyboardEvent) {
   if (['ArrowDown', 'ArrowUp'].includes(e.key)) {
     e.preventDefault()
-    setIsContentOpen(true)
-    nextTick(() => getContentItemsEl()[0].focus())
+    isContentOpen.value = true
+    nextTick(() => ContentItemsEl.value[0].focus())
   }
 })
 
-useEventListener(getContentEl, 'keydown', function onKeydown(e: KeyboardEvent) {
+useEventListener(ContentEl, 'keydown', function onKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') {
     e.preventDefault()
-    setIsContentOpen(false)
-    getTriggerEl()?.focus()
+    isContentOpen.value = false
+    TriggerEl.value?.focus()
     return
   }
 
@@ -144,7 +145,7 @@ watchDebounced(
     if (!query) return
 
     suggestions.value = []
-    setIsContentOpen(true)
+    isContentOpen.value = false
 
     if (p.getOptions) {
       setIsLoading(true)
@@ -173,19 +174,19 @@ function onInputBlur() {
   inputValue.lay(p.modelValue)
 }
 
-watch(getSelected, () => {
-  inputValue.lay(getSelected())
+watch(selected, (selected) => {
+  inputValue.lay(selected)
 })
 
 //----------------------------------------------------------------------------------------------------
 // 📌 form
 //----------------------------------------------------------------------------------------------------
 
-useEventListener(getFormEl, 'reset', () => setSelected(undefined))
+useEventListener(getFormEl, 'reset', () => (selected.value = undefined))
 
 //----------------------------------------------------------------------------------------------------
 
-const { floatingStyles } = useFloating(getTriggerEl, getContentEl, isContentOpen, {
+const { floatingStyles } = useFloating(TriggerEl, ContentEl, isContentOpen, {
   placement: 'bottom-start',
   offset: 4,
   autoMinWidth: true,
@@ -197,8 +198,8 @@ const { floatingStyles } = useFloating(getTriggerEl, getContentEl, isContentOpen
     v-model="inputValue"
     v-bind="$attrs"
     @blur="onInputBlur"
-    :ref="setTriggerEl"
-    :aria-expanded="isContentOpen()"
+    ref="TriggerEl"
+    :aria-expanded="isContentOpen"
     :aria-controls="CONTENT_ID"
     :id="TRIGGER_ID"
     :compact="p.compact"
@@ -218,11 +219,11 @@ const { floatingStyles } = useFloating(getTriggerEl, getContentEl, isContentOpen
 
   <Teleport to="body">
     <ul
-      v-if="isContentOpen()"
+      v-if="isContentOpen"
       :style="floatingStyles()"
       :aria-describedby="TRIGGER_ID"
       :id="CONTENT_ID"
-      :ref="setContentEl"
+      ref="ContentEl"
       tabindex="-1"
       class="vex-autocomplete-content"
     >
@@ -236,9 +237,9 @@ const { floatingStyles } = useFloating(getTriggerEl, getContentEl, isContentOpen
           v-for="(item, idx) in suggestions"
           :key="item"
           :id="`${CONTENT_ID}-${idx}`"
-          :class="['vex-autocomplete-content-item', { '--selected': getSelected() === item }]"
-          @click="setSelected(item)"
-          ref="ContentItemsEl"
+          :class="['vex-autocomplete-content-item', { '--selected': selected === item }]"
+          @click="selected = item"
+          ref="ContentItemsRefs"
           tabindex="-1"
         >
           <slot :item="item">
