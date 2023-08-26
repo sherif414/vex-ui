@@ -1,20 +1,9 @@
 <script setup lang="ts">
 import { Input, Loader } from '@/components'
-import { computed, nextTick, ref, watch } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import { useEventListener, watchDebounced } from '@vueuse/core'
 import { IconChevronUpDown } from '@/icons'
-import {
-  useMemo,
-  useFloating,
-  useVModel,
-  useID,
-  useRovingFocus,
-  createSelectScope,
-  useRef,
-  useTemplateRef,
-  useSignal,
-  useComputed,
-} from '@/composables'
+import { useFloating, useVModel, useID, useRovingFocus, useRef, useComputed } from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -136,7 +125,7 @@ useEventListener(ContentEl, 'keydown', function onKeydown(e: KeyboardEvent) {
 // 📌 filter
 //----------------------------------------------------------------------------------------------------
 
-const [isLoading, setIsLoading] = useSignal(false)
+const isLoading = ref(false)
 const inputValue = useRef(p.modelValue)
 
 watchDebounced(
@@ -148,12 +137,12 @@ watchDebounced(
     isContentOpen.value = false
 
     if (p.getOptions) {
-      setIsLoading(true)
+      isLoading.value = true
 
       p.getOptionsCleanup && onCleanup(p.getOptionsCleanup)
       suggestions.value = await p.getOptions(query)
 
-      setIsLoading(false)
+      isLoading.value = false
     }
 
     suggestions.value = p.filter
@@ -228,7 +217,7 @@ const { floatingStyles } = useFloating(TriggerEl, ContentEl, isContentOpen, {
       class="vex-autocomplete-content"
     >
       <div v-if="!suggestions.length" class="vex-autocomplete-placeholder">
-        <Loader v-if="isLoading()" />
+        <Loader v-if="isLoading" />
         <span v-else>no data</span>
       </div>
 
