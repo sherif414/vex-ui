@@ -7,6 +7,7 @@ interface SelectScopeContext {
   selected: Readonly<Ref<string | string[] | undefined>>
   setSelected: (value: string) => void
   resetSelected: (multiselect?: boolean) => void
+  multiselect: Getter<boolean>
 }
 
 const SELECT_SCOPE_CTX = Symbol() as InjectionKey<SelectScopeContext>
@@ -61,26 +62,25 @@ export function createSelectScope(
 
   provide(SELECT_SCOPE_CTX, {
     selected,
+    multiselect,
     setSelected,
     resetSelected,
   })
 
   return {
     selected,
+    multiselect,
     setSelected,
     resetSelected,
   }
 }
 
-export function useSelectScope(): {
-  selected: Ref<string | string[] | undefined>
-  setSelected: (value: string) => void
-}
-export function useSelectScope(value: Getter<string>): {
-  selected: Ref<string | string[] | undefined>
-  setSelected: (value: string) => void
-  isSelected: ComputedRef<boolean>
-}
+export function useSelectScope(): SelectScopeContext
+
+export function useSelectScope(
+  value: Getter<string>
+): SelectScopeContext & { isSelected: ComputedRef<boolean> }
+
 export function useSelectScope(value?: Getter<string>) {
   const ctx = inject(SELECT_SCOPE_CTX, null)
   if (!ctx) {
@@ -92,6 +92,7 @@ export function useSelectScope(value?: Getter<string>) {
   if (value) {
     return {
       selected: ctx.selected,
+      multiselect: ctx.multiselect,
       setSelected: ctx.setSelected,
       isSelected: computed(() => {
         const selectedVal = ctx.selected.value
@@ -103,5 +104,6 @@ export function useSelectScope(value?: Getter<string>) {
   return {
     selected: ctx.selected,
     setSelected: ctx.setSelected,
+    multiselect: ctx.multiselect,
   }
 }
