@@ -1,6 +1,6 @@
 import { onScopeDispose } from 'vue'
 import { noop, remove } from './helpers'
-import { defaultDocument } from '@vueuse/core'
+import { isClient } from '@vueuse/core'
 
 type Listener = (e: KeyboardEvent) => void
 
@@ -8,9 +8,7 @@ const listeners: Listener[] = []
 let isActive = false
 
 export function useEscapeKey(listener: Listener): () => void {
-  const document = defaultDocument
-
-  if (!document) {
+  if (!isClient) {
     return noop
   }
 
