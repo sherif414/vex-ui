@@ -100,20 +100,20 @@ useRovingFocus(ContentEl, ContentItemsEl, {
   orientation: () => 'vertical',
 })
 
-useEventListener(TriggerEl, 'keydown', (e: KeyboardEvent) => {
+function onTriggerKeydown(e: KeyboardEvent) {
   if (e.key === 'ArrowDown') {
     e.preventDefault()
     isContentOpen.value = true
     nextTick(() => ContentEl.value?.focus())
   }
-})
+}
 
-useEventListener(ContentEl, 'keydown', (e: KeyboardEvent) => {
+function onContentKeydown(e: KeyboardEvent) {
   if ([' ', 'Enter'].includes(e.key)) {
     e.preventDefault()
     ;(e.target as HTMLElement).click()
   }
-})
+}
 
 useEscapeKey((e) => {
   if (!isContentOpen.value) return
@@ -196,6 +196,7 @@ const { floatingStyles } = useFloating(TriggerEl, ContentEl, isContentOpen, {
     v-model="inputValue"
     v-bind="$attrs"
     @blur="onInputBlur"
+    @keydown="onTriggerKeydown"
     ref="TriggerEl"
     :aria-expanded="isContentOpen"
     :aria-controls="CONTENT_ID"
@@ -221,6 +222,7 @@ const { floatingStyles } = useFloating(TriggerEl, ContentEl, isContentOpen, {
       :style="floatingStyles()"
       :aria-describedby="TRIGGER_ID"
       :id="CONTENT_ID"
+      @keydown="onContentKeydown"
       ref="ContentEl"
       tabindex="-1"
       class="vex-autocomplete-content"
