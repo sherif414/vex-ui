@@ -63,7 +63,7 @@ export interface AutocompleteProps {
 <script setup lang="ts">
 import { Input, Loader } from '@/components'
 import { nextTick, ref, watch, computed } from 'vue'
-import { useEventListener, watchDebounced, controlledRef } from '@vueuse/core'
+import { useEventListener, watchDebounced, controlledRef, onClickOutside } from '@vueuse/core'
 import { IconChevronUpDown } from '@/icons'
 import {
   useFloating,
@@ -73,6 +73,7 @@ import {
   useEscapeKey,
   createSelectScope,
   createCollection,
+  useClickOutside,
 } from '@/composables'
 import { isArray, noop } from '@/composables/helpers'
 
@@ -112,7 +113,7 @@ const { selected, setSelected, resetSelected } = createSelectScope(
 const { elements: OptionsElements } = createCollection(ContentEl)
 
 //----------------------------------------------------------------------------------------------------
-// 📌 keyboard interactions
+// 📌 keyboard interactions & visibility
 //----------------------------------------------------------------------------------------------------
 
 useRovingFocus(ContentEl, OptionsElements, {
@@ -142,6 +143,13 @@ useEscapeKey((e) => {
   TriggerEl.value?.focus()
 })
 
+onClickOutside(
+  ContentEl,
+  () => {
+    isContentOpen.value &&= false
+  },
+  { ignore: [TriggerEl] }
+)
 //----------------------------------------------------------------------------------------------------
 // 📌 filter
 //----------------------------------------------------------------------------------------------------
@@ -169,6 +177,8 @@ watchDebounced(
     suggestions.value = p.filter
       ? p.filter(query, p.maxDisplayedOptions)
       : filter(p.options ?? [], query, p.maxDisplayedOptions)
+
+    isContentOpen.value ||= true
   },
   { debounce: p.debounce }
 )
@@ -180,12 +190,10 @@ function filter(options: string[], query: string, limit: number): string[] {
     if (result.length >= limit) break
   }
   return result
-
-  // return options.filter((op) => op.includes(query)).slice(0, limit) ?? []
 }
 
-// reset to the last selected value if the user
-// moved focus from the input while typing
+// if focus is moved from the input make sure to set input value to the last "correct" selectable value.
+// we use `.lay` to avoid triggering filter watcher
 function onInputBlur() {
   if (!p.modelValue) return
   inputValue.lay(p.modelValue)
