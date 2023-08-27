@@ -105,6 +105,10 @@ export function wrapArray<T>(array: T[], startIndex: number) {
   return array.map((_, index) => array[(startIndex + index) % array.length])
 }
 
+/**
+ * removes an item from an array if it exists.
+ * mutates the original array.
+ */
 export function remove<T>(array: T[], item: T) {
   const index = array.indexOf(item)
   if (index > -1) {
