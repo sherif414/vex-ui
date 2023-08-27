@@ -1,4 +1,4 @@
-.vex-autocomplete-arrow {
+.vex-autocomplete-chevron {
   width: 16px;
   height: 16px;
 }
@@ -10,49 +10,23 @@
 }
 
 .vex-autocomplete-content {
-  z-index: 100;
-  width: max-content;
-  min-width: var(--vex-auto-min-width);
-  max-height: 14rem;
-  overflow-y: auto;
-  margin: 0;
-  padding: var(--vex-spacing-1);
   display: flex;
   flex-direction: column;
-  gap: var(--vex-spacing-1);
-  border-radius: var(--vex-border-radius-md);
-  background-color: white;
+  align-items: stretch;
+  justify-content: start;
+  gap: var(--vex-spacing-2px);
+
+  padding: var(--vex-spacing-2px);
+  min-width: var(--vex-auto-min-width);
+  height: 14rem;
+  margin: 0;
+  border-radius: var(--vex-border-radius-sm);
+  outline: none;
+  z-index: 100;
+  overflow-y: auto;
+
   font-size: var(--vex-font-size-sm);
-  list-style-type: none;
+  background-color: white;
   filter: var(--vex-drop-shadow-sm);
-}
-
-.vex-autocomplete-content-item {
-  min-width: max-content;
-  display: flex;
-  cursor: pointer;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--vex-spacing-2);
-  transition-property: color, background-color;
-  transition-timing-function: var(--vex-transition-easing);
-  transition-duration: 150ms;
-  border-radius: var(--vex-border-radius-md);
-  padding-inline: var(--vex-spacing-3);
-  padding-block: var(--vex-spacing-2);
-
-  &:not([inert]):hover {
-    background-color: var(--vex-c-neutral-100);
-  }
-
-  &[inert] {
-    color: var(--vex-clr-on-disabled);
-    cursor: not-allowed;
-  }
-
-  &:focus {
-    background-color: var(--vex-c-neutral-100);
-    color: var(--vex-c-primary-500);
-    outline: none;
-  }
+  list-style-type: none;
 }
