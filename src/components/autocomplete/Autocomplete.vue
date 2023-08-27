@@ -52,6 +52,11 @@ export interface AutocompleteProps {
    * @default 300
    */
   debounce?: number
+
+  /**
+   * whether to allow multiselect
+   */
+  multiselect?: boolean
 }
 </script>
 
@@ -60,7 +65,16 @@ import { Input, Loader } from '@/components'
 import { nextTick, ref, watch, computed } from 'vue'
 import { useEventListener, watchDebounced, controlledRef } from '@vueuse/core'
 import { IconChevronUpDown } from '@/icons'
-import { useFloating, useVModel, useID, useRovingFocus, useEscapeKey } from '@/composables'
+import {
+  useFloating,
+  useVModel,
+  useID,
+  useRovingFocus,
+  useEscapeKey,
+  createSelectScope,
+  createCollection,
+} from '@/composables'
+import { isArray, noop } from '@/composables/helpers'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -81,22 +95,27 @@ const TriggerEl = ref<HTMLElement | null>(null)
 const ContentEl = ref<HTMLElement | null>(null)
 const getFormEl = () => (TriggerEl.value as HTMLInputElement)?.form
 
-const ContentItemsRefs = ref<(HTMLElement | null)[]>([])
-const ContentItemsEl = computed(() => ContentItemsRefs.value.filter(Boolean) as HTMLElement[])
-
 const TRIGGER_ID = useID()
 const CONTENT_ID = useID()
 
 const isContentOpen = ref(false)
 const suggestions = ref<string[]>(p.options?.slice(0, p.maxDisplayedOptions) || [])
 
-const selected = useVModel(() => p.modelValue)
+const { selected, setSelected, resetSelected } = createSelectScope(
+  useVModel(() => p.modelValue),
+  {
+    deselection: () => true,
+    multiselect: () => p.multiselect,
+  }
+)
+
+const { elements: OptionsElements } = createCollection(ContentEl)
 
 //----------------------------------------------------------------------------------------------------
 // 📌 keyboard interactions
 //----------------------------------------------------------------------------------------------------
 
-useRovingFocus(ContentEl, ContentItemsEl, {
+useRovingFocus(ContentEl, OptionsElements, {
   orientation: () => 'vertical',
 })
 
@@ -173,6 +192,7 @@ function onInputBlur() {
 }
 
 watch(selected, (selected) => {
+  if (isArray(selected)) return
   inputValue.lay(selected)
 })
 
@@ -180,7 +200,7 @@ watch(selected, (selected) => {
 // 📌 form
 //----------------------------------------------------------------------------------------------------
 
-useEventListener(getFormEl, 'reset', () => (selected.value = undefined))
+useEventListener(getFormEl, 'reset', () => resetSelected())
 
 //----------------------------------------------------------------------------------------------------
 
@@ -197,7 +217,7 @@ const { floatingStyles } = useFloating(TriggerEl, ContentEl, isContentOpen, {
     v-bind="$attrs"
     @blur="onInputBlur"
     @keydown="onTriggerKeydown"
-    ref="TriggerEl"
+    :ref="(vm )=> TriggerEl = (vm as InstanceType<typeof Input>)?.InputEl"
     :aria-expanded="isContentOpen"
     :aria-controls="CONTENT_ID"
     :id="TRIGGER_ID"
@@ -210,7 +230,7 @@ const { floatingStyles } = useFloating(TriggerEl, ContentEl, isContentOpen, {
     </template>
 
     <template #suffix>
-      <IconChevronUpDown class="vex-autocomplete-arrow" />
+      <IconChevronUpDown class="vex-autocomplete-chevron" />
     </template>
   </Input>
 
@@ -232,21 +252,7 @@ const { floatingStyles } = useFloating(TriggerEl, ContentEl, isContentOpen, {
         <span v-else>no data</span>
       </div>
 
-      <template v-else>
-        <li
-          v-for="(item, idx) in suggestions"
-          :key="item"
-          :id="`${CONTENT_ID}-${idx}`"
-          :class="['vex-autocomplete-content-item', { '--selected': selected === item }]"
-          @click="selected = item"
-          ref="ContentItemsRefs"
-          tabindex="-1"
-        >
-          <slot :item="item">
-            {{ item }}
-          </slot>
-        </li>
-      </template>
+      <slot :options="suggestions"> </slot>
     </ul>
   </Teleport>
 </template>
