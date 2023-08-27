@@ -60,7 +60,7 @@ import { Input, Loader } from '@/components'
 import { nextTick, ref, watch, computed } from 'vue'
 import { useEventListener, watchDebounced, controlledRef } from '@vueuse/core'
 import { IconChevronUpDown } from '@/icons'
-import { useFloating, useVModel, useID, useRovingFocus } from '@/composables'
+import { useFloating, useVModel, useID, useRovingFocus, useEscapeKey } from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -100,26 +100,27 @@ useRovingFocus(ContentEl, ContentItemsEl, {
   orientation: () => 'vertical',
 })
 
-useEventListener(TriggerEl, 'keydown', function onKeydown(e: KeyboardEvent) {
-  if (['ArrowDown', 'ArrowUp'].includes(e.key)) {
+useEventListener(TriggerEl, 'keydown', (e: KeyboardEvent) => {
+  if (e.key === 'ArrowDown') {
     e.preventDefault()
     isContentOpen.value = true
-    nextTick(() => ContentItemsEl.value[0].focus())
+    nextTick(() => ContentEl.value?.focus())
   }
 })
 
-useEventListener(ContentEl, 'keydown', function onKeydown(e: KeyboardEvent) {
-  if (e.key === 'Escape') {
-    e.preventDefault()
-    isContentOpen.value = false
-    TriggerEl.value?.focus()
-    return
-  }
-
+useEventListener(ContentEl, 'keydown', (e: KeyboardEvent) => {
   if ([' ', 'Enter'].includes(e.key)) {
     e.preventDefault()
     ;(e.target as HTMLElement).click()
   }
+})
+
+useEscapeKey((e) => {
+  if (!isContentOpen.value) return
+
+  e.preventDefault()
+  isContentOpen.value = false
+  TriggerEl.value?.focus()
 })
 
 //----------------------------------------------------------------------------------------------------
@@ -157,7 +158,7 @@ function filter(options: string[], query: string, limit: number): string[] {
   const result = []
   for (const option of options) {
     if (option.includes(query)) result.push(option)
-    if (result.length >= limit) return result
+    if (result.length >= limit) break
   }
   return result
 
