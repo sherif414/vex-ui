@@ -6,6 +6,7 @@ import { isArray } from './helpers'
 interface SelectScopeContext {
   selected: Readonly<Ref<string | string[] | undefined>>
   setSelected: (value: string) => void
+  resetSelected: () => void
 }
 
 const SELECT_SCOPE_CTX = Symbol() as InjectionKey<SelectScopeContext>
@@ -52,18 +53,21 @@ export function createSelectScope(
     if (isArray(selected.value)) selected.value = undefined
   }
 
-  watch(multiselect, (multi) => {
-    selected.value = multi ? [] : undefined
-  })
+  const resetSelected = (multi?: boolean) =>
+    (selected.value = multi ?? multiselect() ? [] : undefined)
+
+  watch(multiselect, resetSelected)
 
   provide(SELECT_SCOPE_CTX, {
     selected,
     setSelected,
+    resetSelected,
   })
 
   return {
     selected,
     setSelected,
+    resetSelected,
   }
 }
 
