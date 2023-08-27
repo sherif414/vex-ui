@@ -1,12 +1,14 @@
 import type { Getter } from '@/types'
-import { watch, provide, inject, computed } from 'vue'
+import { watch, provide, inject, computed, readonly } from 'vue'
 import type { Ref, InjectionKey, ComputedRef } from 'vue'
 import { isArray } from './helpers'
 
-const SELECT_SCOPE_CTX = Symbol() as InjectionKey<{
-  selected: Ref<string | string[] | undefined>
+interface SelectScopeContext {
+  selected: Readonly<Ref<string | string[] | undefined>>
   setSelected: (value: string) => void
-}>
+}
+
+const SELECT_SCOPE_CTX = Symbol() as InjectionKey<SelectScopeContext>
 
 interface UseSelectOptions {
   multiselect?: Getter<boolean>
@@ -19,7 +21,7 @@ interface UseSelectOptions {
 export function createSelectScope(
   selected: Ref<string | string[] | undefined>,
   options: UseSelectOptions = {}
-) {
+): SelectScopeContext {
   const { multiselect = () => false, deselection = () => false } = options
 
   const setSelected = (value: string) => {
