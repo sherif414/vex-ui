@@ -1,28 +1,16 @@
-import type { Getter, Signal } from '@/types'
 import { useEventListener } from '@vueuse/core'
-import { watch } from 'vue'
+import { watch, type Ref } from 'vue'
+import { isFunction } from './helpers'
 
 export function useListHighlight(
-  list: Getter<HTMLElement | null>,
-  highlight: Signal<number>,
-  getItems: Getter<HTMLElement[]>
+  parent: Ref<HTMLElement | null>,
+  highlighted: Ref<number>,
+  children: Ref<HTMLElement[]>
 ) {
-  const [highlighted, setHighlighted] = highlight
-
-  watch(highlighted, setHighlightClass, { flush: 'sync' })
-
-  function setHighlightClass(curr: number, prev: number) {
-    const _items = getItems()
-    _items[prev]?.classList.remove('--highlighted')
-    _items[curr]?.classList.add('--highlighted')
-  }
-
-  useEventListener(list, 'keydown', highlightOnKeydown)
-
-  function highlightOnKeydown(e: KeyboardEvent) {
+  useEventListener(parent, 'keydown', (e: KeyboardEvent) => {
     if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) return
 
-    const last = getItems().length - 1
+    const last = children.value.length - 1
     e.preventDefault()
     e.stopPropagation()
 
@@ -43,5 +31,19 @@ export function useListHighlight(
         setHighlighted(last)
         break
     }
+  })
+
+  watch(
+    highlighted,
+    (curr: number, prev: number) => {
+      const items = children.value
+      items[prev]?.classList.remove('--highlighted')
+      items[curr]?.classList.add('--highlighted')
+    },
+    { flush: 'sync' }
+  )
+
+  function setHighlighted(setter: ((v: number) => number) | number): void {
+    highlighted.value = isFunction(setter) ? setter(highlighted.value) : setter
   }
 }
