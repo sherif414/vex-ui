@@ -38,15 +38,17 @@ defineSlots<{
 //----------------------------------------------------------------------------------------------------
 
 const ChipEl = ref<HTMLElement | null>(null)
+const chipID = useID()
 
 const { isSelected, setSelected } = useSelectScope(() => p.value)
 
-useCollection({ id: useID(), ref: ChipEl, disabled: () => p.disabled })
+useCollection({ id: chipID, ref: ChipEl, disabled: () => p.disabled })
 </script>
 
 <template>
   <div
     v-bind="$attrs"
+    :id="chipID"
     :class="['vex-chip', { '--checked': isSelected, '--disabled': p.disabled }]"
     @click="setSelected(p.value)"
     ref="ChipEl"

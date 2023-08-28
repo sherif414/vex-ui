@@ -40,8 +40,8 @@ const slots = defineSlots<{
 
 //----------------------------------------------------------------------------------------------------
 
-const HEADER_ID = useID()
-const CONTENT_ID = useID()
+const headerID = useID()
+const contentID = useID()
 
 const icons = {
   danger: IconDangerSign,
@@ -56,8 +56,8 @@ const icons = {
   <div
     role="alert"
     :class="['vex-alert', `--c-${p.color}`]"
-    :aria-labelledby="HEADER_ID"
-    :aria-describedby="CONTENT_ID"
+    :aria-labelledby="headerID"
+    :aria-describedby="contentID"
   >
     <!-- icon -->
 
@@ -69,7 +69,7 @@ const icons = {
 
     <!-- header -->
 
-    <div v-if="p.header || slots.header" :id="HEADER_ID" class="vex-alert-header">
+    <div v-if="p.header || slots.header" :id="headerID" class="vex-alert-header">
       <slot name="header">
         {{ p.header }}
       </slot>
@@ -77,7 +77,7 @@ const icons = {
 
     <!-- content -->
 
-    <div :id="CONTENT_ID" class="vex-alert-content">
+    <div :id="contentID" class="vex-alert-content">
       <slot />
     </div>
 
