@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { provide } from 'vue'
-import { type Selected, CHIP_GROUP_CTX } from './context'
-import { useRovingFocus, createSelectScope, useTemplateRef, useVModel } from '@/composables'
+import { ref } from 'vue'
+import { useRovingFocus, createSelectScope, useVModel, createCollection } from '@/composables'
 import type { Orientation } from '@/types'
 
 //----------------------------------------------------------------------------------------------------
@@ -19,7 +18,7 @@ const p = withDefaults(
      * specifies the currently checked chips, this should be a string array if
      * `multiselect` prop is set to true, and a string otherwise.
      */
-    modelValue?: Selected
+    modelValue?: string | string[]
 
     /**
      * whether to allow deselecting chips when `multiselect` is false
@@ -37,7 +36,7 @@ const p = withDefaults(
 )
 
 defineEmits<{
-  (event: 'update:modelValue', value?: Selected): void
+  (event: 'update:modelValue', value?: typeof p.modelValue): void
 }>()
 
 defineSlots<{
@@ -46,9 +45,9 @@ defineSlots<{
 
 //----------------------------------------------------------------------------------------------------
 
-const [getGroupEl, setGroupEl] = useTemplateRef('ChipGroup')
+const GroupEl = ref<HTMLElement | null>(null)
 
-const selected = useSelect(
+createSelectScope(
   useVModel(() => p.modelValue),
   {
     deselection: () => p.deselection,
@@ -56,16 +55,10 @@ const selected = useSelect(
   }
 )
 
-useRovingFocus(
-  getGroupEl,
-  () => Array.from(getGroupEl()?.querySelectorAll<HTMLElement>('.vex-chip') ?? []),
-  {
-    orientation: () => p.orientation,
-  }
-)
+const { elements } = createCollection(GroupEl)
 
-provide(CHIP_GROUP_CTX, {
-  selected,
+useRovingFocus(GroupEl, elements, {
+  orientation: () => p.orientation,
 })
 
 function onKeydown(e: KeyboardEvent) {
@@ -77,7 +70,7 @@ function onKeydown(e: KeyboardEvent) {
 </script>
 
 <template>
-  <div :ref="setGroupEl" @keydown="onKeydown" tabindex="0" class="vex-chip-group">
+  <div ref="GroupEl" @keydown="onKeydown" tabindex="0" class="vex-chip-group">
     <slot />
   </div>
 </template>

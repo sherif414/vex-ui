@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import { useCollection, useSelectScope, useID } from '@/composables'
 import { IconCheck } from '@/icons'
 import { TransitionExpand } from '@/transitions'
-import { useMemo } from '@/composables'
-import { useChipGroupCtx } from './context'
+import { ref } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -18,6 +18,11 @@ const p = withDefaults(
      * specifies the chip's unique value.
      */
     value: string
+
+    /**
+     * whether the chip is disabled
+     */
+    disabled?: boolean
   }>(),
   {}
 )
@@ -32,26 +37,25 @@ defineSlots<{
 
 //----------------------------------------------------------------------------------------------------
 
-const {
-  selected: [getSelected, setSelected],
-} = useChipGroupCtx('Chip')
+const ChipEl = ref<HTMLElement | null>(null)
 
-const isChecked = useMemo<boolean>(() =>
-  getSelected((v) => (Array.isArray(v) ? v.includes(p.value) : v === p.value))
-)
+const { isSelected, setSelected } = useSelectScope(() => p.value)
+
+useCollection({ id: useID(), ref: ChipEl, disabled: () => p.disabled })
 </script>
 
 <template>
   <div
-    @click="setSelected(p.value)"
-    :class="['vex-chip', isChecked() && '--checked']"
-    tabindex="-1"
     v-bind="$attrs"
+    :class="['vex-chip', { '--checked': isSelected, '--disabled': p.disabled }]"
+    @click="setSelected(p.value)"
+    ref="ChipEl"
+    tabindex="-1"
   >
     <!-- check icon -->
 
     <TransitionExpand transition-prop="width">
-      <IconCheck aria-hidden="true" class="vex-chip-check" v-show="isChecked()" />
+      <IconCheck aria-hidden="true" class="vex-chip-check" v-show="isSelected" />
     </TransitionExpand>
 
     <!-- content -->
