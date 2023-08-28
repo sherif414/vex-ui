@@ -20,7 +20,7 @@ export interface AccordionItemProps {
   disabled?: boolean
 }
 
-export const ACCORDION_ITEM_CTX = Symbol() as InjectionKey<{
+export const ACCORDION_ITEM_INJECTION_KEY = Symbol() as InjectionKey<{
   contentID: string
   triggerID: string
   disabled: Getter<boolean>
@@ -29,7 +29,7 @@ export const ACCORDION_ITEM_CTX = Symbol() as InjectionKey<{
 }>
 
 export function useAccordionItemCtx(component: string) {
-  return useContext(ACCORDION_ITEM_CTX, 'AccordionItem', component)
+  return useContext(ACCORDION_ITEM_INJECTION_KEY, 'AccordionItem', component)
 }
 </script>
 
@@ -61,7 +61,7 @@ const isExpanded = computed<boolean>(() => {
   return isArray(v) ? v.includes(triggerID) : v === triggerID
 })
 
-provide(ACCORDION_ITEM_CTX, {
+provide(ACCORDION_ITEM_INJECTION_KEY, {
   contentID,
   triggerID,
   setExpanded,

@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { Getter, Orientation } from '@/types'
+import type { Getter } from '@/types'
 
 export interface AccordionProps {
   /**
@@ -29,9 +29,9 @@ export interface AccordionContext {
   chevronPosition: Getter<'start' | 'end'>
 }
 
-export const ACCORDION_CTX = Symbol() as InjectionKey<AccordionContext>
+export const ACCORDION_INJECTION_KEY = Symbol() as InjectionKey<AccordionContext>
 export const useAccordionCtx = (component: string) => {
-  return useContext(ACCORDION_CTX, 'Accordion', component)
+  return useContext(ACCORDION_INJECTION_KEY, 'Accordion', component)
 }
 </script>
 
@@ -53,7 +53,7 @@ createSelectScope(ref(p.multiple ? [] : undefined), {
   deselection: () => true,
 })
 
-provide(ACCORDION_CTX, {
+provide(ACCORDION_INJECTION_KEY, {
   noExpandAnimation: () => p.noExpandAnimation,
   chevronPosition: () => p.chevronPosition,
 })
