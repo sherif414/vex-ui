@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { useSignal } from '@/composables'
 import { onMounted, ref, watch } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
 //----------------------------------------------------------------------------------------------------
 
-type LoadStatus = 'loading' | 'error' | 'idle' | 'loaded'
+type LoadState = 'loading' | 'error' | 'idle' | 'loaded'
 
 defineOptions({
   inheritAttrs: false,
@@ -19,35 +18,34 @@ const p = withDefaults(
     style?: any
     size?: 'sm' | 'md' | 'lg'
     radius?: 'sm' | 'md' | 'lg' | 'full' | 'none'
-    ring?: boolean
-    ringColor?: 'primary' | 'accent' | 'danger' | 'warning' | 'success' | 'black' | 'white'
+    ring?: 'primary' | 'accent' | 'danger' | 'warning' | 'success' | 'black' | 'white' | 'none'
   }>(),
   {
     size: 'md',
     radius: 'full',
-    ringColor: 'accent',
+    ring: 'accent',
   }
 )
 
 defineSlots<{
-  default: (props: { loadStatus: () => LoadStatus }) => any
+  default: (props: { loadState: LoadState }) => any
 }>()
 
 //----------------------------------------------------------------------------------------------------
-// 📌 image loading status
+// 📌 image loading state
 //----------------------------------------------------------------------------------------------------
 
-const [getLoadStatus, setLoadStatus] = useSignal<LoadStatus>('idle')
+const loadState = ref<LoadState>('idle')
 
 onMounted(() => {
   watch(
     () => p.src,
     () => {
       if (!p.src) {
-        setLoadStatus('error')
+        loadState.value = 'error'
         return
       }
-      setLoadStatus('loading')
+      loadState.value = 'loading'
       const img = new Image()
       img.onload = onLoad
       img.onerror = onError
@@ -60,12 +58,12 @@ onMounted(() => {
 function onLoad(e: Event) {
   const img = e.target as HTMLImageElement
   if (img.complete && img.naturalHeight > 0) {
-    setLoadStatus('loaded')
+    loadState.value = 'loaded'
   }
 }
 
 function onError() {
-  setLoadStatus('error')
+  loadState.value = 'error'
 }
 </script>
 
@@ -76,11 +74,11 @@ function onError() {
       'vex-avatar',
       `--size-${p.size}`,
       ` --rounded-${p.radius}`,
-      p.ring && `--ring-${p.ringColor}`,
+      p.ring !== 'none' && `--ring-${p.ring}`,
     ]"
     :style="p.style"
   >
-    <slot v-if="getLoadStatus() !== 'loaded'" :load-status="getLoadStatus" />
+    <slot v-if="loadState !== 'loaded'" :load-state="loadState" />
 
     <img class="vex-avatar-img" v-else v-bind="$attrs" :src="p.src" />
   </div>
