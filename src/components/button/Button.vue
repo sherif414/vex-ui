@@ -1,3 +1,41 @@
+<script lang="ts">
+export interface ButtonProps {
+  /**
+   * whether the button is loading, shows a loading spinner and
+   * disables click events.
+   */
+  loading?: boolean
+
+  /**
+   * disables the button and click events
+   */
+  disabled?: boolean
+
+  /**
+   * specifies the button variant
+   * @default 'filled'
+   */
+  variant?: 'text' | 'filled' | 'outline' | 'light'
+
+  /**
+   * whether the button indicates a destructive action,
+   * note that this only changes how the button looks,
+   * not its behavior
+   */
+  destructive?: boolean
+
+  /**
+   * renders a smaller button
+   */
+  compact?: boolean
+
+  /**
+   * transforms the button into an icon-button
+   */
+  iconOnly?: boolean
+}
+</script>
+
 <script setup lang="ts">
 import { Loader } from '@/components'
 
@@ -5,68 +43,29 @@ import { Loader } from '@/components'
 // 📌 component meta
 //----------------------------------------------------------------------------------------------------
 
-const p = withDefaults(
-  defineProps<{
-    /**
-     * whether the button is loading, shows a loading spinner and
-     * disables click events.
-     */
-    loading?: boolean
-
-    /**
-     * disables the button and click events
-     */
-    disabled?: boolean
-
-    /**
-     * specifies the button variant
-     * @default 'filled'
-     */
-    variant?: 'text' | 'filled' | 'outline' | 'light'
-
-    /**
-     * whether the button indicates a destructive action,
-     * note that this only changes how the button looks,
-     * not its behavior
-     */
-    destructive?: boolean
-
-    /**
-     * renders a smaller button
-     */
-    compact?: boolean
-
-    /**
-     * transforms the button into an icon-button
-     */
-    iconOnly?: boolean
-  }>(),
-  {
-    variant: 'filled',
-  }
-)
+const p = withDefaults(defineProps<ButtonProps>(), {
+  variant: 'filled',
+})
 
 const emit = defineEmits<{
-  (e: 'click', event: Event): void
+  (e: 'click', event: MouseEvent): void
 }>()
 
 //----------------------------------------------------------------------------------------------------
 
-function onClick(e: Event) {
+function onClickCapture(e: MouseEvent) {
   if (p.disabled || p.loading) {
     e.preventDefault()
-
     // stops click event listeners added using `el.addEventListener`
     e.stopImmediatePropagation()
-    return
   }
-  emit('click', e)
 }
 </script>
 
 <template>
   <button
-    @click="onClick"
+    @click="emit('click', $event)"
+    @click.capture="onClickCapture"
     :disabled="p.disabled"
     :aria-disabled="p.disabled || p.loading || undefined"
     :class="[
