@@ -21,3 +21,4 @@ export type MaybeRefOrGetter<T> = RefOrGetter<T> | T
 export type Orientation = 'vertical' | 'horizontal'
 export type NavigationKey = 'ArrowDown' | 'ArrowUp' | 'ArrowLeft' | 'ArrowRight' | 'Home' | 'End'
 export type KeyIntent = 'next' | 'prev' | 'last' | 'first' | 'show' | 'hide'
+export type TemplateRef<T extends HTMLElement = HTMLElement> = Ref<T | null>
