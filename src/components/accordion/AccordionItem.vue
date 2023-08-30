@@ -39,7 +39,6 @@ export function useAccordionItemCtx(component: string) {
 import { useID, useSelectScope } from '@/composables'
 import { provide, type Ref, computed } from 'vue'
 import { useAccordionCtx } from './Accordion.vue'
-import { isArray } from '@/composables/helpers'
 
 const p = withDefaults(defineProps<AccordionItemProps>(), {})
 
@@ -48,18 +47,13 @@ const {} = useAccordionCtx('AccordionItem')
 const contentID = useID()
 const triggerID = useID()
 
-const { selected: expanded, setSelected: setExpanded } = useSelectScope()
+const { setSelected: setExpanded, isSelected } = useSelectScope(() => triggerID)
 
 if (p.initiallyExpanded) {
   setExpanded(triggerID)
 }
 
-const isExpanded = computed<boolean>(() => {
-  if (p.alwaysExpanded) return true
-
-  const v = expanded.value
-  return isArray(v) ? v.includes(triggerID) : v === triggerID
-})
+const isExpanded = computed<boolean>(() => p.alwaysExpanded || isSelected.value)
 
 provide(ACCORDION_ITEM_INJECTION_KEY, {
   contentID,
