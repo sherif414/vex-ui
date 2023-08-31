@@ -4,9 +4,7 @@ import type { Ref } from 'vue'
 import { inject, provide, ref, watch } from 'vue'
 import { isArray, isString } from './helpers'
 
-type ObjectValue = { value: string }
-type PrimitiveValue = string
-type Value = PrimitiveValue | ObjectValue
+type Value = { value: string }
 
 interface SelectScope<T> {
   selected: Readonly<Ref<T | T[] | undefined>>
@@ -27,7 +25,7 @@ const SELECT_SCOPE_CTX = Symbol()
 /**
  * handles multi and single select for a list of items.
  */
-export function createSelectScope<T extends Value>(
+export function createSelectScope<T extends string>(
   selected: Ref<T | T[] | undefined>,
   options: UseSelectOptions = {}
 ): SelectScope<T> {
@@ -38,12 +36,12 @@ export function createSelectScope<T extends Value>(
 
     // multi-select
     if (Array.isArray(prev)) {
-      selected.value = has(next, prev) ? prev.filter((v) => same(v, next)) : [...prev, next]
+      selected.value = prev.includes(next) ? prev.filter((v) => v !== next) : [...prev, next]
       return
     }
 
     // single-select
-    if (prev === undefined || !same(prev, next)) {
+    if (prev !== next) {
       selected.value = next
       return
     }
@@ -82,7 +80,7 @@ export function createSelectScope<T extends Value>(
   }
 }
 
-export function useSelectScope<T extends Value>(value: Getter<T>) {
+export function useSelectScope<T extends string>(value: Getter<T>) {
   const ctx = inject<SelectScope<T>>(SELECT_SCOPE_CTX)
   if (!ctx) {
     throw new Error(
@@ -93,7 +91,7 @@ export function useSelectScope<T extends Value>(value: Getter<T>) {
   const isSelected = computedEager(() => {
     const _selected = ctx.selected.value
     if (_selected == undefined) return false
-    return isArray(_selected) ? has(value(), _selected) : same(value(), _selected)
+    return isArray(_selected) ? _selected.some((v) => v === value()) : _selected === value()
   })
 
   return {
@@ -103,27 +101,3 @@ export function useSelectScope<T extends Value>(value: Getter<T>) {
     isSelected,
   }
 }
-
-//----------------------------------------------------------------------------------------------------
-// 📌 utils
-//----------------------------------------------------------------------------------------------------
-
-function has<T extends Value>(value: T, array: T[]): boolean {
-  if (isString(value)) {
-    return array.includes(value)
-  }
-
-  return array.some((v) => (v as ObjectValue).value === value.value)
-}
-
-function same(a: any, b: any): boolean {
-  if (isString(a)) {
-    return a === b
-  } else {
-    return a.value === b.value
-  }
-}
-
-const boolean = ref(false)
-
-boolean.value = false
