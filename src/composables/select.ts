@@ -1,49 +1,56 @@
 import type { Getter } from '@/types'
-import { watch, provide, inject, computed, readonly } from 'vue'
-import type { Ref, InjectionKey, ComputedRef } from 'vue'
-import { isArray } from './helpers'
+import { computedEager } from '@vueuse/core'
+import type { Ref } from 'vue'
+import { inject, provide, ref, watch } from 'vue'
+import { isArray, isString } from './helpers'
 
-interface SelectScopeContext {
-  selected: Readonly<Ref<string | string[] | undefined>>
-  setSelected: (value: string) => void
+type ObjectValue = { value: string }
+type PrimitiveValue = string
+type Value = PrimitiveValue | ObjectValue
+
+interface SelectScope<T> {
+  selected: Readonly<Ref<T | T[] | undefined>>
+  setSelected: (value: T) => void
   resetSelected: (multiselect?: boolean) => void
   multiselect: Getter<boolean>
 }
-
-const SELECT_SCOPE_CTX = Symbol() as InjectionKey<SelectScopeContext>
 
 interface UseSelectOptions {
   multiselect?: Getter<boolean>
   deselection?: Getter<boolean>
 }
 
+//----------------------------------------------------------------------------------------------------
+
+const SELECT_SCOPE_CTX = Symbol()
+
 /**
  * handles multi and single select for a list of items.
  */
-export function createSelectScope(
-  selected: Ref<string | string[] | undefined>,
+export function createSelectScope<T extends Value>(
+  selected: Ref<T | T[] | undefined>,
   options: UseSelectOptions = {}
-): SelectScopeContext {
+): SelectScope<T> {
   const { multiselect = () => false, deselection = () => false } = options
 
-  const setSelected = (value: string) => {
-    const prev = selected.value
+  const setSelected = (next: T) => {
+    let prev = selected.value
 
     // multi-select
     if (Array.isArray(prev)) {
-      selected.value = prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+      selected.value = has(next, prev) ? prev.filter((v) => same(v, next)) : [...prev, next]
       return
     }
 
     // single-select
-    if (prev !== value) {
-      selected.value = value
+    if (prev === undefined || !same(prev, next)) {
+      selected.value = next
       return
     }
 
     // deselect
     if (deselection()) {
-      selected.value = undefined
+      resetSelected()
     }
   }
 
@@ -75,35 +82,48 @@ export function createSelectScope(
   }
 }
 
-export function useSelectScope(): SelectScopeContext
-
-export function useSelectScope(
-  value: Getter<string>
-): SelectScopeContext & { isSelected: ComputedRef<boolean> }
-
-export function useSelectScope(value?: Getter<string>) {
-  const ctx = inject(SELECT_SCOPE_CTX, null)
+export function useSelectScope<T extends Value>(value: Getter<T>) {
+  const ctx = inject<SelectScope<T>>(SELECT_SCOPE_CTX)
   if (!ctx) {
     throw new Error(
       '[vex] selection scope was not found, make sure this component is used within its appropriate parent.'
     )
   }
 
-  if (value) {
-    return {
-      selected: ctx.selected,
-      multiselect: ctx.multiselect,
-      setSelected: ctx.setSelected,
-      isSelected: computed(() => {
-        const selectedVal = ctx.selected.value
-        return isArray(selectedVal) ? selectedVal.includes(value()) : selectedVal === value()
-      }),
-    }
-  }
+  const isSelected = computedEager(() => {
+    const _selected = ctx.selected.value
+    if (_selected == undefined) return false
+    return isArray(_selected) ? has(value(), _selected) : same(value(), _selected)
+  })
 
   return {
     selected: ctx.selected,
-    setSelected: ctx.setSelected,
     multiselect: ctx.multiselect,
+    setSelected: ctx.setSelected,
+    isSelected,
   }
 }
+
+//----------------------------------------------------------------------------------------------------
+// 📌 utils
+//----------------------------------------------------------------------------------------------------
+
+function has<T extends Value>(value: T, array: T[]): boolean {
+  if (isString(value)) {
+    return array.includes(value)
+  }
+
+  return array.some((v) => (v as ObjectValue).value === value.value)
+}
+
+function same(a: any, b: any): boolean {
+  if (isString(a)) {
+    return a === b
+  } else {
+    return a.value === b.value
+  }
+}
+
+const boolean = ref(false)
+
+boolean.value = false
