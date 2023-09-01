@@ -1,8 +1,7 @@
-import type { Getter, Signal } from '@/types'
-import { useSignal } from './signal'
-import { useVModel } from './v-model'
-import { getCurrentInstance } from 'vue'
+import type { Getter } from '@/types'
+import { getCurrentInstance, shallowRef, type Ref } from 'vue'
 import { getKebabCase } from './helpers'
+import { useVModel } from './v-model'
 
 type UseControllableStateParams<T> = {
   prop: Getter<T>
@@ -14,7 +13,7 @@ export function useControllableState<T>({
   prop,
   defaultValue,
   name = 'modelValue',
-}: UseControllableStateParams<T>): Signal<T> {
+}: UseControllableStateParams<T>): Ref<T> {
   const vm = getCurrentInstance()
   const kebabName = getKebabCase(name)
   const isControlled =
@@ -23,8 +22,8 @@ export function useControllableState<T>({
       vm.vnode.props?.hasOwnProperty(`onUpdate:${kebabName}`))
 
   if (isControlled) {
-    return useVModel(prop, `update:${name}`)
+    return useVModel(prop, undefined, `update:${name}`)
   }
 
-  return useSignal(defaultValue)
+  return shallowRef(defaultValue)
 }
