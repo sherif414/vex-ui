@@ -22,7 +22,7 @@ export function useControllableState<T>({
       vm.vnode.props?.hasOwnProperty(`onUpdate:${kebabName}`))
 
   if (isControlled) {
-    return useVModel(prop, undefined, `update:${name}`)
+    return useVModel(prop, { eventName: `update:${name}` })
   }
 
   return shallowRef(defaultValue)
