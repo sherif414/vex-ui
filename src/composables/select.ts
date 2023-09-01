@@ -1,10 +1,10 @@
 import type { Getter } from '@/types'
 import { computedEager } from '@vueuse/core'
 import type { Ref } from 'vue'
-import { inject, provide, ref, watch } from 'vue'
-import { isArray, isString } from './helpers'
+import { inject, provide, watch } from 'vue'
+import { isArray } from './helpers'
 
-type Value = { value: string }
+type PrimitiveValue = string | number | boolean | symbol
 
 interface SelectScope<T> {
   selected: Readonly<Ref<T | T[] | undefined>>
@@ -25,7 +25,7 @@ const SELECT_SCOPE_CTX = Symbol()
 /**
  * handles multi and single select for a list of items.
  */
-export function createSelectScope<T extends string>(
+export function createSelectScope<T extends PrimitiveValue>(
   selected: Ref<T | T[] | undefined>,
   options: UseSelectOptions = {}
 ): SelectScope<T> {
@@ -80,7 +80,7 @@ export function createSelectScope<T extends string>(
   }
 }
 
-export function useSelectScope<T extends string>(value: Getter<T>) {
+export function useSelectScope<T extends PrimitiveValue>(value: Getter<T>) {
   const ctx = inject<SelectScope<T>>(SELECT_SCOPE_CTX)
   if (!ctx) {
     throw new Error(
