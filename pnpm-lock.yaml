@@ -7,6 +7,9 @@ dependencies:
   '@heroicons/vue':
     specifier: ^2.0.18
     version: 2.0.18(vue@3.3.4)
+  '@tanstack/vue-table':
+    specifier: ^8.9.3
+    version: 8.9.3(vue@3.3.4)
   '@unocss/reset':
     specifier: ^0.55.4
     version: 0.55.4
@@ -977,6 +980,21 @@ packages:
   /@sinclair/typebox@0.27.8:
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
     dev: true
+
+  /@tanstack/table-core@8.9.3:
+    resolution: {integrity: sha512-NpHZBoHTfqyJk0m/s/+CSuAiwtebhYK90mDuf5eylTvgViNOujiaOaxNDxJkQQAsVvHWZftUGAx1EfO1rkKtLg==}
+    engines: {node: '>=12'}
+    dev: false
+
+  /@tanstack/vue-table@8.9.3(vue@3.3.4):
+    resolution: {integrity: sha512-Ca9+XZogYOi99rBqIoEJKKIfS0hNWcHnIh8pDUy2xbBk396AtJaO/tvP6B9qsxZF6j4szHzx8TeRveHPpZ+bBw==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      vue: ^3.2.33
+    dependencies:
+      '@tanstack/table-core': 8.9.3
+      vue: 3.3.4
+    dev: false
 
   /@tootallnate/once@2.0.0:
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
