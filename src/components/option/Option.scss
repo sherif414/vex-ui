@@ -1,7 +1,7 @@
 .vex-option {
   position: relative;
-  min-height: var(--vex-spacing-6);
-  font-size: var(--vex-font-size-xs);
+  height: var(--vex-spacing-8);
+  font-size: var(--vex-font-size-sm);
   border-radius: var(--vex-border-radius-sm);
   display: flex;
   align-items: stretch;
@@ -43,6 +43,6 @@
   }
 
   &-prefix-check {
-    color: var(--vex-c-neutral-400);
+    color: var(--vex-c-primary-500);
   }
 }

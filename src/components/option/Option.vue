@@ -23,8 +23,8 @@ defineSlots<{
 
 //----------------------------------------------------------------------------------------------------
 
-const OptionEl = ref<HTMLElement | null>(null)
 const id = useID()
+const OptionEl = ref<HTMLElement | null>(null)
 
 const { isSelected, setSelected, multiselect } = useSelectScope(() => p.value)
 useCollection({ ref: OptionEl, id, disabled: () => p.disabled })
