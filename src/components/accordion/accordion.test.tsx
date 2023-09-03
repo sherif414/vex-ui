@@ -1,5 +1,4 @@
 import { mount } from '@vue/test-utils'
-import {} from '@storybook/testing-library'
 import { Accordion, AccordionItem, AccordionContent, AccordionTrigger } from '.'
 import { describe, it, expect } from 'vitest'
 
