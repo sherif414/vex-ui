@@ -9,7 +9,7 @@ import { useID } from '@/composables'
 const p = withDefaults(
   defineProps<{
     /**
-     * specifies the alert title text
+     * specifies the alert header text
      */
     header?: string
 
@@ -77,7 +77,7 @@ const icons = {
 
     <!-- content -->
 
-    <div :id="contentID" class="vex-alert-content">
+    <div v-if="slots.default" :id="contentID" class="vex-alert-content">
       <slot />
     </div>
 

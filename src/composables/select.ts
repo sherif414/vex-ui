@@ -1,7 +1,6 @@
 import type { Getter } from '@/types'
-import { computedEager } from '@vueuse/core'
 import type { Ref } from 'vue'
-import { inject, provide, watch } from 'vue'
+import { watch } from 'vue'
 import { isArray } from './helpers'
 
 type PrimitiveValue = string | number | boolean | symbol
@@ -18,14 +17,15 @@ interface UseSelectOptions {
   deselection?: Getter<boolean>
 }
 
+// TODO: Remove me
+// this function is here so old code wont break
+export function createSelectScope() {}
 //----------------------------------------------------------------------------------------------------
-
-const SELECT_SCOPE_CTX = Symbol()
 
 /**
  * handles multi and single select for a list of items.
  */
-export function createSelectScope<T extends PrimitiveValue>(
+export function useSelectionScope<T extends PrimitiveValue>(
   selected: Ref<T | T[] | undefined>,
   options: UseSelectOptions = {}
 ): SelectScope<T> {
@@ -65,13 +65,6 @@ export function createSelectScope<T extends PrimitiveValue>(
 
   watch(multiselect, resetSelected)
 
-  provide(SELECT_SCOPE_CTX, {
-    selected,
-    multiselect,
-    setSelected,
-    resetSelected,
-  })
-
   return {
     selected,
     multiselect,
@@ -81,23 +74,24 @@ export function createSelectScope<T extends PrimitiveValue>(
 }
 
 export function useSelectScope<T extends PrimitiveValue>(value: Getter<T>) {
-  const ctx = inject<SelectScope<T>>(SELECT_SCOPE_CTX)
-  if (!ctx) {
-    throw new Error(
-      '[vex] selection scope was not found, make sure this component is used within its appropriate parent.'
-    )
-  }
+  // const ctx = inject<SelectScope<T>>(SELECT_SCOPE_CTX)
+  // if (!ctx) {
+  //   throw new Error(
+  //     '[vex] selection scope was not found, make sure this component is used within its appropriate parent.'
+  //   )
+  // }
 
-  const isSelected = computedEager(() => {
-    const _selected = ctx.selected.value
-    if (_selected == undefined) return false
-    return isArray(_selected) ? _selected.some((v) => v === value()) : _selected === value()
-  })
+  // const isSelected = computedEager(() => {
+  //   const _selected = ctx.selected.value
+  //   if (_selected == undefined) return false
+  //   return isArray(_selected) ? _selected.some((v) => v === value()) : _selected === value()
+  // })
 
-  return {
-    selected: ctx.selected,
-    multiselect: ctx.multiselect,
-    setSelected: ctx.setSelected,
-    isSelected,
-  }
+  // return {
+  //   selected: ctx.selected,
+  //   multiselect: ctx.multiselect,
+  //   setSelected: ctx.setSelected,
+  //   isSelected,
+  // }
+  return {} as any
 }

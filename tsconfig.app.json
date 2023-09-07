@@ -1,13 +1,18 @@
 {
   "extends": "@vue/tsconfig/tsconfig.dom.json",
-  "include": ["env.d.ts", "./**/*.vue", "./**/*.ts"],
-  "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts", "node_modules"],
+  "include": [
+    "env.d.ts",
+    "src/**/*.vue",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "playground/**/*",
+    "cypress"
+  ],
+  "exclude": ["src/**/*.spec.tsx", "src/**/*.spec.ts", "src/**/*.test.ts", "src/**/*.test.tsx"],
   "compilerOptions": {
     "composite": true,
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
+    "paths": { "@/*": ["src/*"] },
     "jsx": "preserve",
     "noImplicitReturns": true,
     "strictFunctionTypes": true,

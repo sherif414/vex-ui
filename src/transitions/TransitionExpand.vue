@@ -6,23 +6,27 @@ import { Transition } from 'vue'
 // 📌 component meta
 //----------------------------------------------------------------------------------------------------
 
+defineOptions({
+  inheritAttrs: false,
+})
+
 const p = withDefaults(
   defineProps<{
     duration?: number
-    transitionProp?: 'width' | 'height'
+    orientation?: 'horizontal' | 'vertical'
     disabled?: boolean
   }>(),
   {
     duration: 300,
-    transitionProp: 'height',
+    orientation: 'vertical',
   }
 )
 
 //----------------------------------------------------------------------------------------------------
 
 let expandedSize = '0'
-const dynamicSize = p.transitionProp
-const staticSize = p.transitionProp === 'height' ? 'width' : 'height'
+const dynamicSize = p.orientation === 'vertical' ? 'height' : 'width'
+const staticSize = p.orientation === 'vertical' ? 'width' : 'height'
 
 async function onEnter(el: HTMLElement, done: () => void) {
   el.style.transitionDuration = '0s'
@@ -51,7 +55,7 @@ async function onEnter(el: HTMLElement, done: () => void) {
 
 function onAfterEnter(el: HTMLElement) {
   el.style.overflow = ''
-  el.style[dynamicSize] = 'auto'
+  el.style[dynamicSize] = ''
 }
 
 async function onLeave(el: HTMLElement, done: () => void) {
@@ -68,7 +72,7 @@ async function onLeave(el: HTMLElement, done: () => void) {
 
 function onAfterLeave(el: HTMLElement) {
   el.style.overflow = ''
-  el.style[dynamicSize] = 'auto'
+  el.style[dynamicSize] = ''
 }
 </script>
 
@@ -83,6 +87,6 @@ function onAfterLeave(el: HTMLElement) {
     @after-enter="(el) => onAfterEnter(el as HTMLElement)"
     @after-leave="(el) => onAfterLeave(el as HTMLElement)"
   >
-    <slot></slot>
+    <slot />
   </Transition>
 </template>

@@ -33,3 +33,12 @@ playground
 
 docs/.vitepress/dist
 docs/.vitepress/cache
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/test-results/
+/playwright-report/
+/playwright/.cache/

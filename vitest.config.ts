@@ -10,9 +10,8 @@ export default mergeConfig(
       globals: true,
       environment: 'jsdom',
       root: fileURLToPath(new URL('./', import.meta.url)),
-      transformMode: {
-        web: [/\.[jt]sx$/],
-      },
+      include: ['./src/**/*.test.ts', './src/**/*.test.tsx'],
+      exclude: ['node_modules', 'dist', '.idea', '.git', '.cache', '/playwright'],
     },
   })
 )
