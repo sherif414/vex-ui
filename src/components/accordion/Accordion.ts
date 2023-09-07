@@ -1,10 +1,17 @@
-import { computed, defineComponent, h, type InjectionKey, type Ref, type SlotsType } from 'vue'
-import { useSelectionScope, useContext, useID } from '@/composables'
-import { provide, ref, watch } from 'vue'
-import type { Getter } from '@/types'
+import { useContext, useID, useSelectionScope } from '@/composables'
 import { isArray } from '@/composables/helpers'
-import type { Setter } from '@/types'
+import type { Getter, Setter } from '@/types'
 import { computedEager } from '@vueuse/core'
+import {
+  defineComponent,
+  h,
+  provide,
+  ref,
+  watch,
+  type InjectionKey,
+  type Ref,
+  type SlotsType,
+} from 'vue'
 
 const ACCORDION_INJECTION_KEY = Symbol() as InjectionKey<{
   setExpanded: (value: string) => void
@@ -175,10 +182,4 @@ type AccordionItem = InstanceType<typeof AccordionItem>
 type AccordionTrigger = InstanceType<typeof AccordionTrigger>
 type AccordionContent = InstanceType<typeof AccordionContent>
 
-export {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-  //
-}
+export { Accordion, AccordionContent, AccordionItem, AccordionTrigger }
