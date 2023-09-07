@@ -6,10 +6,10 @@ describe('Accordion', () => {
   it('renders correctly', () => {
     // Arrange
     const wrapper = mount(() => (
-      <Accordion>
-        <AccordionItem>
-          <AccordionTrigger>trigger</AccordionTrigger>
-          <AccordionContent>content</AccordionContent>
+      <Accordion class="vex-accordion">
+        <AccordionItem class="vex-accordion-item">
+          <AccordionTrigger class="vex-accordion-trigger">trigger</AccordionTrigger>
+          <AccordionContent class="vex-accordion-content">content</AccordionContent>
         </AccordionItem>
       </Accordion>
     ))
@@ -27,14 +27,14 @@ describe('Accordion', () => {
   it('renders the correct number of items', () => {
     // Arrange
     const wrapper = mount(() => (
-      <Accordion>
-        <AccordionItem>
-          <AccordionTrigger>trigger 1</AccordionTrigger>
-          <AccordionContent>content 1</AccordionContent>
+      <Accordion class="vex-accordion">
+        <AccordionItem class="vex-accordion-item">
+          <AccordionTrigger class="vex-accordion-trigger">trigger 1</AccordionTrigger>
+          <AccordionContent class="vex-accordion-content">content 1</AccordionContent>
         </AccordionItem>
-        <AccordionItem>
-          <AccordionTrigger>trigger 2</AccordionTrigger>
-          <AccordionContent>content 2</AccordionContent>
+        <AccordionItem class="vex-accordion-item">
+          <AccordionTrigger class="vex-accordion-trigger">trigger 2</AccordionTrigger>
+          <AccordionContent class="vex-accordion-content">content 2</AccordionContent>
         </AccordionItem>
       </Accordion>
     ))
@@ -46,10 +46,10 @@ describe('Accordion', () => {
   it('shows/hides the content when clicked', async () => {
     // Arrange
     const wrapper = mount(() => (
-      <Accordion>
-        <AccordionItem>
-          <AccordionTrigger>trigger</AccordionTrigger>
-          <AccordionContent>content</AccordionContent>
+      <Accordion class="vex-accordion">
+        <AccordionItem class="vex-accordion-item">
+          <AccordionTrigger class="vex-accordion-trigger">trigger</AccordionTrigger>
+          <AccordionContent class="vex-accordion-content">content</AccordionContent>
         </AccordionItem>
       </Accordion>
     ))
@@ -79,14 +79,14 @@ describe('Accordion', () => {
   it('sets the proper aria attributes when expanded/collapsed', async () => {
     // Arrange
     const wrapper = mount(() => (
-      <Accordion>
-        <AccordionItem>
-          <AccordionTrigger>trigger 1</AccordionTrigger>
-          <AccordionContent>content 1</AccordionContent>
+      <Accordion class="vex-accordion">
+        <AccordionItem class="vex-accordion-item">
+          <AccordionTrigger class="vex-accordion-trigger">trigger 1</AccordionTrigger>
+          <AccordionContent class="vex-accordion-content">content 1</AccordionContent>
         </AccordionItem>
-        <AccordionItem>
-          <AccordionTrigger>trigger 2</AccordionTrigger>
-          <AccordionContent>content 2</AccordionContent>
+        <AccordionItem class="vex-accordion-item">
+          <AccordionTrigger class="vex-accordion-trigger">trigger 2</AccordionTrigger>
+          <AccordionContent class="vex-accordion-content">content 2</AccordionContent>
         </AccordionItem>
       </Accordion>
     ))
@@ -117,13 +117,13 @@ describe('Accordion', () => {
     // Arrange
     const wrapper = mount(() => (
       <Accordion multiple>
-        <AccordionItem>
-          <AccordionTrigger>trigger 1</AccordionTrigger>
-          <AccordionContent>content 1</AccordionContent>
+        <AccordionItem class="vex-accordion-item">
+          <AccordionTrigger class="vex-accordion-trigger">trigger 1</AccordionTrigger>
+          <AccordionContent class="vex-accordion-content">content 1</AccordionContent>
         </AccordionItem>
-        <AccordionItem>
-          <AccordionTrigger>trigger 2</AccordionTrigger>
-          <AccordionContent>content 2</AccordionContent>
+        <AccordionItem class="vex-accordion-item">
+          <AccordionTrigger class="vex-accordion-trigger">trigger 2</AccordionTrigger>
+          <AccordionContent class="vex-accordion-content">content 2</AccordionContent>
         </AccordionItem>
       </Accordion>
     ))
