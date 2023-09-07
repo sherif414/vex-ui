@@ -1,12 +1,10 @@
 .vex-alert {
   display: grid;
   position: relative;
-  grid-template-areas:
-    'icon header'
-    'icon content';
-  align-items: flex-start;
+  grid-template-columns: max-content 1fr;
+  align-items: start;
   gap: var(--vex-spacing-2);
-  padding: var(--vex-spacing-4);
+  padding: var(--vex-spacing-3);
   border-radius: var(--vex-border-radius-sm);
   border-inline-start: 3px solid currentColor;
 }
@@ -14,13 +12,12 @@
 //------ icon ------//
 
 .vex-alert-icon {
-  grid-area: icon;
+  place-self: start center;
 }
 
 //------ header ------//
 
 .vex-alert-header {
-  grid-area: header;
   font-weight: 500;
   font-size: var(--vex-font-size-md);
 }
@@ -28,10 +25,10 @@
 //------ content ------//
 
 .vex-alert-content {
-  grid-area: content;
   font-size: var(--vex-font-size-sm);
   margin: 0;
   padding: 0;
+  grid-column-start: 2;
 }
 
 //------ close button ------//

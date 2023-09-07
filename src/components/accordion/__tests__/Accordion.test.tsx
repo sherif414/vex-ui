@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils'
-import { Accordion, AccordionItem, AccordionContent, AccordionTrigger } from '.'
+import { Accordion, AccordionItem, AccordionContent, AccordionTrigger } from '..'
 import { describe, it, expect } from 'vitest'
 
 describe('Accordion', () => {
@@ -40,7 +40,7 @@ describe('Accordion', () => {
     ))
 
     // Assert
-    expect(wrapper.findAllComponents(AccordionItem)).toHaveLength(2)
+    expect(wrapper.findAll('.vex-accordion-item')).toHaveLength(2)
   })
 
   it('shows/hides the content when clicked', async () => {
@@ -111,5 +111,66 @@ describe('Accordion', () => {
     // Assert
     expect(item1.find('.vex-accordion-trigger-button').attributes('aria-expanded')).toBe('false')
     expect(item2.find('.vex-accordion-trigger-button').attributes('aria-expanded')).toBe('true')
+  })
+
+  it('supports multiple items expansion', async () => {
+    // Arrange
+    const wrapper = mount(() => (
+      <Accordion multiple>
+        <AccordionItem>
+          <AccordionTrigger>trigger 1</AccordionTrigger>
+          <AccordionContent>content 1</AccordionContent>
+        </AccordionItem>
+        <AccordionItem>
+          <AccordionTrigger>trigger 2</AccordionTrigger>
+          <AccordionContent>content 2</AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    ))
+
+    // Act
+    const [item1, item2] = wrapper.findAllComponents(AccordionItem)
+
+    // Assert
+    expect(item1.classes()).not.toContain('--expanded')
+    expect(item2.classes()).not.toContain('--expanded')
+    expect(item1.find('.vex-accordion-content').exists()).toBe(false)
+    expect(item2.find('.vex-accordion-content').exists()).toBe(false)
+
+    // Act
+    await item1.find('.vex-accordion-trigger-button').trigger('click')
+
+    // Assert
+    expect(item1.classes()).toContain('--expanded')
+    expect(item2.classes()).not.toContain('--expanded')
+    expect(item1.find('.vex-accordion-content').exists()).toBe(true)
+    expect(item2.find('.vex-accordion-content').exists()).toBe(false)
+
+    // Act
+    await item2.find('.vex-accordion-trigger-button').trigger('click')
+
+    // Assert
+    expect(item1.classes()).toContain('--expanded')
+    expect(item2.classes()).toContain('--expanded')
+    expect(item1.find('.vex-accordion-content').exists()).toBe(true)
+    expect(item2.find('.vex-accordion-content').exists()).toBe(true)
+
+    // Act
+    await item1.find('.vex-accordion-trigger-button').trigger('click')
+
+    // Assert
+    expect(item1.classes()).not.toContain('--expanded')
+    expect(item2.classes()).toContain('--expanded')
+    expect(item1.find('.vex-accordion-content').exists()).toBe(false)
+    expect(item2.find('.vex-accordion-content').exists()).toBe(true)
+
+    // Act
+    await item2.find('.vex-accordion-trigger-button').trigger('click')
+
+    // Assert
+    expect(item1.classes()).not.toContain('--expanded')
+    expect(item2.classes()).not.toContain('--expanded')
+    expect(item1.find('.vex-accordion-content').exists()).toBe(false)
+    expect(item2.find('.vex-accordion-content').exists()).toBe(false)
   })
 })

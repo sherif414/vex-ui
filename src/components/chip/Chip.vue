@@ -56,7 +56,7 @@ useCollection({ id: chipID, ref: ChipEl, disabled: () => p.disabled })
   >
     <!-- check icon -->
 
-    <TransitionExpand transition-prop="width">
+    <TransitionExpand orientation="width">
       <IconCheck aria-hidden="true" class="vex-chip-check" v-show="isSelected" />
     </TransitionExpand>
 
