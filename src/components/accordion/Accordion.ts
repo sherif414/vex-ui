@@ -142,7 +142,7 @@ const AccordionTrigger = defineComponent({
           'aria-controls': contentID,
           'aria-expanded': isExpanded.value,
         },
-        [slots.prepend?.(), slots.default?.(), slots.append?.()]
+        slots.default?.()
       )
   },
 })
