@@ -7,6 +7,9 @@ dependencies:
   '@heroicons/vue':
     specifier: ^2.0.18
     version: 2.0.18(vue@3.3.4)
+  '@tanstack/table-core':
+    specifier: ^8.9.3
+    version: 8.9.3
   '@tanstack/vue-table':
     specifier: ^8.9.3
     version: 8.9.3(vue@3.3.4)
@@ -33,6 +36,9 @@ dependencies:
     version: 3.3.4
 
 devDependencies:
+  '@faker-js/faker':
+    specifier: ^8.0.2
+    version: 8.0.2
   '@tsconfig/node18':
     specifier: ^18.2.1
     version: 18.2.1
@@ -660,6 +666,11 @@ packages:
     requiresBuild: true
     dev: true
     optional: true
+
+  /@faker-js/faker@8.0.2:
+    resolution: {integrity: sha512-Uo3pGspElQW91PCvKSIAXoEgAUlRnH29sX2/p89kg7sP1m2PzCufHINd0FhTXQf6DYGiUlVncdSPa2F9wxed2A==}
+    engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0, npm: '>=6.14.13'}
+    dev: true
 
   /@floating-ui/core@1.4.1:
     resolution: {integrity: sha512-jk3WqquEJRlcyu7997NtR5PibI+y5bi+LS3hPmguVClypenMsCY3CBa3LAQnozRCtCrYWSEtAdiskpamuJRFOQ==}

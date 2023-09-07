@@ -1,0 +1,51 @@
+//------ wrapper ------//
+
+.vex-datatable-wrapper {
+  width: 100%;
+  padding: var(--vex-spacing-4);
+  background-color: #fff;
+  border-radius: var(--vex-border-radius-sm);
+}
+
+//------ datatable ------//
+
+.vex-datatable {
+  width: 100%;
+  color: var(--vex-c-gray-900);
+  font-size: var(--vex-font-size-sm);
+}
+
+//------ head ------//
+
+.vex-datatable-head {
+  color: var(--vex-c-gray-400);
+  text-transform: uppercase;
+
+  &-row {
+  }
+
+  &-cell {
+    font-size: var(--vex-font-size-xs);
+    font-weight: 500;
+    padding-block: var(--vex-spacing-4);
+
+    &.--id {
+      width: max-content;
+    }
+  }
+}
+
+//------ body ------//
+
+.vex-datatable-body {
+  &-row {
+    &:hover {
+      background-color: var(--vex-c-neutral-100);
+    }
+  }
+
+  &-cell {
+    text-align: center;
+    padding: var(--vex-spacing-1) var(--vex-spacing-4);
+  }
+}

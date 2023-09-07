@@ -12,7 +12,7 @@ import { transformLazyShow } from 'v-lazy-show'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    VueDevTools(),
+    // VueDevTools(),
     vue({ template: { compilerOptions: { nodeTransforms: [transformLazyShow] } } }),
     vueJsx(),
     // dts(),
