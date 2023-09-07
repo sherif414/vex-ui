@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils'
-import { Accordion, AccordionItem, AccordionContent, AccordionTrigger } from '..'
+import { Accordion, AccordionItem, AccordionContent, AccordionTrigger } from '.'
 import { describe, it, expect } from 'vitest'
 
 describe('Accordion', () => {
