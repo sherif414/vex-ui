@@ -1,4 +1,4 @@
-import { type Ref, ref } from 'vue'
+import { type Ref } from 'vue'
 import { isArray } from './helpers'
 
 //----------------------------------------------------------------------------------------------------
@@ -6,15 +6,16 @@ import { isArray } from './helpers'
 //----------------------------------------------------------------------------------------------------
 
 type PrimitiveValue = string | number | boolean | symbol
+type Mode = 'single' | 'multiple'
 
-export abstract class SelectionMode<T> {
+export interface SelectionMode<T> {
   /**
    * Selects the given value and updates the selected array.
    * @param value - The value to be selected.
    * @param selected - The array of selected values.
    * @param shouldDeselect - Whether the value should be deselected if already selected.
    */
-  abstract select(value: T, selected: Ref<T | T[]>, shouldDeselect: boolean): void
+  select(value: T, selected: Ref<T | T[]>, shouldDeselect: boolean): void
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -25,22 +26,21 @@ export abstract class SelectionMode<T> {
  * Represents a selection scope for managing a group of selectable values.
  */
 export class SelectionScope<T extends PrimitiveValue> {
-  #selectionMode: SelectionMode<T>
+  #mode: SelectionMode<T>
 
   /**
-   * @param selectionMode - The selection mode to be used.
    * @param selected - The array of selected values, can be used to add default selected values.
+   * @param mode - The selection mode to be used. Defaults to 'single'
    */
-  constructor(public selected: Ref<T[]>, public mode: 'single' | 'multiple' = 'single') {
-    this.#selectionMode = mode === 'single' ? new SingleSelection() : new MultiSelection()
+  constructor(public selected: Ref<T[]>, mode: Mode = 'single') {
+    this.#mode = mode === 'single' ? new SingleSelection() : new MultiSelection()
   }
 
-  set selectionMode(mode: 'single' | 'multiple') {
-    if (mode === 'single') {
-      this.#selectionMode = new SingleSelection()
-    } else {
-      this.#selectionMode = new MultiSelection()
-    }
+  get mode(): Mode {
+    return this.#mode instanceof SingleSelection ? 'single' : 'multiple'
+  }
+  set mode(mode: Mode) {
+    this.#mode = mode === 'single' ? new SingleSelection() : new MultiSelection()
   }
 
   /**
@@ -48,7 +48,7 @@ export class SelectionScope<T extends PrimitiveValue> {
    * @param value - The value to be selected.
    */
   select(value: T, shouldDeselect: boolean): void {
-    this.#selectionMode.select(value, this.selected, shouldDeselect)
+    this.#mode.select(value, this.selected, shouldDeselect)
   }
 
   /**
@@ -61,7 +61,7 @@ export class SelectionScope<T extends PrimitiveValue> {
 
 //===
 
-export class SingleSelection<T> extends SelectionMode<T> {
+export class SingleSelection<T> implements SelectionMode<T> {
   select(value: T, selected: Ref<T | T[] | undefined>, shouldDeselect: boolean): void {
     const isSelected = !isArray(selected.value) ? selected.value === value : false
 
@@ -75,7 +75,7 @@ export class SingleSelection<T> extends SelectionMode<T> {
 
 //===
 
-export class MultiSelection<T> extends SelectionMode<T> {
+export class MultiSelection<T> implements SelectionMode<T> {
   select(value: T, selected: Ref<T[]>, shouldDeselect: boolean): void {
     const isSelected = selected.value.includes(value)
 
