@@ -1,21 +1,19 @@
-import { type Ref } from 'vue'
-import { isArray } from './helpers'
+import { watch, type Ref } from 'vue'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 types
 //----------------------------------------------------------------------------------------------------
 
 type PrimitiveValue = string | number | boolean | symbol
-type Mode = 'single' | 'multiple'
 
-export interface SelectionMode<T> {
+export abstract class SelectionStrategy<T> {
   /**
    * Selects the given value and updates the selected array.
    * @param value - The value to be selected.
    * @param selected - The array of selected values.
    * @param shouldDeselect - Whether the value should be deselected if already selected.
    */
-  select(value: T, selected: Ref<T | T[]>, shouldDeselect: boolean): void
+  abstract select(value: T, selected: Ref<T[]>, shouldDeselect: boolean): void
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -23,59 +21,70 @@ export interface SelectionMode<T> {
 //----------------------------------------------------------------------------------------------------
 
 /**
- * Represents a selection scope for managing a group of selectable values.
+ * Represents a selection group for managing a group of selectable values.
  */
-export class SelectionScope<T extends PrimitiveValue> {
-  #mode: SelectionMode<T>
+export class SelectionGroup<T extends PrimitiveValue> {
+  deselection = () => true
+  multiselect = () => false
+  strategy: SelectionStrategy<T> = new SingleSelection()
 
   /**
    * @param selected - The array of selected values, can be used to add default selected values.
-   * @param mode - The selection mode to be used. Defaults to 'single'
+   * @param mode - The selection mode to be used, Defaults to 'single'.
    */
-  constructor(public selected: Ref<T[]>, mode: Mode = 'single') {
-    this.#mode = mode === 'single' ? new SingleSelection() : new MultiSelection()
-  }
+  constructor(
+    public selected: Ref<T[]>,
+    options: {
+      multiselect?: () => boolean
+      deselection?: () => boolean
+    } = {}
+  ) {
+    const { deselection, multiselect } = options
+    deselection && (this.deselection = deselection)
+    multiselect && (this.multiselect = multiselect)
 
-  get mode(): Mode {
-    return this.#mode instanceof SingleSelection ? 'single' : 'multiple'
-  }
-  set mode(mode: Mode) {
-    this.#mode = mode === 'single' ? new SingleSelection() : new MultiSelection()
+    watch(
+      () => this.multiselect(),
+      (multi) => {
+        this.strategy = multi ? new MultiSelection() : new SingleSelection()
+      },
+      { immediate: true }
+    )
   }
 
   /**
    * Selects the given value using the current selection mode.
    * @param value - The value to be selected.
    */
-  select(value: T, shouldDeselect: boolean): void {
-    this.#mode.select(value, this.selected, shouldDeselect)
+  select(value: T): void {
+    this.strategy.select(value, this.selected, this.deselection())
   }
 
   /**
-   * Resets the selected values.
+   * clears the selected values.
    */
-  resetSelected(): void {
+  clearSelected(): void {
     this.selected.value = []
   }
 }
 
 //===
 
-export class SingleSelection<T> implements SelectionMode<T> {
-  select(value: T, selected: Ref<T | T[] | undefined>, shouldDeselect: boolean): void {
-    const isSelected = !isArray(selected.value) ? selected.value === value : false
+export class SingleSelection<T> extends SelectionStrategy<T> {
+  select(value: T, selected: Ref<T[]>, shouldDeselect: boolean): void {
+    const isSelected = selected.value.includes(value)
 
     if (isSelected && shouldDeselect) {
-      selected.value = undefined
+      selected.value = []
     } else if (!isSelected) {
-      selected.value = value
+      selected.value = [value]
     }
   }
 }
 
 //===
 
-export class MultiSelection<T> implements SelectionMode<T> {
+export class MultiSelection<T> extends SelectionStrategy<T> {
   select(value: T, selected: Ref<T[]>, shouldDeselect: boolean): void {
     const isSelected = selected.value.includes(value)
 
