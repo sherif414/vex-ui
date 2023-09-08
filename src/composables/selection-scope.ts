@@ -8,25 +8,30 @@ type PrimitiveValue = string | number | boolean | symbol
 export class SelectionGroup<T extends PrimitiveValue> {
   deselection = () => false
   multiselect = () => false
-  strategy: SelectionStrategy<T> = new SingleSelect()
+  selected: Ref<T[]>
+  strategy: SelectionStrategy<T>
 
   constructor(
-    public selected: Ref<T[]>,
+    selected: Ref<T[]>,
     options: {
       multiselect?: () => boolean
       deselection?: () => boolean
     } = {}
   ) {
     const { deselection, multiselect } = options
+
+    this.selected = selected
     deselection && (this.deselection = deselection)
     multiselect && (this.multiselect = multiselect)
+    this.strategy = this.multiselect()
+      ? new MultiSelect(this.selected)
+      : new SingleSelect(this.selected)
 
     watch(
       () => this.multiselect(),
       (multi) => {
-        this.strategy = multi ? new MultiSelect() : new SingleSelect()
-      },
-      { immediate: true }
+        this.strategy = multi ? new MultiSelect(this.selected) : new SingleSelect(this.selected)
+      }
     )
   }
 
@@ -35,11 +40,11 @@ export class SelectionGroup<T extends PrimitiveValue> {
    * @param value - The value to be selected or deselected.
    */
   select(value: T): void {
-    this.strategy.select(value, this.selected, this.deselection())
+    this.strategy.select(value, this.deselection())
   }
 
   deselect(value: T): void {
-    this.strategy.deselect(this.selected, value)
+    this.strategy.deselect(value)
   }
 
   clearSelected(): void {
@@ -50,54 +55,68 @@ export class SelectionGroup<T extends PrimitiveValue> {
 //===
 
 export abstract class SelectionStrategy<T> {
+  protected selected: Ref<T[]>
+
+  constructor(selected: Ref<T[]>) {
+    this.selected = selected
+  }
+
   /**
    * Selects the given value and updates the selected array.
-   * @param value - The value to be selected.
-   * @param selected - The array of selected values.
-   * @param deselectOnReselect - Whether the value should be deselected if already selected.
    */
-  abstract select(value: T, selected: Ref<T[]>, deselectOnReselect: boolean): void
+  abstract select(value: T, deselectOnReselect: boolean): void
 
   /**
    * Deselects the given value and updates the selected array.
-   * @param value - The value to be deselected.
-   * @param selected - The array of selected values.
    */
-  abstract deselect(selected: Ref<T[]>, value: T): void
+  abstract deselect(value: T): void
+
+  /**
+   * whether a value is selected
+   */
+  abstract isSelected(value: T): boolean
 }
 
 //===
 
 export class SingleSelect<T> extends SelectionStrategy<T> {
-  select(value: T, selected: Ref<T[]>, deselectOnReselect: boolean): void {
-    const isSelected = selected.value.includes(value)
-
-    if (isSelected) {
-      deselectOnReselect && this.deselect(selected)
-    } else {
-      selected.value = [value]
-    }
+  isSelected(value: T): boolean {
+    return this.selected.value.includes(value)
   }
 
-  deselect(selected: Ref<T[]>): void {
-    selected.value = []
+  deselect(): void {
+    this.selected.value = []
+  }
+
+  select(value: T, deselectOnReselect: boolean): void {
+    if (this.isSelected(value)) {
+      if (deselectOnReselect) {
+        this.deselect()
+      }
+    } else {
+      this.selected.value = [value]
+    }
   }
 }
 
 //===
 
 export class MultiSelect<T> extends SelectionStrategy<T> {
-  select(value: T, selected: Ref<T[]>, deselectOnReselect: boolean): void {
-    const isSelected = selected.value.includes(value)
-
-    if (isSelected) {
-      deselectOnReselect && this.deselect(selected, value)
-    } else {
-      selected.value = [...selected.value, value]
-    }
+  isSelected(value: T): boolean {
+    return this.selected.value.includes(value)
   }
 
-  deselect(selected: Ref<T[]>, value: T): void {
-    selected.value = selected.value.filter((_value) => _value !== value)
+  deselect(value: T): void {
+    this.selected.value = this.selected.value.filter((_value) => _value !== value)
+  }
+
+  select(value: T, deselectOnReselect: boolean): void {
+    if (this.isSelected(value)) {
+      if (deselectOnReselect) {
+        this.deselect(value)
+      }
+    } else {
+      this.selected.value = [...this.selected.value, value]
+    }
   }
 }
