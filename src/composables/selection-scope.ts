@@ -9,7 +9,7 @@ export class SelectionGroup<T extends PrimitiveValue> {
   deselection = () => false
   multiselect = () => false
   selected: Ref<T[]>
-  strategy: SelectionStrategy<T>
+  private strategy: SelectionStrategy<T>
 
   constructor(
     selected: Ref<T[]>,
@@ -55,26 +55,10 @@ export class SelectionGroup<T extends PrimitiveValue> {
 //===
 
 export abstract class SelectionStrategy<T> {
-  protected selected: Ref<T[]>
-
-  constructor(selected: Ref<T[]>) {
-    this.selected = selected
-  }
-
-  /**
-   * Selects the given value and updates the selected array.
-   */
-  abstract select(value: T, deselectOnReselect: boolean): void
-
-  /**
-   * Deselects the given value and updates the selected array.
-   */
+  constructor(protected selected: Ref<T[]>) {}
   abstract deselect(value: T): void
-
-  /**
-   * whether a value is selected
-   */
   abstract isSelected(value: T): boolean
+  abstract select(value: T, deselectOnReselect: boolean): void
 }
 
 //===
