@@ -65,12 +65,12 @@ export abstract class SelectionStrategy<T> {
 //===
 
 export class SingleSelect<T> extends SelectionStrategy<T> {
-  select(value: T, selected: Ref<T[]>, shouldDeselect: boolean): void {
+  select(value: T, selected: Ref<T[]>, deselectOnReselect: boolean): void {
     const isSelected = selected.value.includes(value)
 
-    if (isSelected && shouldDeselect) {
-      this.deselect(selected)
-    } else if (!isSelected) {
+    if (isSelected) {
+      deselectOnReselect && this.deselect(selected)
+    } else {
       selected.value = [value]
     }
   }
@@ -83,12 +83,12 @@ export class SingleSelect<T> extends SelectionStrategy<T> {
 //===
 
 export class MultiSelect<T> extends SelectionStrategy<T> {
-  select(value: T, selected: Ref<T[]>, shouldDeselect: boolean): void {
+  select(value: T, selected: Ref<T[]>, deselectOnReselect: boolean): void {
     const isSelected = selected.value.includes(value)
 
-    if (isSelected && shouldDeselect) {
-      this.deselect(selected, value)
-    } else if (!isSelected) {
+    if (isSelected) {
+      deselectOnReselect && this.deselect(selected, value)
+    } else {
       selected.value = [...selected.value, value]
     }
   }
