@@ -38,6 +38,10 @@ export class SelectionGroup<T extends PrimitiveValue> {
     this.strategy.select(value, this.selected, this.deselection())
   }
 
+  deselect(value: T): void {
+    this.strategy.deselect(this.selected, value)
+  }
+
   clearSelected(): void {
     this.selected.value = []
   }
