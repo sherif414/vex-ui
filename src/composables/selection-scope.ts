@@ -30,15 +30,12 @@ export class SelectionGroup<T extends PrimitiveValue> {
     watch(
       () => this.multiselect(),
       (multi) => {
+        this.clearSelected()
         this.strategy = multi ? new MultiSelect(this.selected) : new SingleSelect(this.selected)
       }
     )
   }
 
-  /**
-   * Selects or deselects the given value using the current selection mode.
-   * @param value - The value to be selected or deselected.
-   */
   select(value: T): void {
     this.strategy.select(value, this.deselection())
   }
