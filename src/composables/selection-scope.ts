@@ -1,31 +1,6 @@
 import { watch, type Ref } from 'vue'
 
-//----------------------------------------------------------------------------------------------------
-// 📌 types
-//----------------------------------------------------------------------------------------------------
-
 type PrimitiveValue = string | number | boolean | symbol
-
-export abstract class SelectionStrategy<T> {
-  /**
-   * Selects the given value and updates the selected array.
-   * @param value - The value to be selected.
-   * @param selected - The array of selected values.
-   * @param deselectOnReselect - Whether the value should be deselected if already selected.
-   */
-  abstract select(value: T, selected: Ref<T[]>, deselectOnReselect: boolean): void
-
-  /**
-   * Deselects the given value and updates the selected array.
-   * @param value - The value to be deselected.
-   * @param selected - The array of selected values.
-   */
-  abstract deselect(selected: Ref<T[]>, value: T): void
-}
-
-//----------------------------------------------------------------------------------------------------
-// 📌 implementation
-//----------------------------------------------------------------------------------------------------
 
 /**
  * Represents a selection group for managing a group of selectable values.
@@ -66,6 +41,25 @@ export class SelectionGroup<T extends PrimitiveValue> {
   clearSelected(): void {
     this.selected.value = []
   }
+}
+
+//===
+
+export abstract class SelectionStrategy<T> {
+  /**
+   * Selects the given value and updates the selected array.
+   * @param value - The value to be selected.
+   * @param selected - The array of selected values.
+   * @param deselectOnReselect - Whether the value should be deselected if already selected.
+   */
+  abstract select(value: T, selected: Ref<T[]>, deselectOnReselect: boolean): void
+
+  /**
+   * Deselects the given value and updates the selected array.
+   * @param value - The value to be deselected.
+   * @param selected - The array of selected values.
+   */
+  abstract deselect(selected: Ref<T[]>, value: T): void
 }
 
 //===
