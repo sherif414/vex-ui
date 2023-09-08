@@ -2,16 +2,8 @@ import { useContext, useID, useSelectionScope } from '@/composables'
 import { isArray } from '@/composables/helpers'
 import type { Getter, Setter } from '@/types'
 import { computedEager } from '@vueuse/core'
-import {
-  defineComponent,
-  h,
-  provide,
-  ref,
-  watch,
-  type InjectionKey,
-  type Ref,
-  type SlotsType,
-} from 'vue'
+import type { InjectionKey, Ref, SlotsType } from 'vue'
+import { defineComponent, h, provide, ref, watch } from 'vue'
 
 const ACCORDION_INJECTION_KEY = Symbol() as InjectionKey<{
   setExpanded: (value: string) => void
@@ -67,23 +59,6 @@ const Accordion = defineComponent({
 // 📌 Accordion Item
 //----------------------------------------------------------------------------------------------------
 
-export interface AccordionItemProps {
-  /**
-   * expands the item and prevents it from being collapsed
-   */
-  alwaysExpanded?: boolean
-
-  /**
-   * expands the item on the first render
-   */
-  initiallyExpanded?: boolean
-
-  /**
-   * prevents the item from being collapsed/expanded
-   */
-  disabled?: boolean
-}
-
 const AccordionItem = defineComponent({
   setup(p, { slots }) {
     const { expanded, setExpanded } = useAccordionCtx('AccordionItem')
@@ -121,8 +96,17 @@ const AccordionItem = defineComponent({
   },
 
   props: {
+    /**
+     * expands the item and prevents it from being collapsed
+     */
     alwaysExpanded: Boolean,
+    /**
+     * expands the item on the first render
+     */
     initiallyExpanded: Boolean,
+    /**
+     * prevents the item from being collapsed/expanded
+     */
     disabled: Boolean,
   },
   slots: Object as SlotsType<{
