@@ -24,14 +24,10 @@ export abstract class SelectionStrategy<T> {
  * Represents a selection group for managing a group of selectable values.
  */
 export class SelectionGroup<T extends PrimitiveValue> {
-  deselection = () => true
+  deselection = () => false
   multiselect = () => false
   strategy: SelectionStrategy<T> = new SingleSelection()
 
-  /**
-   * @param selected - The array of selected values, can be used to add default selected values.
-   * @param mode - The selection mode to be used, Defaults to 'single'.
-   */
   constructor(
     public selected: Ref<T[]>,
     options: {
