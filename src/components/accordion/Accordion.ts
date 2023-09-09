@@ -60,12 +60,9 @@ const AccordionItem = defineComponent({
     const value = triggerID
 
     if (p.initiallyExpanded) {
-      group.select(triggerID)
+      group.select(value)
     }
-
-    const isExpanded = computedEager<boolean>(() =>
-      p.alwaysExpanded ? true : group.isSelected(value)
-    )
+    const isExpanded = computedEager(() => (p.alwaysExpanded ? true : group.isSelected(value)))
 
     provide(ACCORDION_ITEM_INJECTION_KEY, {
       contentID,
