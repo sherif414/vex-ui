@@ -2,6 +2,11 @@ import { watch, type Ref } from 'vue'
 
 type PrimitiveValue = string | number | boolean | symbol
 
+interface Options {
+  multiselect?: () => boolean
+  deselection?: () => boolean
+}
+
 /**
  * Represents a selection group for managing a group of selectable values.
  */
@@ -11,13 +16,7 @@ export class SelectionGroup<T extends PrimitiveValue> {
   selected: Ref<T[]>
   private strategy: SelectionStrategy<T>
 
-  constructor(
-    selected: Ref<T[]>,
-    options: {
-      multiselect?: () => boolean
-      deselection?: () => boolean
-    } = {}
-  ) {
+  constructor(selected: Ref<T[]>, options: Options = {}) {
     const { deselection, multiselect } = options
 
     this.selected = selected
