@@ -32,6 +32,7 @@ function useAccordionItemCtx(component: string) {
 
 const Accordion = defineComponent({
   setup(p, { slots }) {
+    // TODO: make state controllable from the outside
     const group = useSelectionGroup<Value>(ref([]), {
       multiselect: () => p.multiple,
       deselection: () => p.deselectOnReselect,
@@ -76,7 +77,7 @@ const AccordionItem = defineComponent({
       h(
         'div',
         {
-          class: { '--expanded': isExpanded.value },
+          'data-state': isExpanded.value ? 'expanded' : 'collapsed',
         },
         slots.default?.({ expanded: isExpanded.value })
       )
@@ -115,6 +116,7 @@ const AccordionTrigger = defineComponent({
         'button',
         {
           id: triggerID,
+          type: 'button',
           disabled: disabled(),
           onClick: toggleExpansion,
           'aria-controls': contentID,
