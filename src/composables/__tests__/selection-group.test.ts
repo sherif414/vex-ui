@@ -137,4 +137,30 @@ describe('SelectionGroup', () => {
     group.deselect(value)
     expect(group.selected.value).toEqual([])
   })
+
+  it('should clear selected when selection strategy changes', () => {
+    let multiselect = ref(false)
+    const value = 1
+    const { selected, select } = useSelectionGroup(ref([value]), {
+      multiselect: () => multiselect.value,
+    })
+
+    expect(selected.value).toEqual([value])
+
+    // flush timing for watch is 'pre' so we need to deffer the test
+    multiselect.value = true
+    requestAnimationFrame(() => {
+      expect(selected.value).toEqual([])
+    })
+
+    select(value)
+    requestAnimationFrame(() => {
+      expect(selected.value).toEqual([value])
+    })
+
+    multiselect.value = false
+    requestAnimationFrame(() => {
+      expect(selected.value).toEqual([])
+    })
+  })
 })
