@@ -41,9 +41,7 @@ const Accordion = defineComponent({
       deselection,
     })
 
-    watch(multiselect, group.clearSelected)
     provide(ACCORDION_INJECTION_KEY, { group })
-
     return () => h('div', null, slots.default?.())
   },
 
