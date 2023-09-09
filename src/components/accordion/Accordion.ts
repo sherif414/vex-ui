@@ -32,13 +32,9 @@ function useAccordionItemCtx(component: string) {
 
 const Accordion = defineComponent({
   setup(p, { slots }) {
-    const selected = ref([])
-    const multiselect = () => p.multiple
-    const deselection = () => p.deselectOnReselect
-
-    const group = useSelectionGroup<Value>(selected, {
-      multiselect,
-      deselection,
+    const group = useSelectionGroup<Value>(ref([]), {
+      multiselect: () => p.multiple,
+      deselection: () => p.deselectOnReselect,
     })
 
     provide(ACCORDION_INJECTION_KEY, { group })
