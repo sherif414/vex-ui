@@ -17,7 +17,7 @@ interface UseSelectOptions {
   deselection?: Getter<boolean>
 }
 
-// TODO: Remove me
+// FIXME: Remove me
 // this function is here so old code wont break
 export function createSelectScope() {}
 //----------------------------------------------------------------------------------------------------
