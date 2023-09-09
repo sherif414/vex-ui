@@ -1,13 +1,13 @@
-import { useContext, useID, useSelectionScope } from '@/composables'
-import { isArray } from '@/composables/helpers'
-import type { Getter, Setter } from '@/types'
+import { useContext, useID, useSelectionGroup, type SelectionGroup } from '@/composables'
+import type { Getter } from '@/types'
 import { computedEager } from '@vueuse/core'
 import type { InjectionKey, Ref, SlotsType } from 'vue'
 import { defineComponent, h, provide, ref, watch } from 'vue'
 
+type Value = string
+
 const ACCORDION_INJECTION_KEY = Symbol() as InjectionKey<{
-  setExpanded: (value: string) => void
-  expanded: Ref<string | string[] | undefined>
+  group: SelectionGroup<Value>
 }>
 
 function useAccordionCtx(component: string) {
@@ -19,7 +19,7 @@ const ACCORDION_ITEM_INJECTION_KEY = Symbol() as InjectionKey<{
   triggerID: string
   disabled: Getter<boolean>
   isExpanded: Ref<boolean>
-  setExpanded: Setter<string>
+  toggleExpansion: () => void
 }>
 
 function useAccordionItemCtx(component: string) {
@@ -31,27 +31,25 @@ function useAccordionItemCtx(component: string) {
 //----------------------------------------------------------------------------------------------------
 
 const Accordion = defineComponent({
-  setup(props, { slots }) {
-    const { selected, setSelected, resetSelected } = useSelectionScope<string>(
-      ref(props.multiple ? [] : undefined),
-      {
-        multiselect: () => props.multiple!,
-        deselection: () => true,
-      }
-    )
+  setup(p, { slots }) {
+    const selected = ref([])
+    const multiselect = () => p.multiple
+    const deselection = () => p.deselectOnReselect
 
-    watch(() => props.multiple, resetSelected)
-
-    provide(ACCORDION_INJECTION_KEY, {
-      expanded: selected,
-      setExpanded: setSelected,
+    const group = useSelectionGroup<Value>(selected, {
+      multiselect,
+      deselection,
     })
+
+    watch(multiselect, group.clearSelected)
+    provide(ACCORDION_INJECTION_KEY, { group })
 
     return () => h('div', null, slots.default?.())
   },
 
   props: {
     multiple: Boolean,
+    deselectOnReselect: Boolean,
   },
 })
 
@@ -61,28 +59,26 @@ const Accordion = defineComponent({
 
 const AccordionItem = defineComponent({
   setup(p, { slots }) {
-    const { expanded, setExpanded } = useAccordionCtx('AccordionItem')
+    const { group } = useAccordionCtx('AccordionItem')
 
     const contentID = useID()
     const triggerID = useID()
+    const value = triggerID
 
     if (p.initiallyExpanded) {
-      setExpanded(triggerID)
+      group.select(triggerID)
     }
 
-    const isExpanded = computedEager<boolean>(() => {
-      if (p.alwaysExpanded) return true
-
-      const _expanded = expanded.value
-      return isArray(_expanded) ? _expanded.includes(triggerID) : _expanded === triggerID
-    })
+    const isExpanded = computedEager<boolean>(() =>
+      p.alwaysExpanded ? true : group.isSelected(value)
+    )
 
     provide(ACCORDION_ITEM_INJECTION_KEY, {
       contentID,
       triggerID,
-      setExpanded,
       isExpanded,
       disabled: () => p.disabled!,
+      toggleExpansion: () => group.select(value),
     })
 
     return () =>
@@ -120,7 +116,7 @@ const AccordionItem = defineComponent({
 
 const AccordionTrigger = defineComponent({
   setup(_, { slots }) {
-    const { setExpanded, contentID, isExpanded, triggerID, disabled } =
+    const { toggleExpansion, contentID, isExpanded, triggerID, disabled } =
       useAccordionItemCtx('AccordionTrigger')
 
     return () =>
@@ -129,7 +125,7 @@ const AccordionTrigger = defineComponent({
         {
           id: triggerID,
           disabled: disabled(),
-          onClick: () => setExpanded(triggerID),
+          onClick: toggleExpansion,
           'aria-controls': contentID,
           'aria-expanded': isExpanded.value,
         },
