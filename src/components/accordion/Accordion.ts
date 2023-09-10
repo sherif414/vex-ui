@@ -2,7 +2,7 @@ import { useContext, useID, useSelectionGroup, type SelectionGroup } from '@/com
 import type { Getter } from '@/types'
 import { computedEager } from '@vueuse/core'
 import type { InjectionKey, Ref, SlotsType } from 'vue'
-import { defineComponent, h, provide, ref, watch } from 'vue'
+import { defineComponent, h, provide, ref } from 'vue'
 
 type Value = string
 
@@ -35,7 +35,7 @@ const Accordion = defineComponent({
     // TODO: make state controllable from the outside
     const group = useSelectionGroup<Value>(ref([]), {
       multiselect: () => p.multiple,
-      deselection: () => p.deselectOnReselect,
+      deselection: () => true,
     })
 
     provide(ACCORDION_INJECTION_KEY, { group })
@@ -44,7 +44,6 @@ const Accordion = defineComponent({
 
   props: {
     multiple: Boolean,
-    deselectOnReselect: Boolean,
   },
 })
 
