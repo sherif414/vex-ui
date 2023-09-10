@@ -56,6 +56,7 @@ async function onEnter(el: HTMLElement, done: () => void) {
 function onAfterEnter(el: HTMLElement) {
   el.style.overflow = ''
   el.style[dynamicSize] = ''
+  el.style.opacity = ''
 }
 
 async function onLeave(el: HTMLElement, done: () => void) {
@@ -73,6 +74,7 @@ async function onLeave(el: HTMLElement, done: () => void) {
 function onAfterLeave(el: HTMLElement) {
   el.style.overflow = ''
   el.style[dynamicSize] = ''
+  el.style.opacity = ''
 }
 </script>
 
