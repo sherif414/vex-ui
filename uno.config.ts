@@ -4,7 +4,7 @@ export default defineConfig({
   transformers: [transformerVariantGroup(), transformerDirectives()],
   content: {
     pipeline: {
-      include: ['./playground/**/*.{ts,vue}'],
+      include: ['src/patterns/**/*'],
     },
   },
-})
+}) as any
