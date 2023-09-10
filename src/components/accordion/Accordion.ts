@@ -77,7 +77,7 @@ const AccordionItem = defineComponent({
       h(
         'div',
         {
-          'data-state': isExpanded.value ? 'expanded' : 'collapsed',
+          'data-vex-state': isExpanded.value ? 'expanded' : 'collapsed',
         },
         slots.default?.({ expanded: isExpanded.value })
       )
