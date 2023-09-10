@@ -53,19 +53,15 @@ const emit = defineEmits<{
 
 //----------------------------------------------------------------------------------------------------
 
-function onClickCapture(e: MouseEvent) {
-  if (p.disabled || p.loading) {
-    e.preventDefault()
-    // stops click event listeners added using `el.addEventListener`
-    e.stopImmediatePropagation()
-  }
+function onClick(e: MouseEvent) {
+  if (p.disabled || p.loading) return
+  emit('click', e)
 }
 </script>
 
 <template>
   <button
-    @click="emit('click', $event)"
-    @click.capture="onClickCapture"
+    @click="onClick"
     :disabled="p.disabled"
     :aria-disabled="p.disabled || p.loading || undefined"
     :class="[
