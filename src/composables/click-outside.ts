@@ -1,12 +1,13 @@
-import type { Fn, Getter } from '@/types'
+import type { Fn, Getter, MaybeRefOrGetter, TemplateRef } from '@/types'
 import { isIOS, noop } from './helpers'
 import { useEventListener } from '@vueuse/core'
+import { toValue } from 'vue'
 
 export interface useClickOutsideOptions {
   /**
    * List of elements that should not trigger the event.
    */
-  ignore?: Getter<Getter<HTMLElement | null>[]>
+  ignore?: MaybeRefOrGetter<TemplateRef[]>
   /**
    * Use capturing phase for internal event listener.
    * @default true
@@ -15,21 +16,23 @@ export interface useClickOutsideOptions {
 }
 
 let _iOSWorkaround = false
+const listeners = []
 
 /**
  * Listen for clicks outside of an element.
  */
-export function useClickOutside(
-  target: Getter<HTMLElement | null>,
+export function useClickOutsideV2(
+  target: TemplateRef,
   handler: (e: PointerEvent | MouseEvent) => void,
   options: useClickOutsideOptions = {}
 ): Fn {
-  const { ignore = () => [], capture = true } = options
+  const { ignore = [], capture = true } = options
 
   if (!window) return noop
 
   // Fixes: https://github.com/vueuse/vueuse/issues/1520
   // How it works: https://stackoverflow.com/a/39712411
+  // TODO: consider using the cursor: pointer; hack instead
   if (isIOS && !_iOSWorkaround) {
     _iOSWorkaround = true
     Array.from(window.document.body.children).forEach((el) => el.addEventListener('click', noop))
@@ -38,8 +41,8 @@ export function useClickOutside(
   let shouldListen = true
 
   const shouldIgnore = (e: PointerEvent | MouseEvent) => {
-    return ignore().some((getElement) => {
-      const el = getElement()
+    return toValue(ignore).some((templateRef) => {
+      const el = templateRef.value
       return el && (e.target === el || e.composedPath().includes(el))
     })
   }
@@ -47,7 +50,7 @@ export function useClickOutside(
   const stop = useEventListener(
     'pointerdown',
     (e: PointerEvent) => {
-      const el = target()
+      const el = target.value
       if (!el || el === e.target || e.composedPath().includes(el)) return
 
       shouldListen = e.detail === 0 ? !shouldIgnore(e) : shouldListen
