@@ -31,12 +31,11 @@ export function useClickOutside(
   listener: (e: PointerEvent) => void,
   options: Options = {}
 ): Fn {
-  const { ignore = [], isActive = true } = options
-  const initiallyActive = toValue(isActive)
-
   if (!window) return noop
 
-  let shouldListen = true
+  const { ignore = [], isActive = true } = options
+  const initiallyActive = toValue(isActive)
+  let isOutside = true
 
   const shouldIgnore = (e: PointerEvent) => {
     return toValue(ignore).some((templateRef) => {
@@ -49,16 +48,16 @@ export function useClickOutside(
     const el = target.value
     if (!el || el === e.target || e.composedPath().includes(el)) return
 
-    shouldListen = e.detail === 0 ? !shouldIgnore(e) : shouldListen
-    shouldListen && listener(e)
+    isOutside = e.detail === 0 ? !shouldIgnore(e) : isOutside
+    isOutside && listener(e)
   }
 
-  let cleanup = initiallyActive ? outsideClicksHandler(onClickOutside) : noop
+  let cleanup = initiallyActive ? registerListener(onClickOutside) : noop
 
   if (isWatchSource(isActive)) {
     watch(isActive, (value) => {
       if (value) {
-        cleanup = outsideClicksHandler(onClickOutside)
+        cleanup = registerListener(onClickOutside)
       } else {
         cleanup()
       }
@@ -70,7 +69,11 @@ export function useClickOutside(
 }
 
 //----------------------------------------------------------------------------------------------------
-// 📌 shared handler
+// 📌 shared listener
+//
+// The idea is to have a single shared listener that automatically unregister itself
+// when there are no active subscribers, the listener should loop through and run all
+// the registered listeners.
 //----------------------------------------------------------------------------------------------------
 
 type Listener = (e: PointerEvent) => void
@@ -78,7 +81,7 @@ type Listener = (e: PointerEvent) => void
 let scope: EffectScope | null
 const listeners: Listener[] = []
 
-function outsideClicksHandler(listener: Listener) {
+function registerListener(listener: Listener) {
   listeners.push(listener)
 
   if (!scope) {
