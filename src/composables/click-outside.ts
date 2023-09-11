@@ -21,7 +21,7 @@ let _iOSWorkaround = false
  */
 export function useClickOutside(
   target: Getter<HTMLElement | null>,
-  handler: (evt: PointerEvent | MouseEvent) => void,
+  handler: (e: PointerEvent | MouseEvent) => void,
   options: useClickOutsideOptions = {}
 ): Fn {
   const { ignore = () => [], capture = true } = options
@@ -37,16 +37,16 @@ export function useClickOutside(
 
   let shouldListen = true
 
-  const shouldIgnore = (event: PointerEvent | MouseEvent) => {
-    return ignore().some((target) => {
-      const el = target()
-      return el && (event.target === el || event.composedPath().includes(el))
+  const shouldIgnore = (e: PointerEvent | MouseEvent) => {
+    return ignore().some((getElement) => {
+      const el = getElement()
+      return el && (e.target === el || e.composedPath().includes(el))
     })
   }
 
   const stop = useEventListener(
     'pointerdown',
-    function onPointerdown(e: PointerEvent) {
+    (e: PointerEvent) => {
       const el = target()
       if (!el || el === e.target || e.composedPath().includes(el)) return
 
